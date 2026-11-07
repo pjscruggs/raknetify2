@@ -57,6 +57,7 @@ public final class ClientAddressTest implements PreLaunchEntrypoint {
                 GameplayOrderingTest.verify();
                 SignedChatTest.verify();
                 TransferNativeTest.verify();
+                AddressFallbackNativeTest.verify();
             }
             if (!Boolean.getBoolean("raknetify.test.orderingOnly")) {
                 AddressChecks checks = new AddressChecks();

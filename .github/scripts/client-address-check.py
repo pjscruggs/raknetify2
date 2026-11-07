@@ -85,7 +85,8 @@ def prepare(args, version, metadata, lock):
     if not args.baseline:
         shutil.copy2(args.jar, folder / 'mods/raknetify2.jar')
     shutil.copy2(args.fixture, folder / 'mods/address-test.jar')
-    (folder / 'hosts').write_text('192.0.2.2 fixture.test\n127.0.0.1 localhost\n::1 localhost\n')
+    (folder / 'hosts').write_text('192.0.2.2 fixture.test\n127.0.0.1 localhost\n::1 localhost\n'
+                                '127.0.0.2 fallback.fixture.test\n127.0.0.1 fallback.fixture.test\n')
     (folder / 'minecraft.json').write_text(json.dumps(metadata, indent=2))
     (folder / 'fabric.json').write_text(json.dumps(profile, indent=2))
     return folder, libraries
@@ -164,6 +165,7 @@ def check_transfer_witness(version, text):
     """Require actual query handling and send-overload checks on every version with transfer packets."""
     if version.startswith('26.') or tuple(map(int, version.split('.'))) >= (1, 20, 5):
         assert 'PASS native transfer capability and send overloads' in text
+        assert 'PASS native multi-address RakNet handshake with unreachable first address' in text
         print('PASS', version, 'native transfer capability and send overloads', flush=True)
 
 
