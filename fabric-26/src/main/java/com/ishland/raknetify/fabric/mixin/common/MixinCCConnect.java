@@ -28,6 +28,7 @@ import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RaknetifyEventLoops;
 import com.ishland.raknetify.common.util.ThreadLocalUtil;
+import com.ishland.raknetify.fabric.common.connection.RakNetClientConnectionUtil;
 import com.ishland.raknetify.fabric.common.connection.RakNetFabricConnectionUtil;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -102,7 +103,7 @@ public class MixinCCConnect {
      * @param instance client bootstrap being configured
      * @param aClass vanilla socket class used to choose the corresponding UDP backend
      * @param original original bootstrap channel-class call
-     * @param address remote address captured from the connection call, unused by channel selection
+     * @param address resolved server endpoint used to obtain permitted alternate addresses
      * @param raknetify$eventLoop shared local containing the retained vanilla transport event loops
      * @return bootstrap using the RakNet factory or the original TCP channel class
      */
@@ -150,6 +151,8 @@ public class MixinCCConnect {
                                 }
                                 return channel1;
                             });
+                    channel.parent()
+                            .setRemoteAddresses(RakNetClientConnectionUtil.addresses(address));
                     RakNet.config(channel)
                             .setMTU(
                                     initializingRaknetLargeMTU

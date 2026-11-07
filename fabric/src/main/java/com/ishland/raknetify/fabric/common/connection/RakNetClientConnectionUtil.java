@@ -24,14 +24,18 @@
 
 package com.ishland.raknetify.fabric.common.connection;
 
+import com.ishland.raknetify.common.connection.RakNetAddressCandidates;
 import com.ishland.raknetify.common.util.ThreadLocalUtil;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 
 import io.netty.channel.ChannelFuture;
 
+import net.minecraft.client.network.Address;
+import net.minecraft.client.network.BlockListChecker;
 import net.minecraft.network.ClientConnection;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 
 /** Scopes RakNet bootstrap flags around the version-specific Minecraft connection factory. */
 public class RakNetClientConnectionUtil {
@@ -57,7 +61,6 @@ public class RakNetClientConnectionUtil {
             final boolean largeMTU,
             final Operation<ClientConnection> original,
             final boolean hasPerformanceLog) {
-        System.out.println("aaa");
         try {
             ThreadLocalUtil.setInitializingRaknet(true);
             ThreadLocalUtil.setInitializingRaknetLargeMTU(largeMTU);
@@ -87,7 +90,6 @@ public class RakNetClientConnectionUtil {
             final Object backend,
             final boolean largeMTU,
             final Operation<ClientConnection> original) {
-        System.out.println("aaa");
         try {
             ThreadLocalUtil.setInitializingRaknet(true);
             ThreadLocalUtil.setInitializingRaknetLargeMTU(largeMTU);
@@ -115,7 +117,6 @@ public class RakNetClientConnectionUtil {
             final boolean largeMTU,
             final Operation<ChannelFuture> original,
             final ClientConnection connection) {
-        System.out.println("aaaa");
         try {
             ThreadLocalUtil.setInitializingRaknet(true);
             ThreadLocalUtil.setInitializingRaknetLargeMTU(largeMTU);
@@ -143,7 +144,6 @@ public class RakNetClientConnectionUtil {
             final boolean largeMTU,
             final Operation<ChannelFuture> original,
             final ClientConnection connection) {
-        System.out.println("aaaa");
         try {
             ThreadLocalUtil.setInitializingRaknet(true);
             ThreadLocalUtil.setInitializingRaknetLargeMTU(largeMTU);
@@ -152,5 +152,18 @@ public class RakNetClientConnectionUtil {
             ThreadLocalUtil.setInitializingRaknet(false);
             ThreadLocalUtil.setInitializingRaknetLargeMTU(false);
         }
+    }
+
+    /**
+     * Resolves alternate IPs before registration and applies Minecraft's block list to each
+     * candidate. The original endpoint already passed the native hostname and service checks.
+     *
+     * @param address original resolved endpoint, retaining an SRV target hostname when present
+     * @return permitted endpoints for one transport handshake, with the original first
+     */
+    public static List<InetSocketAddress> addresses(final InetSocketAddress address) {
+        return RakNetAddressCandidates.resolve(
+                address,
+                candidate -> BlockListChecker.create().isAllowed(Address.create(candidate)));
     }
 }
