@@ -138,6 +138,7 @@ def run(args, version, metadata, lock):
         assert 'PASS native gameplay ordering 12' in text
         assert 'PASS native entity lifecycle ordering 4' in text
         check_transfer_witness(version, text)
+        check_address_fallback_witness(version, text)
         check_chat_witness(version, text)
         if not args.ordering_only:
             assert text.count('PASS connect address ') == 18
@@ -165,8 +166,13 @@ def check_transfer_witness(version, text):
     """Require actual query handling and send-overload checks on every version with transfer packets."""
     if version.startswith('26.') or tuple(map(int, version.split('.'))) >= (1, 20, 5):
         assert 'PASS native transfer capability and send overloads' in text
-        assert 'PASS native multi-address RakNet handshake with unreachable first address' in text
         print('PASS', version, 'native transfer capability and send overloads', flush=True)
+
+
+def check_address_fallback_witness(version, text):
+    """Require the socket fallback result only from the client fixture that actually runs that scenario."""
+    if version.startswith('26.') or tuple(map(int, version.split('.'))) >= (1, 20, 5):
+        assert 'PASS native multi-address RakNet handshake with unreachable first address' in text
 
 
 def supported_versions():
