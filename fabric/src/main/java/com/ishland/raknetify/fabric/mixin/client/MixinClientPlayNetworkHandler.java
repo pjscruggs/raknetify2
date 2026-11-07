@@ -24,7 +24,7 @@
 
 package com.ishland.raknetify.fabric.mixin.client;
 
-import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
+import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.fabric.common.util.MultiVersionUtil;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
 
@@ -67,9 +67,6 @@ public class MixinClientPlayNetworkHandler {
                     "Raknetify: Cannot negotiate ordered transport without a login channel");
             return;
         }
-        channel.eventLoop()
-                .execute(() ->
-                        channel.write(RakNetSimpleMultiChannelCodec.SIGNAL_START_MULTICHANNEL)
-                                .addListener(network.ycc.raknet.RakNet.INTERNAL_WRITE_LISTENER));
+        channel.eventLoop().execute(() -> RakNetConnectionUtil.requestMultichannel(channel));
     }
 }

@@ -50,6 +50,37 @@ class TcpHandlerCompatibilityTest {
     /** Name installed by Polymer's shared-port HTTP hosting integration. */
     private static final String HTTP_DETECTOR = "polymer:autohost/protocol_switcher";
 
+    /** Keeps the RakNet join marker out of ordinary TCP and integrated-server pipelines. */
+    @Test
+    void ordinaryJoinDoesNotWriteTransportMarker() {
+        EmbeddedChannel channel = new EmbeddedChannel();
+        try {
+            RakNetConnectionUtil.requestMultichannel(channel);
+            channel.flush();
+            assertNull(channel.readOutbound());
+            assertTrue(channel.isActive());
+        } finally {
+            channel.finishAndReleaseAll();
+        }
+    }
+
+    /** Preserves negotiation for a RakNet connection when its native join callback runs. */
+    @Test
+    void raknetJoinWritesTransportMarker() {
+        EmbeddedChannel channel = new RaknetChannel();
+        try {
+            RakNetConnectionUtil.requestMultichannel(channel);
+            channel.flush();
+            assertSame(
+                    RakNetSimpleMultiChannelCodec.SIGNAL_START_MULTICHANNEL,
+                    channel.readOutbound());
+            assertNull(channel.readOutbound());
+            assertTrue(channel.isActive());
+        } finally {
+            channel.finishAndReleaseAll();
+        }
+    }
+
     /** Ensures a frame reaches the application with exactly one remaining ownership reference. */
     @Test
     void raknetFramesBypassHttpDetection() {

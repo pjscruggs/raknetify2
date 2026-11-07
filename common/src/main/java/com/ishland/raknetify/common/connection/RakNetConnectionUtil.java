@@ -67,6 +67,20 @@ public class RakNetConnectionUtil {
     private RakNetConnectionUtil() {}
 
     /**
+     * Requests multichannel negotiation only for RakNet connections. The marker is a local pipeline
+     * object, so writing it to a TCP or local channel would fail before any packet reaches the
+     * wire.
+     *
+     * @param channel initialized connection receiving the player-join notification
+     */
+    public static void requestMultichannel(final Channel channel) {
+        if (channel.config() instanceof RakNet.Config) {
+            channel.write(RakNetSimpleMultiChannelCodec.SIGNAL_START_MULTICHANNEL)
+                    .addListener(RakNet.INTERNAL_WRITE_LISTENER);
+        }
+    }
+
+    /**
      * Send priority: unreliable before reliable, unordered before ordered, then channel and order
      * index.
      */
