@@ -120,7 +120,7 @@ public final class PayloadOrderingNegotiation extends ChannelDuplexHandler {
             frame.setOrderChannel(0);
             frame.setReliability(FramedPacket.Reliability.RELIABLE_ORDERED);
             context.writeAndFlush(frame)
-                    .addListener(io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    .addListener(network.ycc.raknet.RakNet.INTERNAL_WRITE_LISTENER);
         } finally {
             payload.release();
         }

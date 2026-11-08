@@ -113,9 +113,7 @@ public class MetricsSynchronizationHandler extends ChannelDuplexHandler {
                         FrameData.create(
                                 ctx.alloc(), Constants.RAKNET_METRICS_SYNC_PACKET_ID, buffer);
                 frameData.setReliability(FramedPacket.Reliability.UNRELIABLE);
-                ctx.write(frameData)
-                        .addListener(
-                                io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                ctx.write(frameData).addListener(RakNet.INTERNAL_WRITE_LISTENER);
             } finally {
                 if (buffer != null) {
                     buffer.release();
