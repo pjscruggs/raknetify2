@@ -94,6 +94,7 @@ jobs:
           LOADER: ${{ matrix.loader }}
         run: python .github/scripts/test-curseforge-publisher.py --artifacts release-input --source tested-source --loader "$LOADER"
       - name: Publish the tested JAR
+        if: matrix.loader != 'spigot' || matrix.destination != 'curseforge'
         env:
           MODRINTH_TOKEN: ${{ matrix.destination == 'modrinth' && secrets.MODRINTH_TOKEN || '' }}
           CURSEFORGE_TOKEN: ${{ matrix.destination == 'curseforge' && secrets.CURSEFORGE_TOKEN || '' }}
@@ -107,6 +108,16 @@ jobs:
           "-PnativeManifest=$GITHUB_WORKSPACE/tested-source/native-loaders.json"
           "-PspigotManifest=$GITHUB_WORKSPACE/tested-source/spigot-servers.json"
           "-Ploader=$LOADER" "-Pdestination=$DESTINATION" "-PpublishDryRun=$PREVIEW"
+      - name: Publish the tested Bukkit plugin
+        if: matrix.loader == 'spigot' && matrix.destination == 'curseforge'
+        env:
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          PREVIEW: ${{ inputs.dry_run }}
+        run: |
+          flags=()
+          if [[ "$PREVIEW" == "true" ]]; then flags+=(--dry-run); fi
+          python .github/scripts/publish-bukkit.py --artifacts release-input --source tested-source \
+            --notes release-notes.txt --receipt .github/publish/build/publishMods/publishCurseforge.json "${flags[@]}"
       - name: Retain host publication identifiers
         if: always() && !inputs.dry_run
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

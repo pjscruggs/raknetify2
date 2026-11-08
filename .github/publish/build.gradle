@@ -16,7 +16,6 @@ def supportedGames = supportedGames(loader, compatibility, nativeLoaders,
 def artifact = new File(releaseDirectory, "raknetify2-${loader}-${compatibility.version}.jar")
 def notes = providers.fileContents(layout.projectDirectory.file(providers.gradleProperty('changelogFile').get())).asText
 def preview = providers.gradleProperty('publishDryRun').map { it.toBoolean() }.getOrElse(true)
-def curseforgeTarget = curseforgeTarget(loader)
 
 if (!artifact.isFile()) throw new GradleException('Missing verified release artifact: ' + artifact.name)
 if (!preview && compatibility.version.contains('dirty')) throw new GradleException('Refusing to publish an uncommitted build')
@@ -43,27 +42,24 @@ publishMods {
     if (destination == 'curseforge') {
         curseforge {
             accessToken = providers.environmentVariable('CURSEFORGE_TOKEN')
-            projectId = curseforgeTarget.projectId
-            modLoaders.set(curseforgeTarget.loaders)
+            projectId = '1785937'
             minecraftVersions.addAll(supportedGames.collect { it == '26.4-snapshot-7' ? '26.4-snapshot' : it })
-            javaVersions.addAll(curseforgeTarget.javaVersions)
-            client = curseforgeTarget.client
+            javaVersions.addAll(requiredJavaVersions(loader))
+            client = true
             server = true
         }
     }
 }
 
 /**
- * Routes server plugins to the Bukkit project without attaching mod-loader or client-only tags.
- * @param loader validated distribution whose runtime requirements determine the hosting metadata
- * @return project, loader, environment and Java settings consumed by the CurseForge publisher
+ * Selects Java runtime tags for the universal Fabric artifact or a native modern loader.
+ * @param loader validated mod distribution whose supported games determine the Java requirements
+ * @return Java releases required by the advertised Minecraft versions
  */
-static Map curseforgeTarget(String loader) {
-    boolean plugin = loader == 'spigot'
-    return [projectId: plugin ? '1787146' : '1785937', loaders: plugin ? [] : [loader], client: !plugin,
-            javaVersions: loader == 'fabric'
+static List requiredJavaVersions(String loader) {
+    return loader == 'fabric'
                     ? [JavaVersion.VERSION_17, JavaVersion.VERSION_21, JavaVersion.VERSION_25]
-                    : [JavaVersion.VERSION_25]]
+                    : [JavaVersion.VERSION_25]
 }
 
 /**
@@ -75,6 +71,9 @@ static Map curseforgeTarget(String loader) {
 static void validateTarget(String loader, String destination) {
     if (!(loader in ['fabric', 'forge', 'neoforge', 'spigot'])) throw new GradleException('Unsupported publication loader')
     if (!(destination in ['modrinth', 'curseforge'])) throw new GradleException('Unsupported publication destination')
+    if (loader == 'spigot' && destination == 'curseforge') {
+        throw new GradleException('Use the publication workflow Bukkit uploader for CurseForge server plugins')
+    }
 }
 
 /**

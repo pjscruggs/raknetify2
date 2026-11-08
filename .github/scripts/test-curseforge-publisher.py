@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import threading
 import unittest
@@ -23,7 +24,8 @@ class UploadFixture(ThreadingHTTPServer):
         self.reject_upload = False
         self.source = source
         groups = [('minecraft', games), ('modloader', ['fabric', 'forge', 'neoforge']),
-                  ('environment', ['Client', 'Server']), ('java', ['Java 17', 'Java 21', 'Java 25'])]
+                  ('environment', ['Client', 'Server']), ('java', ['Java 17', 'Java 21', 'Java 25']),
+                  ('bukkit', games)]
         self.types = [{'id': index, 'name': name, 'slug': name}
                       for index, (name, _) in enumerate(groups, 1)]
         self.versions = [{'id': index * 1000 + offset, 'gameVersionTypeID': index, 'name': name, 'slug': name}
@@ -99,14 +101,32 @@ def run_publisher(repository, artifacts, loader, fixture):
         environment = os.environ.copy()
         environment.pop('CURSEFORGE_TOKEN', None)
         environment.pop('MODRINTH_TOKEN', None)
+        if loader == 'spigot':
+            command = bukkit_command(repository, artifacts, folder, fixture)
+            environment['CURSEFORGE_TOKEN'] = 'fixture-only-token'
         return subprocess.run(command, cwd=repository, env=environment, capture_output=True,
                               text=True, timeout=180, check=False)
+
+
+def bukkit_command(repository, artifacts, folder, fixture):
+    """Redirect the real Bukkit uploader inside a temporary harness without adding a production endpoint override."""
+    script = repository / '.github/scripts/publish-bukkit.py'
+    launcher = folder / 'bukkit_fixture.py'
+    launcher.write_text('"""Run the production uploader against a local synthetic API."""\n'
+                        'import importlib.util\n'
+                        'spec = importlib.util.spec_from_file_location("publisher", ' + repr(str(script)) + ')\n'
+                        'publisher = importlib.util.module_from_spec(spec)\n'
+                        'spec.loader.exec_module(publisher)\n'
+                        'publisher.API_ROOT = "http://127.0.0.1:' + str(fixture.server_port) + '"\n'
+                        'publisher.main()\n', encoding='utf-8')
+    return [sys.executable, str(launcher), '--artifacts', str(artifacts), '--source', str(fixture.source),
+            '--notes', str(folder / 'notes.txt'), '--receipt', str(folder / 'receipt.json')]
 
 
 def expected_tags(loader, games):
     """Describe supported runtime tags independently of the publisher's Groovy target selection."""
     if loader == 'spigot':
-        return set(games) | {'Java 25', 'Server'}
+        return set(games)
     if loader == 'fabric':
         return set(games) | {'fabric', 'Java 17', 'Java 21', 'Java 25', 'Client', 'Server'}
     return set(games) | {loader, 'Java 25', 'Client', 'Server'}
@@ -130,6 +150,9 @@ def check_upload(upload, artifacts, loader, fixture):
     games = supported_games(fixture.source, compatibility, loader)
     check.assertEqual(expected_tags(loader, games), actual)
     check.assertEqual(len(actual), len(metadata['gameVersions']))
+    if loader == 'spigot':
+        bukkit_ids = {item['id'] for item in fixture.versions if item['gameVersionTypeID'] == 5}
+        check.assertTrue(set(metadata['gameVersions']).issubset(bukkit_ids), 'Bukkit upload used Minecraft mod IDs')
 
 
 def exercise_upload(repository, artifacts, loader, fixture):
