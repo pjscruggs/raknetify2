@@ -28,9 +28,11 @@ import com.ishland.raknetify.common.Constants;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.CorruptedFrameException;
+import io.netty.util.concurrent.PromiseCombiner;
 
 import network.ycc.raknet.frame.FrameData;
 
@@ -65,6 +67,9 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
 
     /** Outbound zlib dictionaries indexed by ordering channel, owned by the event loop. */
     private final Deflater[] deflaters = new Deflater[Constants.ORDER_CHANNEL_COUNT];
+
+    /** Delivery of each dictionary marker, which must precede completion of dependent data. */
+    private final ChannelFuture[] channelStarts = new ChannelFuture[Constants.ORDER_CHANNEL_COUNT];
 
     /** Reusable scratch space for draining inflated payload bytes without per-packet arrays. */
     private final byte[] inflateBuffer = new byte[256 * 1024];
@@ -163,7 +168,8 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
                             Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID,
                             buf);
             data.setOrderChannel(channel);
-            ctx.write(data).addListener(network.ycc.raknet.RakNet.INTERNAL_WRITE_LISTENER);
+            channelStarts[channel] = ctx.write(data);
+            channelStarts[channel].addListener(network.ycc.raknet.RakNet.INTERNAL_WRITE_LISTENER);
             initDeflater(channel);
         } finally {
             buf.release();
@@ -279,18 +285,40 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
                 if (deflaters[channel] == null) {
                     startChannel(ctx, channel);
                 }
+                final ChannelPromise delivery = includeChannelStart(ctx, channel, promise);
                 if (rawFrameData.getDataSize() < 16 + 1) {
                     outBytesRaw.addAndGet(rawFrameData.getDataSize() - 1);
                     outBytesCompressed.addAndGet(rawFrameData.getDataSize() - 1);
-                    super.write(ctx, rawFrameData, promise);
+                    super.write(ctx, rawFrameData, delivery);
                     return;
                 }
 
-                deflateFrame(ctx, rawFrameData, promise);
+                deflateFrame(ctx, rawFrameData, delivery);
                 return;
             }
         }
         super.write(ctx, msg, promise);
+    }
+
+    /**
+     * Includes the dictionary marker in delivery completion so phase barriers cannot overtake it.
+     *
+     * @param ctx event loop owning both transport completions
+     * @param channel ordering lane whose dictionary the payload requires
+     * @param promise application completion for the payload and its prerequisite
+     * @return transport completion to attach to the payload frame
+     */
+    private ChannelPromise includeChannelStart(
+            final ChannelHandlerContext ctx, final int channel, final ChannelPromise promise) {
+        if (channelStarts[channel].isSuccess()) {
+            return promise;
+        }
+        final ChannelPromise delivery = ctx.newPromise();
+        final PromiseCombiner completion = new PromiseCombiner();
+        completion.add(channelStarts[channel]);
+        completion.add((io.netty.util.concurrent.Future<?>) delivery);
+        completion.finish(promise.unvoid());
+        return delivery;
     }
 
     /**

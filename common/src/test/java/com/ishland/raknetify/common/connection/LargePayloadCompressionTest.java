@@ -82,6 +82,66 @@ class LargePayloadCompressionTest {
         }
     }
 
+    /** Data delivery cannot release a world barrier while its compression dictionary is missing. */
+    @Test
+    void payloadCompletionWaitsForDictionaryMarker() {
+        var marker =
+                new java.util.concurrent.atomic.AtomicReference<io.netty.channel.ChannelPromise>();
+        var gate =
+                new io.netty.channel.ChannelOutboundHandlerAdapter() {
+                    /*
+                     * Retains dictionary completion while accepting the following application
+                     * frame.
+                     */
+                    @Override
+                    public void write(
+                            final io.netty.channel.ChannelHandlerContext ctx,
+                            final Object message,
+                            final io.netty.channel.ChannelPromise promise) {
+                        if (message instanceof FrameData data
+                                && data.getPacketId()
+                                        == Constants
+                                                .RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID
+                                && marker.get() == null) {
+                            marker.set(promise);
+                            data.release();
+                        } else {
+                            assertSame(promise, ctx.write(message, promise));
+                        }
+                    }
+                };
+        EmbeddedChannel channel =
+                new EmbeddedChannel(gate, new MultiChannelingStreamingCompression(RAW, COMPRESSED));
+        try {
+            java.util.Objects.requireNonNull(marker.getAndSet(null)).trySuccess();
+            ByteBuf handshake =
+                    channel.alloc()
+                            .buffer()
+                            .writeLong(MultiChannelingStreamingCompression.SERVER_HANDSHAKE);
+            try {
+                channel.writeInbound(
+                        FrameData.create(
+                                channel.alloc(),
+                                Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID,
+                                handshake));
+            } finally {
+                handshake.release();
+            }
+            ByteBuf bytes = channel.alloc().buffer().writeZero(32);
+            FrameData frame = FrameData.create(channel.alloc(), RAW, bytes);
+            bytes.release();
+            var result = channel.writeAndFlush(frame);
+            ((FrameData) channel.readOutbound()).release();
+            assertFalse(
+                    result.isDone(),
+                    "Dictionary marker must be delivered before the payload completes");
+            java.util.Objects.requireNonNull(marker.get()).trySuccess();
+            assertTrue(result.isSuccess());
+        } finally {
+            channel.finishAndReleaseAll();
+        }
+    }
+
     /** Rejects invalid channel metadata without leaking incoming payloads or control frames. */
     @Test
     void invalidIncomingChannelsReleasePayloadAndControlFrames() {
