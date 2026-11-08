@@ -202,13 +202,27 @@ class ReleasePlanTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'metadata version'):
                     self.guard.verify_artifacts(self.folder)
 
-    def test_spigot_publication_does_not_target_a_mod_project(self):
-        """Publish server plugins with Modrinth metadata and reject uploading them to the CurseForge mod project."""
-        self.assertEqual({'include': [{'loader': 'spigot', 'destination': 'modrinth'}]},
-                         self.guard.publication_matrix('spigot', 'modrinth'))
-        for destination in ('curseforge', 'both'):
-            with self.assertRaisesRegex(ValueError, 'Bukkit project'):
-                self.guard.publication_matrix('spigot', destination)
+    def test_spigot_publication_selects_only_requested_hosts(self):
+        """Allow plugin-only publication to either host without resubmitting previously uploaded mod builds."""
+        for destination in ('modrinth', 'curseforge'):
+            self.assertEqual({'include': [{'loader': 'spigot', 'destination': destination}]},
+                             self.guard.publication_matrix('spigot', destination))
+        self.assertEqual(2, len(self.guard.publication_matrix('spigot', 'both')['include']))
+
+    def test_all_platforms_includes_plugins_on_both_hosts(self):
+        """Schedule each loader and destination pair once when publishing a release containing server plugins."""
+        jobs = self.guard.publication_matrix('all-platforms', 'both')['include']
+        pairs = {(job['loader'], job['destination']) for job in jobs}
+        expected = {(loader, host) for loader in ('fabric', 'forge', 'neoforge', 'spigot')
+                    for host in ('modrinth', 'curseforge')}
+        self.assertEqual(expected, pairs)
+        self.assertEqual(len(expected), len(jobs))
+
+    def test_unknown_publication_targets_are_rejected(self):
+        """Fail closed on a misspelled loader or destination rather than interpreting it as a bulk upload."""
+        for loader, destination in (('unknown', 'both'), ('fabric', 'unknown')):
+            with self.assertRaises(ValueError):
+                self.guard.publication_matrix(loader, destination)
 
     def test_all_mods_excludes_server_plugins(self):
         """Keep the explicit bulk-mod selection compatible with older releases that do not contain server plugins."""

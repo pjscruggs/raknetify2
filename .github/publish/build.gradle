@@ -16,6 +16,7 @@ def supportedGames = supportedGames(loader, compatibility, nativeLoaders,
 def artifact = new File(releaseDirectory, "raknetify2-${loader}-${compatibility.version}.jar")
 def notes = providers.fileContents(layout.projectDirectory.file(providers.gradleProperty('changelogFile').get())).asText
 def preview = providers.gradleProperty('publishDryRun').map { it.toBoolean() }.getOrElse(true)
+def curseforgeTarget = curseforgeTarget(loader)
 
 if (!artifact.isFile()) throw new GradleException('Missing verified release artifact: ' + artifact.name)
 if (!preview && compatibility.version.contains('dirty')) throw new GradleException('Refusing to publish an uncommitted build')
@@ -25,11 +26,11 @@ publishMods {
     version = compatibility.version + '+' + loader
     displayName = "Raknetify2 ${compatibility.version} (${loader})"
     changelog = notes
-    type = BETA
+    type = compatibility.version.contains('-beta.') ? BETA : ALPHA
     modLoaders.addAll(loader == 'spigot' ? ['spigot', 'paper'] : [loader])
     dryRun = preview
-    // An uncertain upload must be reconciled before retrying, because creation is not an idempotent API operation.
-    maxRetries = 0
+    // The plugin counts total attempts. One avoids replaying an upload after an uncertain response.
+    maxRetries = 1
 
     if (destination == 'modrinth') {
         modrinth {
@@ -42,15 +43,27 @@ publishMods {
     if (destination == 'curseforge') {
         curseforge {
             accessToken = providers.environmentVariable('CURSEFORGE_TOKEN')
-            projectId = '1785937'
+            projectId = curseforgeTarget.projectId
+            modLoaders.set(curseforgeTarget.loaders)
             minecraftVersions.addAll(supportedGames.collect { it == '26.4-snapshot-7' ? '26.4-snapshot' : it })
-            javaVersions.addAll(loader == 'fabric'
-                    ? [JavaVersion.VERSION_17, JavaVersion.VERSION_21, JavaVersion.VERSION_25]
-                    : [JavaVersion.VERSION_25])
-            client = true
+            javaVersions.addAll(curseforgeTarget.javaVersions)
+            client = curseforgeTarget.client
             server = true
         }
     }
+}
+
+/**
+ * Routes server plugins to the Bukkit project without attaching mod-loader or client-only tags.
+ * @param loader validated distribution whose runtime requirements determine the hosting metadata
+ * @return project, loader, environment and Java settings consumed by the CurseForge publisher
+ */
+static Map curseforgeTarget(String loader) {
+    boolean plugin = loader == 'spigot'
+    return [projectId: plugin ? '1787146' : '1785937', loaders: plugin ? [] : [loader], client: !plugin,
+            javaVersions: loader == 'fabric'
+                    ? [JavaVersion.VERSION_17, JavaVersion.VERSION_21, JavaVersion.VERSION_25]
+                    : [JavaVersion.VERSION_25]]
 }
 
 /**
@@ -62,9 +75,6 @@ publishMods {
 static void validateTarget(String loader, String destination) {
     if (!(loader in ['fabric', 'forge', 'neoforge', 'spigot'])) throw new GradleException('Unsupported publication loader')
     if (!(destination in ['modrinth', 'curseforge'])) throw new GradleException('Unsupported publication destination')
-    if (loader == 'spigot' && destination == 'curseforge') {
-        throw new GradleException('Spigot requires a separate CurseForge Bukkit project')
-    }
 }
 
 /**

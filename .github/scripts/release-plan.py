@@ -33,19 +33,19 @@ def validate_run(run, repository):
 def publication_matrix(loader, destination):
     """Select independent upload jobs so a failed destination can be retried without replaying successful jobs."""
     loaders = ['fabric', 'forge', 'neoforge'] if loader in ('all', 'all-mods') else [loader]
+    if loader == 'all-platforms':
+        loaders = ['fabric', 'forge', 'neoforge', 'spigot']
     destinations = ['modrinth', 'curseforge'] if destination == 'both' else [destination]
     validate_targets(loaders, destinations)
     return {'include': [{'loader': item, 'destination': target} for item in loaders for target in destinations]}
 
 
 def validate_targets(loaders, destinations):
-    """Reject unknown destinations and prevent a server plugin from being uploaded to a mod-only project."""
+    """Reject unknown loaders and destinations before selecting an upload job or exposing credentials."""
     if not all(item in ('fabric', 'forge', 'neoforge', 'spigot') for item in loaders):
         raise ValueError('Unknown loader')
     if not all(item in ('modrinth', 'curseforge') for item in destinations):
         raise ValueError('Unknown destination')
-    if 'spigot' in loaders and 'curseforge' in destinations:
-        raise ValueError('Spigot requires a separate CurseForge Bukkit project')
 
 
 def verify_checksums(folder):

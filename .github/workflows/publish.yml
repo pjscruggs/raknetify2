@@ -10,7 +10,7 @@ on:
         description: Mod loader or server plugin to publish
         type: choice
         default: all-mods
-        options: [all-mods, fabric, forge, neoforge, spigot]
+        options: [all-mods, all-platforms, fabric, forge, neoforge, spigot]
       destination:
         description: Publication destination
         type: choice
@@ -88,6 +88,11 @@ jobs:
         with:
           distribution: zulu
           java-version: 25
+      - name: Verify the CurseForge upload contract without credentials
+        if: matrix.destination == 'curseforge'
+        env:
+          LOADER: ${{ matrix.loader }}
+        run: python .github/scripts/test-curseforge-publisher.py --artifacts release-input --source tested-source --loader "$LOADER"
       - name: Publish the tested JAR
         env:
           MODRINTH_TOKEN: ${{ matrix.destination == 'modrinth' && secrets.MODRINTH_TOKEN || '' }}
@@ -102,3 +107,10 @@ jobs:
           "-PnativeManifest=$GITHUB_WORKSPACE/tested-source/native-loaders.json"
           "-PspigotManifest=$GITHUB_WORKSPACE/tested-source/spigot-servers.json"
           "-Ploader=$LOADER" "-Pdestination=$DESTINATION" "-PpublishDryRun=$PREVIEW"
+      - name: Retain host publication identifiers
+        if: always() && !inputs.dry_run
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: publication-${{ matrix.loader }}-${{ matrix.destination }}
+          path: .github/publish/build/publishMods/*.json
+          if-no-files-found: ignore
