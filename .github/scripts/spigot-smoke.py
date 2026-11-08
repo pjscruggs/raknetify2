@@ -72,7 +72,9 @@ def configure_server(args, native):
     plugins.mkdir(exist_ok=True)
     shutil.copy2(args.jar, plugins / 'raknetify2.jar')
     if args.voicechat:
-        sibling('voicechat-fixture').install(folder, 'bukkit', 28991 if args.proxy_protocol else None)
+        sibling('voicechat-fixture').install(folder, 'bukkit',
+                                            28991 if args.proxy_protocol else args.udp_port,
+                                            args.udp_port or -1)
     return folder
 
 
@@ -88,7 +90,7 @@ def configure_paper_proxy(folder, enabled):
     path.write_text(text, encoding='utf-8')
 
 
-def await_transport(process, events):
+def await_transport(process, events, port):
     """Wait for this plugin's listener instead of assuming the server's earlier Done line implies UDP readiness."""
     deadline = time.monotonic() + 180
     while time.monotonic() < deadline:
@@ -98,7 +100,7 @@ def await_transport(process, events):
         except queue.Empty:
             continue
         assert 'Could not start RakNet' not in line, line
-        if 'RakNet is listening on UDP port 28990' in line:
+        if 'RakNet is listening on UDP port ' + str(port) + ' ' in line:
             return
     raise AssertionError('RakNet listener startup timed out')
 
@@ -166,6 +168,9 @@ def exercise(args, lock, native, authority, server_jar):
     folder = configure_server(args, native)
     command = [args.java, '-Xms256M', '-Xmx1G', '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8',
                '-Dminecraft.api.discovery.host=' + authority.url, '-jar', str(server_jar), 'nogui']
+    if args.udp_port:
+        command.insert(1, '-Draknetify.spigot.portOverride=' + str(args.udp_port))
+    udp_port = args.udp_port or 28990
     process = subprocess.Popen(command, cwd=folder, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT, text=True, encoding='utf-8')
     events = queue.Queue()
@@ -174,15 +179,15 @@ def exercise(args, lock, native, authority, server_jar):
     reader.start()
     smoke = sibling('server-smoke')
     try:
-        await_transport(process, events)
+        await_transport(process, events, udp_port)
         expected = {'name': args.platform.capitalize() + ' ' + lock['minecraft'], 'protocol_version': lock['protocol']}
         smoke.check_tcp_when_ready(28990, expected, args.proxy_protocol and args.platform == 'paper')
-        with sibling('udp-proxy-fixture').transport(args.proxy_protocol, 28990, repeated=True,
+        with sibling('udp-proxy-fixture').transport(args.proxy_protocol, udp_port, repeated=True,
                                                    duplicate=args.proxy_protocol, frontend_port=28991) as port:
             args.client_port = port
             # Check silence before a closed RakNet probe's source port can be reused by this socket.
             if args.voicechat:
-                sibling('voicechat-fixture').check(folder, log, 28990, port)
+                sibling('voicechat-fixture').check(folder, log, udp_port, port)
             smoke.check_udp(port)
             smoke.check_connected_udp(port, expected, args.java, args.probe_dir)
             rejected_logins(args, authority)
@@ -215,6 +220,7 @@ def main():
     parser.add_argument('--side', choices=['server', 'both'], default='both')
     parser.add_argument('--proxy-protocol', action='store_true')
     parser.add_argument('--voicechat', action='store_true')
+    parser.add_argument('--udp-port', type=int, help='Override only the UDP listener while retaining TCP on 28990')
     args = parser.parse_args()
     args.work_dir = args.work_dir.resolve()
     args.probe_dir = args.probe_dir.resolve()

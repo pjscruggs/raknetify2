@@ -11,7 +11,7 @@ import uuid
 import zipfile
 
 
-def configure(folder, bukkit=False, public_port=None):
+def configure(folder, bukkit=False, public_port=None, local_port=-1):
     """Opt an isolated server into shared sockets and retain voice's ordinary authentication and encryption."""
     config = folder / 'config'
     config.mkdir(parents=True, exist_ok=True)
@@ -20,10 +20,10 @@ def configure(folder, bukkit=False, public_port=None):
     voice.mkdir(parents=True, exist_ok=True)
     destination = 'voice_host=127.0.0.1:' + str(public_port) + '\n' if public_port else ''
     (voice / 'voicechat-server.properties').write_text(
-        'port=-1\nbind_address=127.0.0.1\nallow_pings=true\n' + destination, encoding='utf-8')
+        'port=' + str(local_port) + '\nbind_address=127.0.0.1\nallow_pings=true\n' + destination, encoding='utf-8')
 
 
-def install(folder, loader, public_port=None):
+def install(folder, loader, public_port=None, local_port=-1):
     """Install only the hash-pinned native loader or Bukkit voice artifact selected by the fixture."""
     lock = json.loads((Path(__file__).resolve().parents[2] / 'voicechat-native-lock.json').read_text())
     entry = lock[loader]
@@ -33,7 +33,7 @@ def install(folder, loader, public_port=None):
     if hashlib.sha512(data).hexdigest() != entry['sha512']:
         raise ValueError("Artifact digest mismatch: " + str(entry['filename']))
     destination.write_bytes(data)
-    configure(folder, loader == 'bukkit', public_port)
+    configure(folder, loader == 'bukkit', public_port, local_port)
 
 
 def client(folder, loader):
