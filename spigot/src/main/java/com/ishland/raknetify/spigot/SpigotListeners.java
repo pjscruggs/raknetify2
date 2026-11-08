@@ -41,6 +41,8 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 
 import network.ycc.raknet.server.channel.RakNetServerChannel;
 
+import org.jspecify.annotations.Nullable;
+
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,10 +53,13 @@ final class SpigotListeners implements AutoCloseable {
     private final ServerAccess access;
 
     /** Datagram I/O loop owned exclusively by this plugin instance. */
-    private final EventLoopGroup transport = new NioEventLoopGroup(1);
+    private final EventLoopGroup transport;
 
     /** Application loop keeps Minecraft packet processing off the datagram I/O loop. */
-    private final EventLoopGroup application = new DefaultEventLoopGroup(1);
+    private final EventLoopGroup application;
+
+    /** Explicit UDP listener port, or zero to retain each TCP listener's port number. */
+    private final int portOverride;
 
     /** Bound or pending sockets retained immediately so a failed bind cannot leak a channel. */
     private final List<Channel> channels = new ArrayList<>();
@@ -65,7 +70,52 @@ final class SpigotListeners implements AutoCloseable {
      * @param access tested server listener metadata
      */
     SpigotListeners(final ServerAccess access) {
+        this(access, parsePortOverride(System.getProperty("raknetify.spigot.portOverride")));
+    }
+
+    /**
+     * Selects the UDP port before allocating plugin-owned event loops.
+     *
+     * @param access native listener metadata whose bind addresses and login handlers are retained
+     * @param portOverride UDP port from 1 through 65535, or zero to follow the native TCP ports
+     * @throws IllegalArgumentException if the override is outside the usable port range
+     */
+    SpigotListeners(final ServerAccess access, final int portOverride) {
+        if (portOverride < 0 || portOverride > 65535) {
+            throw new IllegalArgumentException(
+                    "UDP port override is outside the usable port range");
+        }
         this.access = access;
+        this.portOverride = portOverride;
+        transport = new NioEventLoopGroup(1);
+        application = new DefaultEventLoopGroup(1);
+    }
+
+    /**
+     * Reads an optional explicit port without silently replacing a malformed setting with TCP's
+     * port.
+     *
+     * @param value raw system property, or null when the operator left the port unchanged
+     * @return configured UDP port, or zero when the property is absent
+     * @throws IllegalArgumentException if the supplied property is not a usable integer port
+     */
+    static int parsePortOverride(final @Nullable String value) {
+        if (value == null) {
+            return 0;
+        }
+        final int port;
+        try {
+            port = Integer.parseInt(value);
+        } catch (NumberFormatException invalid) {
+            throw new IllegalArgumentException(
+                    "raknetify.spigot.portOverride must be an integer from 1 through 65535",
+                    invalid);
+        }
+        if (port < 1 || port > 65535) {
+            throw new IllegalArgumentException(
+                    "raknetify.spigot.portOverride must be an integer from 1 through 65535");
+        }
+        return port;
     }
 
     /**
@@ -92,15 +142,33 @@ final class SpigotListeners implements AutoCloseable {
      */
     private void bind(final Channel listener) {
         ChannelHandler acceptor = ServerAccess.acceptor(listener);
+        InetSocketAddress original = (InetSocketAddress) listener.localAddress();
+        InetSocketAddress address =
+                portOverride == 0
+                        ? original
+                        : new InetSocketAddress(original.getAddress(), portOverride);
         var future =
                 new ServerBootstrap()
                         .group(transport)
                         .channelFactory(this::newServerChannel)
                         .childHandler(new AcceptedChannelInitializer(acceptor))
-                        .localAddress(listener.localAddress())
+                        .localAddress(address)
                         .bind();
         channels.add(future.channel());
         future.syncUninterruptibly();
+    }
+
+    /**
+     * Reports actual bound endpoints so startup diagnostics also describe overridden UDP ports.
+     *
+     * @return snapshot of the plugin's bound IP endpoints
+     */
+    List<InetSocketAddress> localAddresses() {
+        return channels.stream()
+                .map(Channel::localAddress)
+                .filter(InetSocketAddress.class::isInstance)
+                .map(InetSocketAddress.class::cast)
+                .toList();
     }
 
     /**

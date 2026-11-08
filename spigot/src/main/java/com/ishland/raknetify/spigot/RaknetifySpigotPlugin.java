@@ -57,7 +57,14 @@ public final class RaknetifySpigotPlugin extends JavaPlugin {
             ServerAccess access = new ServerAccess(getServer());
             listeners = new SpigotListeners(access);
             listeners.bind();
-            getLogger().info("RakNet is listening on UDP port " + getServer().getPort());
+            for (var address : listeners.localAddresses()) {
+                getLogger()
+                        .info(
+                                "RakNet is listening on UDP port "
+                                        + address.getPort()
+                                        + " at "
+                                        + address.getAddress().getHostAddress());
+            }
         } catch (Exception exception) {
             getLogger().log(Level.SEVERE, "Could not start RakNet transport", exception);
             getServer().getPluginManager().disablePlugin(this);

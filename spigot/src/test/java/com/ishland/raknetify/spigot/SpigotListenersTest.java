@@ -53,6 +53,82 @@ import java.util.concurrent.TimeUnit;
  * Uses real loopback sockets to verify listener ownership after normal and failed plugin startup.
  */
 class SpigotListenersTest {
+    /** Accepts absent configuration and both valid socket-range boundaries. */
+    @Test
+    void parsesOptionalPortAndValidBoundaries() {
+        assertEquals(0, SpigotListeners.parsePortOverride(null));
+        for (int port : new int[] {1, 25570, 65535}) {
+            assertEquals(port, SpigotListeners.parsePortOverride(Integer.toString(port)));
+        }
+    }
+
+    /** Rejects malformed or unusable explicit values instead of binding an unintended UDP port. */
+    @Test
+    void rejectsInvalidExplicitPorts() {
+        for (String value : List.of("", "udp", "0", "-1", "65536", "2147483648", " 25570 ")) {
+            assertThrows(
+                    IllegalArgumentException.class, () -> SpigotListeners.parsePortOverride(value));
+        }
+    }
+
+    /**
+     * An override retains the native address and TCP socket while leaving the old UDP port alone.
+     *
+     * @throws Exception if loopback sockets or the synthetic native metadata cannot be created
+     */
+    @Test
+    void overrideBindsSeparateUdpAndReleasesItOnClose() throws Exception {
+        NioEventLoopGroup group = new NioEventLoopGroup(1);
+        try (PortPair ports = reservePortPair(group);
+                DatagramSocket reservation =
+                        new DatagramSocket(new InetSocketAddress(NetUtil.LOCALHOST4, 0))) {
+            int udpPort = reservation.getLocalPort();
+            InetSocketAddress expected = new InetSocketAddress(NetUtil.LOCALHOST4, udpPort);
+            try (SpigotListeners listeners =
+                    new SpigotListeners(new ServerAccess(new CraftFacade(ports.tcp())), udpPort)) {
+                reservation.close();
+                listeners.bind();
+                assertEquals(List.of(expected), listeners.localAddresses());
+                assertTrue(ports.tcp().channel().isActive());
+                assertFalse(ports.udp().isClosed());
+                try (DatagramSocket duplicate = new DatagramSocket(null)) {
+                    assertThrows(BindException.class, () -> duplicate.bind(expected));
+                }
+            }
+            assertTrue(ports.tcp().channel().isActive());
+            try (DatagramSocket replacement = new DatagramSocket(expected)) {
+                assertEquals(udpPort, replacement.getLocalPort());
+            }
+        } finally {
+            group.shutdownGracefully(0, 5, TimeUnit.SECONDS).sync();
+        }
+    }
+
+    /**
+     * A busy override fails without falling back to the TCP port or closing another service.
+     *
+     * @throws Exception if the fixture cannot reserve its independent sockets
+     */
+    @Test
+    void overrideConflictPreservesTcpAndExistingUdpServices() throws Exception {
+        NioEventLoopGroup group = new NioEventLoopGroup(1);
+        try (PortPair ports = reservePortPair(group);
+                DatagramSocket occupied =
+                        new DatagramSocket(new InetSocketAddress(NetUtil.LOCALHOST4, 0))) {
+            try (SpigotListeners listeners =
+                    new SpigotListeners(
+                            new ServerAccess(new CraftFacade(ports.tcp())),
+                            occupied.getLocalPort())) {
+                assertThrows(Exception.class, listeners::bind);
+            }
+            assertTrue(ports.tcp().channel().isActive());
+            assertFalse(ports.udp().isClosed());
+            assertFalse(occupied.isClosed());
+        } finally {
+            group.shutdownGracefully(0, 5, TimeUnit.SECONDS).sync();
+        }
+    }
+
     /**
      * Plugin disable releases UDP for a subsequent listener while retaining the native TCP channel.
      *
