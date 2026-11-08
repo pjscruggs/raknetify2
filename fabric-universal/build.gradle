@@ -110,7 +110,7 @@ plugins.withId('io.github.themrmilchmann.curseforge-publish') {
                 artifacts.register('main') {
                     from(jar)
                     displayName = 'Raknetify2 ' + project.version
-                    releaseType = rootProject.curseforgeAlpha
+                    releaseType = rootProject.curseforgeBeta
                     changelog {
                         format = rootProject.curseforgeMarkdown
                         from(com.ishland.buildscript.ParseGItHubActionChangelog.getChangelog())

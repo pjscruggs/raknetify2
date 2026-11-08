@@ -141,6 +141,19 @@ class ReleasePlanTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Invalid checksum'):
             self.guard.verify_checksums(self.folder)
 
+    def test_accepts_beta_release(self):
+        """Accept a beta bundle only after checking its checksums and each loader's embedded version."""
+        self.version = '0.1.0-beta.1.427'
+        self.make_bundle()
+        self.assertEqual(self.version, self.guard.verify_artifacts(self.folder))
+
+    def test_rejects_dirty_beta_release(self):
+        """Reject a beta built from uncommitted sources even when every artifact agrees on that version."""
+        self.version = '0.1.0-beta.1.427-dirty'
+        self.make_bundle()
+        with self.assertRaisesRegex(ValueError, 'clean release'):
+            self.guard.verify_artifacts(self.folder)
+
     def test_rejects_dirty_release(self):
         """Keep local uncommitted development builds out of live publication."""
         self.version += '-dirty'

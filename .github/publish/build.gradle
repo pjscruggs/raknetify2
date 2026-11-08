@@ -25,7 +25,7 @@ publishMods {
     version = compatibility.version + '+' + loader
     displayName = "Raknetify2 ${compatibility.version} (${loader})"
     changelog = notes
-    type = ALPHA
+    type = BETA
     modLoaders.addAll(loader == 'spigot' ? ['spigot', 'paper'] : [loader])
     dryRun = preview
     // An uncertain upload must be reconciled before retrying, because creation is not an idempotent API operation.
@@ -41,8 +41,6 @@ publishMods {
     }
     if (destination == 'curseforge') {
         curseforge {
-            // CurseForge hides Alpha files from its app, including otherwise compatible loader downloads.
-            type = STABLE
             accessToken = providers.environmentVariable('CURSEFORGE_TOKEN')
             projectId = '1785937'
             minecraftVersions.addAll(supportedGames.collect { it == '26.4-snapshot-7' ? '26.4-snapshot' : it })

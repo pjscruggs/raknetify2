@@ -125,7 +125,7 @@ def verify_artifacts(folder):
     checked = verify_checksums(folder)
     metadata = json.loads((folder / 'compatibility.json').read_text(encoding='utf-8'))
     version = metadata['version']
-    if not re.fullmatch(r'\d+\.\d+\.\d+-alpha\.\d+\.\d+', version):
+    if not re.fullmatch(r'\d+\.\d+\.\d+-(?:alpha|beta)\.\d+\.\d+', version):
         raise ValueError('Not a clean release version')
     for loader in ('fabric', 'forge', 'neoforge'):
         name = 'raknetify2-' + loader + '-' + version + '.jar'

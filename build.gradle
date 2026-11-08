@@ -30,7 +30,7 @@ plugins {
 }
 
 ext.remapJarTaskType = net.fabricmc.loom.task.RemapJarTask
-ext.curseforgeAlpha = io.github.themrmilchmann.gradle.publish.curseforge.ReleaseType.ALPHA
+ext.curseforgeBeta = io.github.themrmilchmann.gradle.publish.curseforge.ReleaseType.BETA
 ext.curseforgeMarkdown = io.github.themrmilchmann.gradle.publish.curseforge.ChangelogFormat.MARKDOWN
 ext.modrinthProjectId = providers.gradleProperty('modrinth_project_id')
 ext.curseforgeProjectId = providers.gradleProperty('curseforge_project_id')
@@ -166,7 +166,7 @@ subprojects {
 				projectId = rootProject.modrinthProjectId.get()
 //				versionNumber = project.version + "+" + project.minecraft_version // You don't need to set this manually. Will fail if Modrinth has this version already
 //				versionName = project.version + " devbuild for " + project.minecraft_version
-				versionType = "alpha" // This is the default -- can also be `beta` or `alpha`
+				versionType = "beta"
 //				uploadFile = remapShadowJar // With Loom, this MUST be set to `remapJar` instead of `jar`!
 				gameVersions = rootProject.supportedVersions.values().collectMany { it.gameVersions }.unique()
 //				loaders = ["fabric"]
