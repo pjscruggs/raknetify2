@@ -47,6 +47,41 @@ class LargePayloadCompressionTest {
     /** Compressed application frame identifier reserved for this isolated codec pair. */
     private static final int COMPRESSED = 252;
 
+    /** Receives an independent channel before the peer's channel-zero handshake arrives. */
+    @Test
+    void channelStartCanOvertakeCapabilityHandshake() {
+        var codec = new MultiChannelingStreamingCompression(RAW, COMPRESSED);
+        EmbeddedChannel left = new EmbeddedChannel(codec);
+        EmbeddedChannel right =
+                new EmbeddedChannel(new MultiChannelingStreamingCompression(RAW, COMPRESSED));
+        try {
+            right.flushOutbound();
+            FrameData handshake = right.readOutbound();
+            try {
+                transferControl(left, right);
+                right.flushOutbound();
+                FrameData marker;
+                while ((marker = right.readOutbound()) != null) {
+                    try {
+                        assertEquals(0, marker.getOrderChannel());
+                    } finally {
+                        marker.release();
+                    }
+                }
+                assertFalse(codec.isActive());
+                exchange(right, left, 1, 891L);
+                left.writeInbound(handshake.retain());
+                assertTrue(codec.isActive());
+                exchange(right, left, 1, 892L);
+            } finally {
+                handshake.release();
+            }
+        } finally {
+            left.finishAndReleaseAll();
+            right.finishAndReleaseAll();
+        }
+    }
+
     /** Rejects invalid channel metadata without leaking incoming payloads or control frames. */
     @Test
     void invalidIncomingChannelsReleasePayloadAndControlFrames() {
@@ -181,6 +216,12 @@ class LargePayloadCompressionTest {
         assertTrue(sender.writeOutbound(frame));
         FrameData compressed = sender.readOutbound();
         assertNotNull(compressed);
+        if (compressed.getPacketId()
+                == Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID) {
+            receiver.writeInbound(compressed);
+            compressed = sender.readOutbound();
+            assertNotNull(compressed);
+        }
         try {
             assertEquals(COMPRESSED, compressed.getPacketId());
             assertTrue(compressed.getDataSize() < TransportTestPayload.LARGE_SIZE);

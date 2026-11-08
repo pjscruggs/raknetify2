@@ -132,8 +132,8 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     }
 
     /**
-     * Sends a dictionary-reset marker on every ordering channel before creating fresh deflaters.
-     * Does nothing until the peer has advertised compression support.
+     * Sends dictionary-reset markers only for channels whose outgoing streams have started. Does
+     * nothing until the peer has advertised compression support.
      *
      * @param ctx outbound context preserving each marker's order relative to later payloads
      */
@@ -141,18 +141,30 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
         if (!active) {
             return;
         }
+        for (int channel = 0; channel < deflaters.length; channel++) {
+            if (deflaters[channel] != null) {
+                startChannel(ctx, channel);
+            }
+        }
+    }
+
+    /**
+     * Starts a dictionary on its first use, after any login encryption transition.
+     *
+     * @param ctx outbound context preserving marker order
+     * @param channel ordering channel whose dictionary starts here
+     */
+    private void startChannel(final ChannelHandlerContext ctx, final int channel) {
         ByteBuf buf = ctx.alloc().buffer().writeLong(CHANNEL_START);
         try {
-            for (int i = 0; i < 8; i++) {
-                final FrameData data =
-                        FrameData.create(
-                                ctx.alloc(),
-                                Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID,
-                                buf);
-                data.setOrderChannel(i);
-                ctx.write(data).addListener(network.ycc.raknet.RakNet.INTERNAL_WRITE_LISTENER);
-                initDeflater(i);
-            }
+            FrameData data =
+                    FrameData.create(
+                            ctx.alloc(),
+                            Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID,
+                            buf);
+            data.setOrderChannel(channel);
+            ctx.write(data).addListener(network.ycc.raknet.RakNet.INTERNAL_WRITE_LISTENER);
+            initDeflater(channel);
         } finally {
             buf.release();
         }
@@ -186,9 +198,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
      */
     private void initInflater(final int channel) {
         Objects.checkIndex(channel, inflaters.length);
-        if (!active) {
-            return;
-        }
+        // Independent channels can deliver their start marker before the capability handshake.
         if (inflaters[channel] != null) {
             inflaters[channel].end();
         }
@@ -265,7 +275,10 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
                     && rawFrameData.getReliability().isReliable
                     && rawFrameData.getReliability().isOrdered
                     && !rawFrameData.getReliability().isSequenced
-                    && deflaters[channel] != null) {
+                    && active) {
+                if (deflaters[channel] == null) {
+                    startChannel(ctx, channel);
+                }
                 if (rawFrameData.getDataSize() < 16 + 1) {
                     outBytesRaw.addAndGet(rawFrameData.getDataSize() - 1);
                     outBytesCompressed.addAndGet(rawFrameData.getDataSize() - 1);
@@ -316,7 +329,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
                     return;
                 } else if (l == SERVER_HANDSHAKE) {
                     active = true;
-                    doChannelStart(ctx);
+                    startChannel(ctx, 0);
                     return;
                 }
             }

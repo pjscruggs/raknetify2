@@ -24,6 +24,7 @@
 
 package com.ishland.raknetify.fabric.common.connection;
 
+import com.ishland.raknetify.common.connection.LocalWriteCompletion;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.connection.multichannel.CustomPayloadChannel;
 
@@ -35,6 +36,7 @@ import io.netty.channel.ChannelPromise;
 
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.login.ServerboundKeyPacket;
 
 import org.jspecify.annotations.Nullable;
 
@@ -65,7 +67,11 @@ public class MultiChannellingPacketCapture extends ChannelOutboundHandlerAdapter
         final Class<?> previous = this.packetClass;
         this.packetClass = msg.getClass();
         try {
-            super.write(ctx, msg, promise);
+            if (msg instanceof ServerboundKeyPacket) {
+                LocalWriteCompletion.write(ctx, msg, promise);
+            } else {
+                super.write(ctx, msg, promise);
+            }
         } finally {
             this.packetClass = previous;
         }
