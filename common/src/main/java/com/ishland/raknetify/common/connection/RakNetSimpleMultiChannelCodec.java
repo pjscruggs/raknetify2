@@ -131,6 +131,12 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     /** Whether Minecraft writes must wait for the multichannel negotiation marker. */
     private boolean queuePendingWrites;
 
+    /** Single-channel packets whose delivery must precede independently ordered traffic. */
+    private int pendingSingleChannelWrites;
+
+    /** Whether the current negotiation marker has completed transport delivery. */
+    private boolean negotiationAcknowledged;
+
     /** Owned encoded frames and their completion promises awaiting negotiation completion. */
     private final Queue<PendingWrite> pendingWrites = new ArrayDeque<>();
 
@@ -187,7 +193,7 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
             try {
                 final FrameData frameData = encode0(ctx, buf);
                 if (frameData != null) {
-                    super.write(ctx, frameData, promise);
+                    writeFrame(ctx, frameData, promise);
                 } else {
                     promise.setSuccess();
                 }
@@ -223,6 +229,7 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
             final FrameData frameData =
                     FrameData.create(ctx.alloc(), Constants.RAKNET_PING_PACKET_ID, buf);
             frameData.setOrderChannel(7);
+            this.negotiationAcknowledged = false;
             this.queuePendingWrites = true;
             ctx.write(frameData)
                     .addListener(future -> {
@@ -234,16 +241,56 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
                                                     .FIRE_EXCEPTION_ON_FAILURE);
                             return;
                         }
-                        isMultichannelEnabled = true;
-                        if (Constants.DEBUG) {
-                            System.out.println(
-                                    "Raknetify: [MultiChannellingDataCodec] Started multichannel");
-                        }
-                        flushPendingWrites(ctx);
+                        negotiationAcknowledged = true;
+                        finishNegotiation(ctx);
                     });
         } finally {
             buf.release();
         }
+    }
+
+    /**
+     * Tracks every pre-negotiation packet so a marker ACK cannot bypass an earlier lost frame.
+     *
+     * @param ctx outbound context forwarding the owned frame
+     * @param frame encoded packet whose delivery may guard the next ordering phase
+     * @param promise original application completion
+     * @throws Exception if downstream forwarding fails
+     */
+    private void writeFrame(
+            final ChannelHandlerContext ctx, final FrameData frame, final ChannelPromise promise)
+            throws Exception {
+        final ChannelPromise completion = promise.unvoid();
+        if (!isMultichannelEnabled) {
+            pendingSingleChannelWrites++;
+            completion.addListener(future -> {
+                pendingSingleChannelWrites--;
+                if (!future.isSuccess() && queuePendingWrites) {
+                    failPendingWrites(future.cause());
+                    ctx.close().addListener(network.ycc.raknet.RakNet.INTERNAL_WRITE_LISTENER);
+                    return;
+                }
+                finishNegotiation(ctx);
+            });
+        }
+        super.write(ctx, frame, completion);
+    }
+
+    /**
+     * Opens independent channels only after both the marker and all prior packets are delivered.
+     *
+     * @param ctx context draining retained application frames in submission order
+     */
+    private void finishNegotiation(final ChannelHandlerContext ctx) {
+        if (!queuePendingWrites || !negotiationAcknowledged || pendingSingleChannelWrites != 0) {
+            return;
+        }
+        isMultichannelEnabled = true;
+        if (Constants.DEBUG) {
+            System.out.println("Raknetify: [MultiChannellingDataCodec] Started multichannel");
+        }
+        flushPendingWrites(ctx);
+        ctx.flush();
     }
 
     /**

@@ -161,6 +161,32 @@ class SynchronizationOwnershipTest {
         }
     }
 
+    /** A marker ACK cannot release terrain while the preceding world change remains undelivered. */
+    @Test
+    void negotiationWaitsForEveryPriorSingleChannelPacket() {
+        NegotiationGate gate = new NegotiationGate();
+        RakNetSimpleMultiChannelCodec codec =
+                new RakNetSimpleMultiChannelCodec(Constants.RAKNET_GAME_PACKET_ID)
+                        .addHandler((buffer, silent) -> 1);
+        EmbeddedChannel channel = new EmbeddedChannel(gate, codec);
+        try {
+            channel.writeOutbound(Unpooled.buffer().writeByte(1));
+            channel.writeOutbound(RakNetSimpleMultiChannelCodec.SIGNAL_START_MULTICHANNEL);
+            ((FrameData) channel.readOutbound()).release();
+            channel.writeOutbound(Unpooled.buffer().writeByte(2));
+            assertNull(channel.readOutbound(), "Terrain must wait for the missing world change");
+            java.util.Objects.requireNonNull(gate.pending).setSuccess();
+            FrameData terrain = channel.readOutbound();
+            try {
+                assertEquals(1, terrain.getOrderChannel());
+            } finally {
+                terrain.release();
+            }
+        } finally {
+            channel.finishAndReleaseAll();
+        }
+    }
+
     /**
      * A failed marker must fail queued writes instead of sending packets on channels the peer never
      * enabled.
