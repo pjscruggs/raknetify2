@@ -76,8 +76,14 @@ final class AuthenticatedFrameCipher {
     /** Reused nonce serialization storage confined to this direction's event loop. */
     private final ByteBuffer nonce = ByteBuffer.allocate(12);
 
-    /** Reused outer packet identifier authenticated together with each frame header. */
-    private final byte[] packetIdentifier = new byte[1];
+    /** Complete authenticated header followed by the outer packet identifier. */
+    private final byte[] authenticatedHeader = new byte[HEADER_SIZE + 1];
+
+    /** Bounded scratch storage confined to this direction's event loop. */
+    private final FrameCipherBuffers buffers = new FrameCipherBuffers();
+
+    /** Immutable reliability lookup without allocating an enum array per packet. */
+    private static final Reliability[] RELIABILITIES = Reliability.values();
 
     /** Untrusted receive scratch that is copied only when the first valid salt is established. */
     private final byte[] incomingSalt = new byte[16];
@@ -251,7 +257,7 @@ final class AuthenticatedFrameCipher {
         if (replay[lane] == null) {
             replay[lane] = new FrameReplayWindow(replayBudget);
         }
-        Reliability reliability = Reliability.get(lane / 8);
+        Reliability reliability = RELIABILITIES[lane / 8];
         boolean accepted =
                 reliability.isOrdered
                         ? replay[lane].acceptOrdered(sequence)
@@ -311,7 +317,7 @@ final class AuthenticatedFrameCipher {
         if (lane >= 64 || sequence < 0 || sequence >= MAX_PACKETS) {
             throw new GeneralSecurityException("Invalid encrypted frame sequence or lane");
         }
-        Reliability original = Reliability.get(lane / 8);
+        Reliability original = RELIABILITIES[lane / 8];
         if (frame.getReliability() != original
                 && frame.getReliability() != original.makeReliable()) {
             throw new GeneralSecurityException("Encrypted reliability changed");
@@ -348,13 +354,13 @@ final class AuthenticatedFrameCipher {
      */
     private void authenticateHeader(
             final FrameData frame, final ByteBuf envelope, final int start) {
-        cipher.updateAAD(envelope.nioBuffer(start, HEADER_SIZE));
-        packetIdentifier[0] = (byte) frame.getPacketId();
-        cipher.updateAAD(packetIdentifier);
+        envelope.getBytes(start, authenticatedHeader, 0, HEADER_SIZE);
+        authenticatedHeader[HEADER_SIZE] = (byte) frame.getPacketId();
+        cipher.updateAAD(authenticatedHeader);
     }
 
     /**
-     * Uses NIO views to avoid retaining plaintext-sized scratch arrays on the connection.
+     * Uses bounded scratch storage for small frames and NIO views for large frames.
      *
      * @param input source ciphertext or plaintext buffer
      * @param start first input byte
@@ -365,12 +371,6 @@ final class AuthenticatedFrameCipher {
      */
     private void crypt(final ByteBuf input, final int start, final int length, final ByteBuf output)
             throws GeneralSecurityException {
-        int capacity = cipher.getOutputSize(length);
-        output.ensureWritable(capacity);
-        int written =
-                cipher.doFinal(
-                        input.nioBuffer(start, length),
-                        output.nioBuffer(output.writerIndex(), capacity));
-        output.writerIndex(output.writerIndex() + written);
+        buffers.transform(cipher, input, start, length, output);
     }
 }
