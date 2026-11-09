@@ -158,6 +158,7 @@ public final class RaknetEncryptionProbe extends SimpleChannelInboundHandler<Obj
             ((RakNet.Config) channel.config()).setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE);
             // Metrics are transport control traffic handled before application encryption.
             channel.pipeline().addLast("metrics", new MetricsSynchronizationHandler());
+            RaknetStatusProbe.installOptionalCompatibility(channel);
             channel.pipeline().addLast("game", new UserDataCodec(0xFD));
             channel.pipeline().addLast("probe", RaknetEncryptionProbe.this);
         });
@@ -282,7 +283,11 @@ public final class RaknetEncryptionProbe extends SimpleChannelInboundHandler<Obj
      * @param context connection whose plaintext key or options response has already been written
      */
     private void enableEncryption(final ChannelHandlerContext context) {
-        context.pipeline().addBefore("game", "encryption", new MultiChannellingEncryption(KEY));
+        String boundary =
+                Boolean.getBoolean("raknetify.test.ordered")
+                        ? CompatibilityNegotiation.NAME
+                        : "game";
+        context.pipeline().addBefore(boundary, "encryption", new MultiChannellingEncryption(KEY));
         if ("rejected-session".equals(mode)) {
             return;
         }

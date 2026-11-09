@@ -29,6 +29,7 @@ def run(probe_dir, work_dir, request):
     command = client.launch_command(args, request.version, folder, libraries)
     connection = ','.join(map(str, (request.port, request.protocol, request.payload_size)))
     command[1:1] = ['-Draknetify.test.encryption=' + connection,
+                    '-Draknetify.test.ordered=' + str(getattr(request, 'ordered', False)).lower(),
                     '-Draknetify.test.encryptionModes=' + ','.join(request.modes)]
     log = folder / 'encryption.log'
     with log.open('w', encoding='utf-8') as output:

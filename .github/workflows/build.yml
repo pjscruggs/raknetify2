@@ -121,7 +121,7 @@ jobs:
       max-parallel: 8
       matrix:
         os: [ubuntu-24.04]
-        suite: [server, proxy, bungee, proxy-protocol, disconnect, polymer, polymer-krypton, packetfixer-krypton, packetfixer-polymer-krypton, ordering, transfers, transfer-clients, fastipping]
+        suite: [server, ordered, proxy, bungee, proxy-protocol, disconnect, polymer, polymer-krypton, packetfixer-krypton, packetfixer-polymer-krypton, ordering, transfers, transfer-clients, fastipping]
         include:
           - os: ubuntu-24.04
             suite: voicechat
@@ -198,6 +198,16 @@ jobs:
           --jar fabric-universal/build/libs/*.jar
           --work-dir "$RUNNER_TEMP/raknetify-smoke"
           --java-17 "${{ steps.java17.outputs.path }}/bin/java"
+          --java-21 "${{ steps.java21.outputs.path }}/bin/java"
+          --encryption-legacy transport-test-legacy/build/libs/*.jar
+          --encryption-modern transport-test-modern/build/libs/*.jar
+      - name: Ordered compatibility and native encryption
+        if: matrix.suite == 'ordered'
+        run: >-
+          python .github/scripts/server-smoke.py --discard-runtime --ordered-compatibility
+          --jar fabric-universal/build/libs/*.jar
+          --work-dir "$RUNNER_TEMP/raknetify-ordered"
+          --versions 1.21.11 26.3
           --java-21 "${{ steps.java21.outputs.path }}/bin/java"
           --encryption-legacy transport-test-legacy/build/libs/*.jar
           --encryption-modern transport-test-modern/build/libs/*.jar

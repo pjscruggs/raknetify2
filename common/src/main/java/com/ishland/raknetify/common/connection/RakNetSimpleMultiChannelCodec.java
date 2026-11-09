@@ -167,11 +167,13 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     public void write(
             final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise)
             throws Exception {
-        if (this.queuePendingWrites && msg instanceof ByteBuf buf) {
-            queueWrite(ctx, buf, promise);
+        if (ignoreControl(ctx, msg)) {
+            promise.trySuccess();
             return;
         }
-
+        if (queueIfPending(ctx, msg, promise)) {
+            return;
+        }
         if (msg == SIGNAL_START_MULTICHANNEL) {
             startMultichannel(ctx, promise);
             return;
@@ -205,6 +207,36 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
         }
 
         super.write(ctx, msg, promise);
+    }
+
+    /**
+     * Retains game writes while the multichannel marker is awaiting delivery.
+     *
+     * @param ctx owning outbound context
+     * @param message pending payload or unrelated control
+     * @param promise original write completion
+     * @return whether the write was retained
+     */
+    private boolean queueIfPending(
+            final ChannelHandlerContext ctx, final Object message, final ChannelPromise promise) {
+        if (queuePendingWrites && message instanceof ByteBuf buffer) {
+            queueWrite(ctx, buffer, promise);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Keeps strict sessions out of multichannel negotiation and destructive phase resets.
+     *
+     * @param ctx connection owning the delivery policy
+     * @param message local outbound control or application payload
+     * @return whether the local control has no meaning in ordered compatibility mode
+     */
+    private static boolean ignoreControl(final ChannelHandlerContext ctx, final Object message) {
+        return CompatibilityPolicy.isOrdered(ctx.channel())
+                && (message == SIGNAL_START_MULTICHANNEL
+                        || message instanceof SynchronizationLayer.SyncRequest);
     }
 
     /**
@@ -341,6 +373,9 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
      * @return an owned frame, or null for empty payloads or an explicit discard rule
      */
     private @Nullable FrameData encode0(final ChannelHandlerContext ctx, final ByteBuf buf) {
+        if (CompatibilityPolicy.isOrdered(ctx.channel())) {
+            return FrameData.create(ctx.alloc(), packetId, buf);
+        }
         if (buf.isReadable()) {
             final int packetChannelOverride = getChannelOverride(buf, !isMultichannelEnabled);
             if (packetChannelOverride == Integer.MIN_VALUE) {

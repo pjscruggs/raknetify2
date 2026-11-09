@@ -44,6 +44,7 @@ class SmokeFeatures:
     transfers: bool = False
     proxy_protocol: bool = False
     voicechat: bool = False
+    ordered: bool = False
 
 
 @dataclass(frozen=True)
@@ -115,11 +116,11 @@ def check_udp(port):
         assert 128 <= struct.unpack('>H', reply[26:28])[0] <= 1200
 
 
-def check_connected_udp(port, metadata, java, probe_dir):
+def check_connected_udp(port, metadata, java, probe_dir, ordered=False):
     """Exercise Minecraft's application pipeline over the original single-channel RakNet wire format."""
     classpath = os.pathsep.join(str(probe_dir.resolve() / part) for part in ('classes', 'lib/*'))
     output = subprocess.check_output(
-        [java, '-cp', classpath, 'com.ishland.raknetify.common.connection.RaknetStatusProbe',
+        [java, '-Draknetify.test.ordered=' + str(ordered).lower(), '-cp', classpath, 'com.ishland.raknetify.common.connection.RaknetStatusProbe',
          str(port), str(metadata['protocol_version'])], text=True, encoding='utf-8', timeout=30)
     status = json.loads(next(line for line in output.splitlines() if line.startswith('{')))
     assert status['version']['protocol'] == metadata['protocol_version'], status
@@ -284,6 +285,7 @@ def check_server(run):
     EULA acceptance are written here, and native and NIO runs use different worlds.
     """
     (run.folder / 'eula.txt').write_text('eula=true\n')
+    configure_compatibility(run.folder, run.features.ordered)
     (run.folder / 'server.properties').write_text(
         f'server-ip=127.0.0.1\nserver-port={run.port}\nenforce-secure-profile=false\n'
         'online-mode=' + str(run.features.encryption).lower() + '\n'
@@ -305,7 +307,7 @@ def check_server(run):
             if run.features.voicechat:
                 voice_fixture().check(run.folder, log, run.port, frontend)
             check_udp(frontend)
-            check_connected_udp(frontend, metadata, run.java, run.probe_dir)
+            check_connected_udp(frontend, metadata, run.java, run.probe_dir, run.features.ordered)
             if run.features.encryption:
                 check_encryption(run, frontend, metadata)
             if run.features.proxy_protocol:
@@ -318,9 +320,21 @@ def check_server(run):
         assert process.wait(timeout=45) == 0
         reader.join(timeout=10)
         check_log(log, run.version, run.features.krypton, run.features.packetfixer)
+        if run.features.ordered:
+            assert 'ordered compatibility negotiated' in log.read_text(encoding='utf-8')
         report_success(run.version, transport, log, run.features)
     finally:
         stop_server(process, reader)
+
+
+def configure_compatibility(folder, ordered):
+    """Set only the disposable fixture's compatibility requirement."""
+    path = folder / 'config' / 'raknetify2-compatibility.json'
+    if ordered:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text('{"mode":"ordered"}', encoding='utf-8')
+    else:
+        path.unlink(missing_ok=True)
 
 
 def check_transport_threads(folder, native, java, pid):
@@ -375,6 +389,7 @@ def check_encryption(run, port, metadata):
     spec.loader.exec_module(module)
     request = SimpleNamespace(version=run.version, java=run.java, port=port,
                               protocol=metadata['protocol_version'], modes=('echo',),
+                              ordered=run.features.ordered,
                               payload_size=8 * 1024 * 1024 + 64 if run.features.packetfixer else 8)
     module.run(run.probe_dir, run.folder.parent / 'encryption-clients', request)
 
@@ -402,6 +417,7 @@ def arguments():
     parser.add_argument('--port', type=int, default=25871)
     parser.add_argument('--discard-runtime', action='store_true')
     parser.add_argument('--proxy-protocol', action='store_true')
+    parser.add_argument('--ordered-compatibility', action='store_true')
     parser.add_argument('--encryption-legacy', type=Path)
     parser.add_argument('--encryption-modern', type=Path)
     return parser.parse_args()
@@ -513,7 +529,7 @@ def main():
             features = SmokeFeatures(polymer=bool(polymer), krypton=bool(krypton),
                                      encryption=bool(encryption_fixture(args, version)),
                                      packetfixer=bool(packetfixer), proxy_protocol=args.proxy_protocol,
-                                     voicechat=bool(voicechat))
+                                     voicechat=bool(voicechat), ordered=args.ordered_compatibility)
             check_server(ServerRun(folder, version, native, java, args.probe_dir, features, args.port))
         if args.discard_runtime:
             discard_runtime(folder)

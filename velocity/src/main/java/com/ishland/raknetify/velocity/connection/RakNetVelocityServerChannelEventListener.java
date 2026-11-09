@@ -23,6 +23,7 @@ package com.ishland.raknetify.velocity.connection;
 
 import com.google.common.base.Preconditions;
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.connection.CompatibilityPolicy;
 import com.ishland.raknetify.common.connection.DelayedPacketSender;
 import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;
 import com.velocitypowered.proxy.protocol.packet.KeepAlivePacket;
@@ -35,10 +36,7 @@ import network.ycc.raknet.RakNet;
 
 import java.util.Map;
 
-/**
- * Answers backend keepalives using the RakNet client's measured RTT instead of relaying them to the
- * client.
- */
+/** Relays genuine backend keepalives in ordered mode and uses transport RTT replies otherwise. */
 public class RakNetVelocityServerChannelEventListener extends DelayedPacketSender {
 
     /** Pipeline name for the backend-facing keepalive and connection diagnostic handler. */
@@ -58,7 +56,7 @@ public class RakNetVelocityServerChannelEventListener extends DelayedPacketSende
     }
 
     /**
-     * Answers backend keepalives locally and forwards other decoded packets to the proxy. Replies
+     * Forwards every packet in ordered mode. Otherwise answers backend keepalives locally. Replies
      * are delayed by the client RTT minus four milliseconds, bounded below by zero, to account for
      * scheduling overhead without involving Minecraft's client keepalive path.
      *
@@ -68,7 +66,7 @@ public class RakNetVelocityServerChannelEventListener extends DelayedPacketSende
      */
     @Override
     public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
-        if (msg instanceof KeepAlivePacket) {
+        if (msg instanceof KeepAlivePacket && !CompatibilityPolicy.isOrdered(clientChannel)) {
             if (Constants.DEBUG) {
                 RaknetifyVelocityPlugin.LOGGER.info("Received downstream keepalive, swallowing it");
             }

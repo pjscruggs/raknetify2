@@ -110,6 +110,18 @@ public class RakNetConnectionUtil {
             config.setNoDelayEnabled(false);
             //            config.setIgnoreResendGauge(true);
 
+            boolean server =
+                    channel instanceof RakNetApplicationChannel
+                            || channel
+                                    instanceof network.ycc.raknet.server.channel.RakNetChildChannel;
+            CompatibilityPolicy policy =
+                    new CompatibilityPolicy(server && CompatibilityPolicy.serverRequiresOrdered());
+            Channel transport =
+                    channel instanceof RakNetApplicationChannel
+                                    || channel instanceof RakNetClientThreadedChannel
+                            ? channel.parent()
+                            : channel;
+            policy.install(channel, transport);
             initRaknetChannel(channel);
 
             //            channel.pipeline().addLast("raknetify-flush-enforcer", new
@@ -124,6 +136,11 @@ public class RakNetConnectionUtil {
                             new MultiChannelingStreamingCompression(
                                     Constants.RAKNET_GAME_PACKET_ID,
                                     Constants.RAKNET_STREAMING_COMPRESSION_PACKET_ID));
+            channel.pipeline()
+                    .addAfter(
+                            MultiChannelingStreamingCompression.NAME,
+                            CompatibilityNegotiation.NAME,
+                            new CompatibilityNegotiation(policy, server));
             channel.pipeline()
                     .addLast(
                             PayloadOrderingNegotiation.NAME,

@@ -29,7 +29,6 @@ import static com.ishland.raknetify.common.util.ReflectionUtil.accessible;
 
 import com.ishland.raknetify.bungee.RaknetifyBungeePlugin;
 import com.ishland.raknetify.common.Constants;
-import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.connection.SynchronizationLayer;
@@ -95,7 +94,7 @@ public class RakNetBungeeConnectionUtil {
             // MultiChannellingDataCodec(Constants.RAKNET_GAME_PACKET_ID));
             channel.pipeline()
                     .addAfter(
-                            MultiChannelingStreamingCompression.NAME,
+                            com.ishland.raknetify.common.connection.CompatibilityNegotiation.NAME,
                             RakNetSimpleMultiChannelCodec.NAME,
                             new RakNetSimpleMultiChannelCodec(Constants.RAKNET_GAME_PACKET_ID));
         }

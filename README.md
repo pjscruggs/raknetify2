@@ -41,6 +41,22 @@ Encrypted RakNet connections require the authenticated encryption protocol on bo
 
 Install the matching plugin on Velocity or BungeeCord and the matching client mod on each connecting client. Allow UDP on the proxy's listening port. Clients use the `raknet;` prefix with the proxy address. Backend servers do not need Raknetify2 for this setup.
 
+## Ordered mode
+
+Normally, Raknetify2 lets independent packet channels continue while one channel waits for missing data. Ordered mode puts all Minecraft packets on one channel, so a missing packet holds up every later packet in that direction until it is retransmitted. This preserves the order expected by some anti-cheat software, but gives up Raknetify2’s ability to keep unrelated game traffic moving during that wait.
+
+Create `config/raknetify2-compatibility.json` in the working directory of the server or Minecraft proxy accepting RakNet connections:
+
+```json
+{"mode": "ordered"}
+```
+
+All Minecraft packets use one reliable ordered channel, including bundle delimiters and world transitions. Velocity and BungeeCord forward backend keepalive requests to the real client. Configure this at the proxy even if the anti-cheat runs on a backend. The policy applies across backend switches.
+
+Keep anti-cheat checks enabled and validate your particular setup.
+
+Older clients can use the ordinary TCP address without `raknet;`. An absent file or `"mode": "multichannel"` retains ordinary behavior. Invalid settings reject RakNet connections.
+
 ## UDP proxies and PROXY protocol v2
 
 To preserve client IP addresses behind a UDP proxy, create `config/raknetify2-proxy-protocol.json` on the server or Minecraft proxy receiving the forwarded traffic:

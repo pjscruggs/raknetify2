@@ -110,6 +110,31 @@ class ProxyPacketOwnershipTest {
         }
     }
 
+    /**
+     * Ordered compatibility forwards the original backend request without synthesizing a response.
+     */
+    @Test
+    void orderedModeForwardsKeepaliveToRealClient() {
+        EmbeddedChannel client = new RaknetChannel();
+        new com.ishland.raknetify.common.connection.CompatibilityPolicy(true)
+                .install(client, client);
+        EmbeddedChannel backend =
+                new EmbeddedChannel(new RakNetBungeeServerChannelEventListener(client));
+        PacketWrapper wrapper =
+                new PacketWrapper(
+                        new KeepAlive(42), Unpooled.buffer().writeLong(42), Protocol.GAME);
+        try {
+            assertTrue(backend.writeInbound(wrapper));
+            assertSame(wrapper, backend.readInbound());
+            backend.runScheduledPendingTasks();
+            assertNull(backend.readOutbound());
+            wrapper.trySingleRelease();
+        } finally {
+            backend.finishAndReleaseAll();
+            client.finishAndReleaseAll();
+        }
+    }
+
     /** Supplies transport RTT configuration without creating a socket or event-loop thread. */
     private static final class RaknetChannel extends EmbeddedChannel {
 

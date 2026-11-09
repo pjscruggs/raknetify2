@@ -28,6 +28,7 @@ package com.ishland.raknetify.bungee.connection;
 import com.google.common.base.Preconditions;
 import com.ishland.raknetify.bungee.RaknetifyBungeePlugin;
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.connection.CompatibilityPolicy;
 import com.ishland.raknetify.common.connection.DelayedPacketSender;
 import com.ishland.raknetify.common.connection.SynchronizationLayer;
 
@@ -44,10 +45,7 @@ import network.ycc.raknet.RakNet;
 
 import java.util.Map;
 
-/**
- * Answers backend keepalives using the RakNet client's measured RTT instead of relaying them to the
- * client.
- */
+/** Relays genuine backend keepalives in ordered mode and uses transport RTT replies otherwise. */
 public class RakNetBungeeServerChannelEventListener extends DelayedPacketSender {
 
     /** Pipeline name for the backend-facing keepalive and connection diagnostic handler. */
@@ -67,9 +65,9 @@ public class RakNetBungeeServerChannelEventListener extends DelayedPacketSender 
     }
 
     /**
-     * Resynchronizes client ordering on respawn and answers backend keepalives locally. Replies are
-     * delayed by the client RTT minus four milliseconds, bounded below by zero, to account for
-     * scheduling overhead without involving Minecraft's client keepalive path.
+     * Requests respawn synchronization and, outside ordered mode, answers keepalives locally.
+     * Replies are delayed by the client RTT minus four milliseconds, bounded below by zero, to
+     * account for scheduling overhead without involving Minecraft's client keepalive path.
      *
      * @param ctx backend-facing context used to schedule and send the reply
      * @param msg decoded backend packet wrapper
@@ -83,7 +81,8 @@ public class RakNetBungeeServerChannelEventListener extends DelayedPacketSender 
                 clientChannel
                         .write(SynchronizationLayer.SYNC_REQUEST_OBJECT)
                         .addListener(RakNet.INTERNAL_WRITE_LISTENER);
-            } else if (packet instanceof KeepAlive keepAlive) {
+            } else if (packet instanceof KeepAlive keepAlive
+                    && !CompatibilityPolicy.isOrdered(clientChannel)) {
                 if (Constants.DEBUG) {
                     RaknetifyBungeePlugin.LOGGER.info(
                             "Received downstream keepalive, swallowing it");

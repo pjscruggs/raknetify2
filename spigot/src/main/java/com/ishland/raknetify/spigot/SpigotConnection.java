@@ -55,7 +55,7 @@ final class SpigotConnection {
         RakNetConnectionUtil.initChannel(channel);
         channel.pipeline()
                 .addAfter(
-                        MultiChannelingStreamingCompression.NAME,
+                        com.ishland.raknetify.common.connection.CompatibilityNegotiation.NAME,
                         RakNetSimpleMultiChannelCodec.NAME,
                         new RakNetSimpleMultiChannelCodec(Constants.RAKNET_GAME_PACKET_ID));
     }

@@ -97,9 +97,26 @@ public final class RaknetStatusProbe {
     private static ChannelInitializer<Channel> initializer(
             final CompletableFuture<String> response) {
         return new com.ishland.raknetify.test.ChannelSetup(channel -> {
+            installOptionalCompatibility(channel);
             channel.pipeline().addLast(new UserDataCodec(0xFD));
             channel.pipeline().addLast(new StatusReceiver(response));
         });
+    }
+
+    /**
+     * Advertises ordered compatibility only when requested by the integration harness.
+     *
+     * @param channel isolated client connection
+     */
+    static void installOptionalCompatibility(final Channel channel) {
+        if (Boolean.getBoolean("raknetify.test.ordered")) {
+            CompatibilityPolicy policy = new CompatibilityPolicy(false);
+            policy.install(channel, channel);
+            channel.pipeline()
+                    .addLast(
+                            CompatibilityNegotiation.NAME,
+                            new CompatibilityNegotiation(policy, false));
+        }
     }
 
     /**

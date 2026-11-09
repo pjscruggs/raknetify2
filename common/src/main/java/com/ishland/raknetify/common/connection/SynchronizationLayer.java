@@ -112,6 +112,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
      * @param ctx receiving connection context
      * @param msg owned input frame or unrelated message transferred onward
      * @throws Exception if ordinary pipeline processing or marker validation fails
+     * @throws IllegalArgumentException if an ordered peer attempts to reset delivery cursors
      */
     @Override
     public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
@@ -120,6 +121,11 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             return;
         }
         try {
+            if (CompatibilityPolicy.isOrdered(ctx.channel())) {
+                ctx.close().addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                throw new IllegalArgumentException(
+                        "Ordering resets are forbidden in ordered compatibility mode");
+            }
             final ByteBuf bytes = packet.createData();
             try {
                 bytes.skipBytes(1);
@@ -168,6 +174,10 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
     public void write(
             final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise)
             throws Exception {
+        if (msg instanceof SyncRequest && CompatibilityPolicy.isOrdered(ctx.channel())) {
+            promise.trySuccess();
+            return;
+        }
         if (msg instanceof SyncRequest) {
             if (!waiting) {
                 startReset(ctx);
