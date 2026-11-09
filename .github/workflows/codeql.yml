@@ -76,7 +76,9 @@ jobs:
       - uses: ./.github/actions/setup-checks
       - name: Compile all modules for analysis
         if: matrix.build-mode == 'manual'
-        run: ./gradlew build :common:benchmarkClasses --no-build-cache --rerun-tasks --no-daemon --max-workers=2 --warning-mode fail
+        # Extract the transport against its declared API baseline; runtime compatibility
+        # with maintained Netty versions is exercised separately by the build workflow.
+        run: ./gradlew build :common:benchmarkClasses -PnettyTestVersion=4.1.25.Final --no-build-cache --rerun-tasks --no-daemon --max-workers=2 --warning-mode fail
       - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           category: /language:${{ matrix.language }}
