@@ -1,5 +1,7 @@
 name: build
 on:
+  schedule:
+    - cron: '23 5 * * 2'
   pull_request:
   push:
     branches: [main]
@@ -15,6 +17,8 @@ concurrency:
 jobs:
   quality:
     name: Source quality
+    outputs:
+      network: ${{ steps.network.outputs.matrix }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -29,6 +33,10 @@ jobs:
       - uses: ./.github/actions/setup-checks
       - name: Check every owned source before compiling Minecraft modules
         run: ./gradlew -p quality check --no-daemon --max-workers=2
+      - id: network
+        env:
+          TIER: ${{ github.event_name }}
+        run: python3 .github/scripts/integration-plan.py --network --tier "$TIER" >> "$GITHUB_OUTPUT"
       - name: Preserve quality reports
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -96,7 +104,7 @@ jobs:
           cp --parents velocity/build/libs/*-all.jar bungee/build/libs/*-all.jar ci-input/
           cp --parents transport-test-legacy/build/libs/*.jar transport-test-modern/build/libs/*.jar transport-test-client/build/libs/*.jar ci-input/
           cp --parents forge/build/libs/*.jar neoforge/build/libs/*.jar ci-input/
-          cp --parents spigot/build/libs/*.jar ci-input/
+          cp --parents fabric-26/build/libs/*-integration-test.jar spigot/build/libs/*.jar ci-input/
           cp --parents -r common/build/transport-probe ci-input/
           cd ci-input
           find . -type f -print0 | sort -z | xargs -0 sha256sum > ../test-inputs.sha256
@@ -110,7 +118,7 @@ jobs:
 
   network:
     name: ${{ matrix.suite }}${{ matrix.shard && format(' {0}/4', matrix.shard) || '' }} (${{ matrix.os }})
-    needs: build
+    needs: [build, quality]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     defaults:
@@ -119,54 +127,7 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 8
-      matrix:
-        os: [ubuntu-24.04]
-        suite: [server, ordered, proxy, bungee, proxy-protocol, disconnect, polymer, polymer-krypton, packetfixer-krypton, packetfixer-polymer-krypton, ordering, transfers, transfer-clients, fastipping]
-        include:
-          - os: ubuntu-24.04
-            suite: voicechat
-            shard: 1
-          - os: ubuntu-24.04
-            suite: voicechat
-            shard: 2
-          - os: ubuntu-24.04
-            suite: voicechat
-            shard: 3
-          - os: ubuntu-24.04
-            suite: voicechat
-            shard: 4
-          - os: ubuntu-24.04
-            suite: krypton
-            shard: 1
-          - os: ubuntu-24.04
-            suite: krypton
-            shard: 2
-          - os: ubuntu-24.04
-            suite: krypton
-            shard: 3
-          - os: ubuntu-24.04
-            suite: krypton
-            shard: 4
-          - os: ubuntu-24.04
-            suite: packetfixer
-            shard: 1
-          - os: ubuntu-24.04
-            suite: packetfixer
-            shard: 2
-          - os: ubuntu-24.04
-            suite: packetfixer
-            shard: 3
-          - os: ubuntu-24.04
-            suite: packetfixer
-            shard: 4
-          - os: windows-2022
-            suite: disconnect
-          - os: windows-2022
-            suite: ordering
-          - os: windows-2022
-            suite: proxy
-          - os: windows-2022
-            suite: bungee
+      matrix: ${{ fromJSON(needs.quality.outputs.network) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -487,7 +448,7 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
           LIBGL_ALWAYS_SOFTWARE: 'true'
         run: |
-          jar=$(find spigot/build/libs -name '*.jar' ! -name '*-dev.jar')
+          jar=$(find spigot/build/libs -name '*.jar' ! -name '*-dev.jar' ! -name '*-integration-test.jar')
           client=$(find neoforge/build/libs -name '*.jar' ! -name '*-dev.jar' ! -name '*-transport-test.jar')
           fixture=$(find neoforge/build/libs -name '*-transport-test.jar')
           command=(python .github/scripts/spigot-smoke.py --platform "$PLATFORM" --jar "$jar" --client-jar "$client" --client-fixture "$fixture" --probe-dir common/build/transport-probe --work-dir "$RUNNER_TEMP/plugin-$PLATFORM")
@@ -515,9 +476,15 @@ jobs:
           path: ${{ runner.temp }}/plugin-${{ matrix.platform }}/**/*.log
           if-no-files-found: error
 
+  integration:
+    needs: build
+    uses: ./.github/workflows/integration.yml
+    with:
+      tier: ${{ github.event_name }}
+
   downloads:
     name: Verified downloads
-    needs: [quality, mappings, security, source-security, build, network, native-loaders, spigot]
+    needs: [quality, mappings, security, source-security, build, network, native-loaders, spigot, integration]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -531,7 +498,7 @@ jobs:
           cp fabric-universal/build/libs/*.jar fabric-universal/build/generated/metadata/compatibility.json downloads/
           cp velocity/build/libs/*-all.jar bungee/build/libs/*-all.jar downloads/
           find forge/build/libs neoforge/build/libs -name '*.jar' ! -name '*-dev.jar' ! -name '*-transport-test.jar' -exec cp {} downloads/ \;
-          find spigot/build/libs -name '*.jar' ! -name '*-dev.jar' -exec cp {} downloads/ \;
+          find spigot/build/libs -name '*.jar' ! -name '*-dev.jar' ! -name '*-integration-test.jar' -exec cp {} downloads/ \;
           cd downloads
           sha256sum ./*.jar ./compatibility.json > SHA256SUMS
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

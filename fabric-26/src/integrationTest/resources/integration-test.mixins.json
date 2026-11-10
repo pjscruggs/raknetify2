@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_25",
+  "package": "com.ishland.raknetify.test.mixin",
+  "client": [
+    "NativeClientTickMixin",
+    "IntegrationClientMixin",
+    "IncomingPayloadMixin", "IntegrationPayloadMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

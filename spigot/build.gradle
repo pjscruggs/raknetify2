@@ -38,3 +38,14 @@ shadowJar {
 jar { archiveClassifier = 'dev' }
 assemble.dependsOn shadowJar
 test { useJUnitPlatform() }
+
+sourceSets {
+    integrationTest {
+        compileClasspath += sourceSets.main.compileClasspath
+    }
+}
+tasks.register('integrationTestJar', Jar) {
+    archiveClassifier = 'integration-test'
+    from sourceSets.integrationTest.output
+}
+assemble.dependsOn integrationTestJar

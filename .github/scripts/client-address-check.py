@@ -72,8 +72,8 @@ def prepare(args, version, metadata, lock):
     """Install the isolated client libraries and pinned mods without assets or real account data."""
     folder = (args.work_dir / version).resolve()
     (folder / 'mods').mkdir(parents=True, exist_ok=True)
-    cache = args.work_dir.resolve() / 'downloads'
-    cache.mkdir(exist_ok=True)
+    cache = getattr(args, 'cache_dir', args.work_dir.resolve() / 'downloads')
+    cache.mkdir(parents=True, exist_ok=True)
     profile = fetch_json('https://meta.fabricmc.net/v2/versions/loader/' + version + '/0.20.1/profile/json')
     libraries = profile_libraries(cache, profile)
     libraries.extend(minecraft_libraries(cache, metadata, profile))

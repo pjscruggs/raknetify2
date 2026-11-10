@@ -75,3 +75,18 @@ test {
     workingDir = layout.buildDirectory.dir('test-runtime').get().asFile
     doFirst { workingDir.mkdirs() }
 }
+
+sourceSets {
+    integrationTest {
+        java.srcDir rootProject.file('transport-tests/shared')
+        java.srcDir rootProject.file('transport-test-client/src/shared/java')
+        java.srcDir rootProject.file('transport-test-client/src/native/java')
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+tasks.register('integrationTestJar', Jar) {
+    archiveClassifier = 'integration-test'
+    from sourceSets.integrationTest.output
+}
+assemble.dependsOn integrationTestJar

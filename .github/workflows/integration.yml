@@ -1,0 +1,76 @@
+name: Tested compatibility
+on:
+  workflow_call:
+    inputs:
+      tier:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: select
+        env:
+          TIER: ${{ inputs.tier }}
+        run: python3 .github/scripts/integration-plan.py --tier "$TIER" >> "$GITHUB_OUTPUT"
+
+  exercise:
+    name: ${{ matrix.scenario }} (${{ matrix.server }}, ${{ matrix.mode }})
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/integration-runtime
+      - name: Run pinned integration
+        env:
+          SCENARIO: ${{ matrix.scenario }}
+          SERVER: ${{ matrix.server }}
+          MODE: ${{ matrix.mode }}
+        run: python .github/scripts/run-integration.py
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Compatibility-${{ matrix.scenario }}-${{ matrix.server }}-${{ matrix.mode }}
+          path: ${{ runner.temp }}/integration/result.json
+          if-no-files-found: error
+
+  verified:
+    name: Verified compatibility matrix
+    needs: exercise
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: Compatibility-*
+          path: receipts
+      - env:
+          TIER: ${{ inputs.tier }}
+        run: python3 .github/scripts/integration-plan.py --tier "$TIER" --receipts receipts
+
+  grim:
+    name: Grim tracking (informational)
+    if: inputs.tier == 'schedule' || inputs.tier == 'workflow_dispatch'
+    continue-on-error: true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/integration-runtime
+      - name: Observe Grim tracking during ordinary gameplay
+        env:
+          SCENARIO: grim
+          SERVER: '26.3'
+          MODE: ordered
+        run: python .github/scripts/run-integration.py

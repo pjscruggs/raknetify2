@@ -289,8 +289,12 @@ public final class NativeConnectionTest {
         if (lastDimension != null) {
             worldChanges++;
         }
-        String expected = worldChanges == 1 ? "minecraft:the_nether" : "minecraft:overworld";
-        if (worldChanges > 2 || !dimension.equals(expected)) {
+        String[] dimensions =
+                System.getProperty(
+                                "raknetify.test.dimensions",
+                                "minecraft:overworld,minecraft:the_nether,minecraft:overworld")
+                        .split(",", -1);
+        if (worldChanges >= dimensions.length || !dimension.equals(dimensions[worldChanges])) {
             throw new IllegalStateException("Unexpected native world transition: " + dimension);
         }
         lastDimension = dimension;
@@ -306,7 +310,13 @@ public final class NativeConnectionTest {
      * @return true after the final world has remained playable for twenty ticks
      */
     private static boolean worldSettled(final ClientLevel level) {
-        if (worldChanges != 2) {
+        if (worldChanges
+                != System.getProperty(
+                                        "raknetify.test.dimensions",
+                                        "minecraft:overworld,minecraft:the_nether,minecraft:overworld")
+                                .split(",", -1)
+                                .length
+                        - 1) {
             return false;
         }
         if (finalWorldTick < 0) {

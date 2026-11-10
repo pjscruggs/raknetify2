@@ -10,5 +10,9 @@
   "fastmotd": {
     "url": "https://github.com/Elytrium/FastMOTD/releases/download/1.0.10/FastMOTD-1.0.10.jar",
     "sha512": "9b350e5b7a1bc9d28484db255847903419f9141ef4a8c67c60fdec3246bb06dd7ded6b35e8b1e5c68ab797eae45198b3c71281a8634c7954fc3069b8f012a6f8"
+  },
+  "velocity4": {
+    "url": "https://fill-data.papermc.io/v1/objects/0844bcabdcdb4f5b875906fd4c3365bc1bb76918e42bc595ed88ad195258dd75/velocity-4.3.1-45.jar",
+    "sha512": "fdb28bc4ab538ccfc861cfb45ea3da7c94be73ea725532d5756ec39dd2a4f32a331f692d5216b95af18fde7e7ae2b5b532d9dd565ed13f80793e73e8200ae264"
   }
 }
