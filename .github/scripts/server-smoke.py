@@ -226,13 +226,13 @@ def check_tcp_when_ready(port, metadata, proxy_protocol=False):
             time.sleep(0.5)
 
 
-def stop_server(process, reader):
+def stop_server(process, reader, timeout=45):
     """Stop the owned server, force termination after a timeout, and join its log reader."""
     if process.poll() is None:
         try:
             process.stdin.write('stop\n')
             process.stdin.flush()
-            process.wait(timeout=45)
+            process.wait(timeout=timeout)
         except (OSError, subprocess.TimeoutExpired):
             process.kill()
             process.wait(timeout=10)

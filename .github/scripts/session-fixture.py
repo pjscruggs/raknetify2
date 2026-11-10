@@ -112,9 +112,9 @@ class SessionHandler(BaseHTTPRequestHandler):
         fixture = self.server.fixture
         if request.path == '/discovery':
             self.reply(200, discovery(fixture.origin))
-        elif request.path == '/getPublicKeys':
+        elif request.path in ('/getPublicKeys', '/publickeys'):
             self.reply(200, {'profilePropertyKeys': [], 'playerCertificateKeys': []})
-        elif request.path == '/verify':
+        elif request.path in ('/verify', '/session/minecraft/hasJoined'):
             self.reply(*fixture.verify(parse_qs(request.query)))
         elif request.path == '/profile/' + PLAYER_ID:
             self.reply(200, {'id': PLAYER_ID, 'name': 'TransportProbe', 'properties': [], 'profileActions': []})
@@ -123,7 +123,7 @@ class SessionHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         """Reject unexpected endpoints and oversized or malformed credentials before recording a synthetic join."""
-        if self.path != '/join':
+        if self.path not in ('/join', '/session/minecraft/join'):
             self.reply(404)
             return
         try:

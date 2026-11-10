@@ -1,0 +1,43 @@
+{
+  "client": "26.3",
+  "servers": {
+    "26.2": {
+      "mods": [
+        {
+          "filename": "ViaVersion-5.12.2.jar",
+          "url": "https://cdn.modrinth.com/data/P1OZGk5p/versions/cVhZ1kgN/ViaVersion-5.12.2.jar",
+          "sha512": "c6af11f50e14bc1ba239f5a90be653cce85feee30c473a4b53336b4d5527d790369cf43843f7cb06d3ac3a34fc207e7203436737ca719070644101472453401b"
+        },
+        {
+          "filename": "fabric-api-0.161.0+26.2.jar",
+          "url": "https://cdn.modrinth.com/data/P7dR8mSH/versions/ewUK83HI/fabric-api-0.161.0%2B26.2.jar",
+          "sha512": "2502fa5ade78e9a120b3747bc1a9a2167d6671743bea45bf115d3174c94121aeda87c549446d1a604a9c11fb828de17a551e3514ce42f3e93069dd14bdaee55b"
+        },
+        {
+          "filename": "ViaFabric-0.4.22+188-26.x.jar",
+          "url": "https://cdn.modrinth.com/data/YlKdE5VK/versions/z1FVDMnq/ViaFabric-0.4.22%2B188-26.x.jar",
+          "sha512": "090e8b47b413523b8682c3953beb6d99e5a92473a8d0580bdbf6a057352aadb8ad8b7a2d08f36c99c14ed3294923102c45724c88b24d697a05b729925ce03de3"
+        }
+      ]
+    },
+    "1.21.11": {
+      "mods": [
+        {
+          "filename": "ViaVersion-5.12.2.jar",
+          "url": "https://cdn.modrinth.com/data/P1OZGk5p/versions/cVhZ1kgN/ViaVersion-5.12.2.jar",
+          "sha512": "c6af11f50e14bc1ba239f5a90be653cce85feee30c473a4b53336b4d5527d790369cf43843f7cb06d3ac3a34fc207e7203436737ca719070644101472453401b"
+        },
+        {
+          "filename": "ViaFabric-0.4.22+184-1.14-1.21.jar",
+          "url": "https://cdn.modrinth.com/data/YlKdE5VK/versions/lQ51eydS/ViaFabric-0.4.22%2B184-1.14-1.21.jar",
+          "sha512": "bc4f061567006f37c4a7d0c08b5d12c8f52c9afb6bcadc9f5a56d592b8c859dba8e00b6097e1f5c2db4398b6a105e5196d8f7dd3f77e42038a104193b8cb5c33"
+        },
+        {
+          "filename": "fabric-api-0.141.6+1.21.11.jar",
+          "url": "https://cdn.modrinth.com/data/P7dR8mSH/versions/6qAuTtLR/fabric-api-0.141.6%2B1.21.11.jar",
+          "sha512": "852d3682c4f353fd0ca86546af8578513e8bcf628377fa9d49c556bc59c5024c69ab56c92fc6dfba11fed19e4316a3f5636e7e07fd3d96f7043b531aef59b637"
+        }
+      ]
+    }
+  }
+}

@@ -433,6 +433,16 @@ jobs:
           else
             "${command[@]}" --side server --proxy-protocol
           fi
+      - name: Test ViaFabric cross-version encrypted gameplay
+        if: runner.os == 'Linux' && matrix.loader == 'neoforge'
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 'true'
+        run: |
+          client=$(find neoforge/build/libs -name '*.jar' ! -name '*-dev.jar' ! -name '*-transport-test.jar')
+          fixture=$(find neoforge/build/libs -name '*-transport-test.jar')
+          for version in 26.2 1.21.11; do
+            SDL_VIDEO_FORCE_EGL=1 xvfb-run -a -s '-screen 0 1280x720x24' python .github/scripts/viafabric-smoke.py --jar "$client" --fixture "$fixture" --fabric-jar fabric-universal/build/libs/*.jar --server-version "$version" --assets-dir "$RUNNER_TEMP/native-neoforge/assets" --work-dir "$RUNNER_TEMP/native-neoforge/translation-$version"
+          done
       - name: Preserve native runtime evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

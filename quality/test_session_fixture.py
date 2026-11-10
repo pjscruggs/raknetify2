@@ -43,16 +43,19 @@ class SessionFixtureTest(unittest.TestCase):
     def test_native_client_and_server_must_agree_on_the_digest(self):
         """Accept matching session evidence but reject a changed digest before returning a player profile."""
         fixture = load_fixture()
-        with fixture.SessionAuthority() as authority:
-            status, _ = self.request(authority.origin, '/join',
-                                     {'accessToken': '0', 'selectedProfile': fixture.PLAYER_ID, 'serverId': '-abc'})
-            self.assertEqual(204, status)
-            status, _ = self.request(authority.origin, '/verify?username=TransportProbe&serverId=abc')
-            self.assertEqual(204, status)
-            self.assertEqual([], authority.accepted)
-            status, body = self.request(authority.origin, '/verify?username=TransportProbe&serverId=-abc')
-            self.assertEqual(200, status)
-            self.assertEqual(fixture.PLAYER_ID, json.loads(body)['id'])
+        routes = [('/join', '/verify'), ('/join', '/session/minecraft/hasJoined'),
+                  ('/session/minecraft/join', '/verify')]
+        for join, verify in routes:
+            with fixture.SessionAuthority() as authority:
+                status, _ = self.request(authority.origin, join,
+                                         {'accessToken': '0', 'selectedProfile': fixture.PLAYER_ID, 'serverId': '-abc'})
+                self.assertEqual(204, status)
+                status, _ = self.request(authority.origin, verify + '?username=TransportProbe&serverId=abc')
+                self.assertEqual(204, status)
+                self.assertEqual([], authority.accepted)
+                status, body = self.request(authority.origin, verify + '?username=TransportProbe&serverId=-abc')
+                self.assertEqual(200, status)
+                self.assertEqual(fixture.PLAYER_ID, json.loads(body)['id'])
 
     def test_malformed_or_oversized_requests_do_not_register_sessions(self):
         """Reject scalar JSON and an oversized body before the credential handler consumes either request."""

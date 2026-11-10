@@ -26,6 +26,7 @@
 package com.ishland.raknetify.fabric.common.compat.viafabric;
 
 import com.google.common.base.Preconditions;
+import com.ishland.raknetify.common.compat.CurrentViaFabric;
 import com.ishland.raknetify.minecraft.ModPlatform;
 
 import io.netty.buffer.ByteBuf;
@@ -54,6 +55,13 @@ public class ViaFabricCompatInjector {
         Preconditions.checkNotNull(channel);
         if (ModPlatform.get().isModLoaded("viafabric")) {
             try {
+                if (CurrentViaFabric.inject(
+                        channel,
+                        isClientSide,
+                        determineEncoderName(channel.pipeline()),
+                        determineDecoderName(channel.pipeline()))) {
+                    return;
+                }
                 final Class<?> userConnectionImplClass =
                         Class.forName("com.viaversion.viaversion.connection.UserConnectionImpl");
                 final Constructor<?> userConnectionImplConstructor =
