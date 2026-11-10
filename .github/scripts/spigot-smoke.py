@@ -75,7 +75,19 @@ def configure_server(args, native):
         sibling('voicechat-fixture').install(folder, 'bukkit',
                                             28991 if args.proxy_protocol else args.udp_port,
                                             args.udp_port or -1)
+    configure_packetevents(args, native, plugins)
     return folder
+
+
+def configure_packetevents(args, native, plugins):
+    """Install the locked packet interceptor only for explicit compatibility runs and remove it between cases."""
+    target = plugins / 'packetevents.jar'
+    if args.packetevents:
+        lock = json.loads((Path(__file__).resolve().parents[2] / 'spigot-servers.json').read_text(encoding='utf-8'))
+        entry = lock['packetevents']
+        native.download(target, entry['url'], entry['sha512'], 'sha512')
+    else:
+        target.unlink(missing_ok=True)
 
 
 def configure_paper_proxy(folder, enabled):
@@ -220,6 +232,7 @@ def main():
     parser.add_argument('--side', choices=['server', 'both'], default='both')
     parser.add_argument('--proxy-protocol', action='store_true')
     parser.add_argument('--voicechat', action='store_true')
+    parser.add_argument('--packetevents', action='store_true')
     parser.add_argument('--udp-port', type=int, help='Override only the UDP listener while retaining TCP on 28990')
     args = parser.parse_args()
     args.work_dir = args.work_dir.resolve()

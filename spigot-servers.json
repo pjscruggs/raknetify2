@@ -20,5 +20,11 @@
       "Spigot": "bed90fca391bc35f0dbbcdc7ce5d7bb28e533681",
       "BuildData": "39e62795554dcf6b62e922bc061705b3dc228f88"
     }
+  },
+  "packetevents": {
+    "version": "2.14.0+spigot",
+    "filename": "packetevents-spigot-2.14.0.jar",
+    "url": "https://cdn.modrinth.com/data/HYKaKraK/versions/m78nFxYg/packetevents-spigot-2.14.0.jar",
+    "sha512": "18a942cb55f64783a63b28deea2cebbbe782e5d6a1089f6700430e183bfbce0a45398a640ed0dff4361b55190dcf47017f2ca7788f4a5c8c9efad1f549a63fe3"
   }
 }

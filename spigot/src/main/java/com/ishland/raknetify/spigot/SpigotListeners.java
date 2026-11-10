@@ -53,6 +53,9 @@ final class SpigotListeners implements AutoCloseable {
     /** Native listener snapshot and server login key used by each accepted connection. */
     private final ServerAccess access;
 
+    /** Optional packet-plugin initializer applied after native codecs are present. */
+    private final @Nullable SpigotPacketEvents packetEvents;
+
     /** Datagram I/O loop owned exclusively by this plugin instance. */
     private final EventLoopGroup transport;
 
@@ -71,7 +74,7 @@ final class SpigotListeners implements AutoCloseable {
      * @param access tested server listener metadata
      */
     SpigotListeners(final ServerAccess access) {
-        this(access, parsePortOverride(System.getProperty("raknetify.spigot.portOverride")));
+        this(access, parsePortOverride(System.getProperty("raknetify.spigot.portOverride")), null);
     }
 
     /**
@@ -82,11 +85,27 @@ final class SpigotListeners implements AutoCloseable {
      * @throws IllegalArgumentException if the override is outside the usable port range
      */
     SpigotListeners(final ServerAccess access, final int portOverride) {
+        this(access, portOverride, null);
+    }
+
+    /**
+     * Creates listener ownership with optional packet interception for every accepted connection.
+     *
+     * @param access native listener metadata
+     * @param portOverride UDP port, or zero to use the native TCP port
+     * @param packetEvents resolved optional PacketEvents integration
+     * @throws IllegalArgumentException if the override is outside the usable port range
+     */
+    SpigotListeners(
+            final ServerAccess access,
+            final int portOverride,
+            final @Nullable SpigotPacketEvents packetEvents) {
         if (portOverride < 0 || portOverride > 65535) {
             throw new IllegalArgumentException(
                     "UDP port override is outside the usable port range");
         }
         this.access = access;
+        this.packetEvents = packetEvents;
         this.portOverride = portOverride;
         transport = new NioEventLoopGroup(1);
         application = new DefaultEventLoopGroup(1);
@@ -237,6 +256,9 @@ final class SpigotListeners implements AutoCloseable {
             SpigotConnection.initialize(channel);
             ServerAccess.initialize(acceptor, channel);
             SpigotConnection.finish(channel, access.privateKey());
+            if (packetEvents != null) {
+                packetEvents.initialize(channel);
+            }
         }
     }
 }

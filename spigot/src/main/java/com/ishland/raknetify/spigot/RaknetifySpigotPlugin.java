@@ -56,7 +56,15 @@ public final class RaknetifySpigotPlugin extends JavaPlugin {
     private void startListeners() {
         try {
             ServerAccess access = new ServerAccess(getServer());
-            listeners = new SpigotListeners(access);
+            SpigotPacketEvents packetEvents =
+                    SpigotPacketEvents.load(
+                            getServer().getPluginManager().getPlugin("packetevents"));
+            listeners =
+                    new SpigotListeners(
+                            access,
+                            SpigotListeners.parsePortOverride(
+                                    System.getProperty("raknetify.spigot.portOverride")),
+                            packetEvents);
             listeners.bind();
             for (var address : listeners.localAddresses()) {
                 getLogger()
