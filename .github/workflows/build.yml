@@ -207,7 +207,7 @@ jobs:
           python .github/scripts/server-smoke.py --discard-runtime --ordered-compatibility
           --jar fabric-universal/build/libs/*.jar
           --work-dir "$RUNNER_TEMP/raknetify-ordered"
-          --versions 1.21.11 26.3
+          --versions 1.21.11 26.3 26.4-snapshot-8
           --java-21 "${{ steps.java21.outputs.path }}/bin/java"
           --encryption-legacy transport-test-legacy/build/libs/*.jar
           --encryption-modern transport-test-modern/build/libs/*.jar
@@ -226,7 +226,7 @@ jobs:
           --work-dir "$RUNNER_TEMP/raknetify-smoke/proxy-protocol"
           --java-17 "${{ steps.java17.outputs.path }}/bin/java"
           --java-21 "${{ steps.java21.outputs.path }}/bin/java"
-          --versions 1.18 1.21.11 26.1 26.3 26.4-snapshot-7
+          --versions 1.18 1.21.11 26.1 26.3 26.4-snapshot-8
       - name: BungeeCord direct and required PROXY v2
         if: matrix.suite == 'bungee'
         run: >-

@@ -68,7 +68,7 @@ public final class RaknetEncryptionProbe extends SimpleChannelInboundHandler<Obj
     /**
      * Exact supported snapshot protocol with an options acknowledgement before cipher installation.
      */
-    private static final int OPTIONS_PROTOCOL = 1073742169;
+    private static final int OPTIONS_PROTOCOL = 1073742170;
 
     /** Known payload checked after the server's real frame decryption. */
     private static final long CHALLENGE = 0x5d37a91b046ce28fL;

@@ -137,6 +137,8 @@ def run(args, version, metadata, lock):
             assert 'PASS native legacy mixin call sites and rejected missing-hook control' in text
         assert 'PASS native gameplay ordering 12' in text
         assert 'PASS native entity lifecycle ordering 4' in text
+        if version == '26.4-snapshot-8':
+            assert 'PASS native entity impulse ordering 4' in text
         check_transfer_witness(version, text)
         check_address_fallback_witness(version, text)
         check_chat_witness(version, text)

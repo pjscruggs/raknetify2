@@ -56,6 +56,7 @@ public final class ClientAddressTest implements PreLaunchEntrypoint {
             if (!Boolean.getBoolean("raknetify.test.baseline")) {
                 LegacyMixinContractTest.verify();
                 GameplayOrderingTest.verify();
+                verifyEntityImpulse();
                 SignedChatTest.verify();
                 TransferNativeTest.verify();
                 AddressFallbackNativeTest.verify();
@@ -73,6 +74,24 @@ public final class ClientAddressTest implements PreLaunchEntrypoint {
         } catch (Throwable failure) {
             failure.printStackTrace();
             System.exit(1);
+        }
+    }
+
+    /**
+     * Keeps snapshot entity impulses between creation and later motion updates under reordering.
+     *
+     * @throws Exception if the native packet classes or version predicate cannot be resolved
+     */
+    private static void verifyEntityImpulse() throws Exception {
+        if (FixtureRuntime.atLeast("26.4-alpha.8")) {
+            GameplayOrderingTest.verifyGroup(
+                    new String[][] {
+                        {"", "ClientboundAddEntityPacket"},
+                        {"", "ClientboundAddEntityMotionPacket"},
+                        {"", "ClientboundSetEntityMotionPacket"},
+                        {"", "ClientboundRemoveEntitiesPacket"}
+                    },
+                    "entity impulse");
         }
     }
 

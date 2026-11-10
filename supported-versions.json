@@ -12,9 +12,9 @@
     "additionalMappingVersions": ["23w13a_or_b"]
   },
   "modern": {
-    "minecraft": [">=26.1 <=26.3", "26.4-alpha.7"],
+    "minecraft": [">=26.1 <=26.3", "26.4-alpha.8"],
     "java": ">=25",
     "fabricloader": ">=0.19.5",
-    "gameVersions": ["26.1", "26.1.1", "26.1.2", "26.2", "26.3", "26.4-snapshot-7"]
+    "gameVersions": ["26.1", "26.1.1", "26.1.2", "26.2", "26.3", "26.4-snapshot-8"]
   }
 }

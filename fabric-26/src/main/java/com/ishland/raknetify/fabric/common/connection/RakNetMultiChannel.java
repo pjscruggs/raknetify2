@@ -539,10 +539,10 @@ public class RakNetMultiChannel {
         // These older packet names are absent from the 26.3 compile target and must be resolved by
         // name.
         if (!MinecraftVersions.AT_LEAST_26_3) {
-            addEarlierPacket("ServerboundSwingPacket", 2);
+            addVersionedPacket("ServerboundSwingPacket", 2);
         }
         if (!MinecraftVersions.AT_LEAST_26_2) {
-            addEarlierPacket("ServerboundSpectateEntityPacket", 3);
+            addVersionedPacket("ServerboundSpectateEntityPacket", 3);
         }
         // Keep newer class references inside their version guards so older runtimes never resolve
         // them.
@@ -561,17 +561,20 @@ public class RakNetMultiChannel {
         if (MinecraftVersions.AT_LEAST_26_3) {
             classToChannelIdOverride.put(ClientboundAddTransientBlockPacket.class, 7);
         }
+        if (MinecraftVersions.IS_26_4_SNAPSHOT) {
+            addVersionedPacket("ClientboundAddEntityMotionPacket", 2);
+        }
     }
 
     /**
-     * Resolves an older modern packet name absent from the compile target inside a version guard.
+     * Resolves a packet name absent from the compile target inside a version guard.
      *
      * @param name simple packet class name within the game protocol package
      * @param channel ordering channel assigned to the resolved packet
      * @throws IllegalStateException if the expected packet is absent from a version that should
      *     provide it
      */
-    private static void addEarlierPacket(final String name, final int channel) {
+    private static void addVersionedPacket(final String name, final int channel) {
         try {
             Class<?> packet =
                     Class.forName(

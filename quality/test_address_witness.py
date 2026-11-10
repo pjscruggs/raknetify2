@@ -17,7 +17,7 @@ class AddressWitnessTests(unittest.TestCase):
     def test_transfer_contract_does_not_prove_socket_fallback(self):
         """A successful transfer contract is valid evidence for that check but cannot pass the network gate."""
         text = 'PASS native transfer capability and send overloads'
-        for version in ('1.20.5', '1.21.11', '26.3', '26.4-snapshot-7'):
+        for version in ('1.20.5', '1.21.11', '26.3', '26.4-snapshot-8'):
             with self.subTest(version=version):
                 self.checks.check_transfer_witness(version, text)
                 with self.assertRaises(AssertionError):

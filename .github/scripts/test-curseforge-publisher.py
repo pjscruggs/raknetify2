@@ -173,7 +173,7 @@ def exercise_upload(repository, artifacts, loader, fixture):
 def supported_games(source, compatibility, loader):
     """Read the tested source manifests so a future game-version update also changes the contract fixture."""
     if loader == 'fabric':
-        return [version.replace('26.4-snapshot-7', '26.4-snapshot') for version in compatibility['gameVersions']]
+        return [version.replace('26.4-snapshot-8', '26.4-snapshot') for version in compatibility['gameVersions']]
     if loader == 'spigot':
         return [json.loads((source / 'spigot-servers.json').read_text(encoding='utf-8'))['minecraft']]
     return [json.loads((source / 'native-loaders.json').read_text(encoding='utf-8'))[loader]['minecraft']]

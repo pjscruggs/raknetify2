@@ -48,7 +48,7 @@ public final class MinecraftVersions {
     // Keep this exact snapshot predicate aligned with the Minecraft dependency in fabric.mod.json.
     /** Whether the runtime matches the specifically supported 26.4 snapshot API. */
     public static final boolean IS_26_4_SNAPSHOT =
-            "26.4-alpha.7".equals(CURRENT) || "26.4-snapshot-7".equals(CURRENT);
+            "26.4-alpha.8".equals(CURRENT) || "26.4-snapshot-8".equals(CURRENT);
 
     /** Prevents construction of the immutable runtime-version flags. */
     private MinecraftVersions() {}

@@ -108,7 +108,7 @@ def arguments():
     parser.add_argument('--java-17', default='java')
     parser.add_argument('--java-21', default='java')
     parser.add_argument('--java-modern', default='java')
-    parser.add_argument('--versions', nargs='+', default=['1.19.3', '1.21.11', '26.3', '26.4-snapshot-7'])
+    parser.add_argument('--versions', nargs='+', default=['1.19.3', '1.21.11', '26.3', '26.4-snapshot-8'])
     parser.add_argument('--port', type=int, default=25894)
     parser.add_argument('--discard-runtime', action='store_true')
     parser.set_defaults(encryption_legacy=None, encryption_modern=None)
