@@ -26,32 +26,27 @@
 package com.ishland.raknetify.bungee.connection;
 
 import com.google.common.base.Preconditions;
-import com.ishland.raknetify.bungee.RaknetifyBungeePlugin;
-import com.ishland.raknetify.common.Constants;
-import com.ishland.raknetify.common.connection.CompatibilityPolicy;
-import com.ishland.raknetify.common.connection.DelayedPacketSender;
 import com.ishland.raknetify.common.connection.SynchronizationLayer;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 
-import net.md_5.bungee.protocol.DefinedPacket;
 import net.md_5.bungee.protocol.PacketWrapper;
-import net.md_5.bungee.protocol.packet.KeepAlive;
 import net.md_5.bungee.protocol.packet.Respawn;
 
 import network.ycc.raknet.RakNet;
 
 import java.util.Map;
 
-/** Relays genuine backend keepalives in ordered mode and uses transport RTT replies otherwise. */
-public class RakNetBungeeServerChannelEventListener extends DelayedPacketSender {
+/** Observes backend respawns and leaves genuine keepalive handling to BungeeCord. */
+public class RakNetBungeeServerChannelEventListener
+        extends io.netty.channel.ChannelInboundHandlerAdapter {
 
     /** Pipeline name for the backend-facing keepalive and connection diagnostic handler. */
     public static final String NAME = "raknetify-bungee-downstream-event-listener";
 
-    /** RakNet client connection whose transport RTT determines backend keepalive reply timing. */
+    /** Client connection synchronized when the backend sends a respawn. */
     private final Channel clientChannel;
 
     /**
@@ -65,39 +60,18 @@ public class RakNetBungeeServerChannelEventListener extends DelayedPacketSender 
     }
 
     /**
-     * Requests respawn synchronization and, outside ordered mode, answers keepalives locally.
-     * Replies are delayed by the client RTT minus four milliseconds, bounded below by zero, to
-     * account for scheduling overhead without involving Minecraft's client keepalive path.
+     * Requests respawn synchronization before forwarding the original backend packet.
      *
-     * @param ctx backend-facing context used to schedule and send the reply
+     * @param ctx backend-facing connection
      * @param msg decoded backend packet wrapper
      * @throws Exception if superclass forwarding fails
      */
     @Override
     public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
-        if (msg instanceof PacketWrapper wrapper) {
-            final DefinedPacket packet = wrapper.packet;
-            if (packet instanceof Respawn) {
-                clientChannel
-                        .write(SynchronizationLayer.SYNC_REQUEST_OBJECT)
-                        .addListener(RakNet.INTERNAL_WRITE_LISTENER);
-            } else if (packet instanceof KeepAlive keepAlive
-                    && !CompatibilityPolicy.isOrdered(clientChannel)) {
-                if (Constants.DEBUG) {
-                    RaknetifyBungeePlugin.LOGGER.info(
-                            "Received downstream keepalive, swallowing it");
-                }
-                final long rttNanos = RakNet.config(clientChannel).getRTTNanos();
-                try {
-                    replyAfter(
-                            ctx,
-                            new KeepAlive(keepAlive.getRandomId()),
-                            Math.max(rttNanos - 4_000_000, 0));
-                } finally {
-                    wrapper.trySingleRelease();
-                }
-                return; // prevent keepalive from being sent to clients
-            }
+        if (msg instanceof PacketWrapper wrapper && wrapper.packet instanceof Respawn) {
+            clientChannel
+                    .write(SynchronizationLayer.SYNC_REQUEST_OBJECT)
+                    .addListener(RakNet.INTERNAL_WRITE_LISTENER);
         }
         super.channelRead(ctx, msg);
     }

@@ -22,11 +22,6 @@
 package com.ishland.raknetify.velocity.connection;
 
 import com.google.common.base.Preconditions;
-import com.ishland.raknetify.common.Constants;
-import com.ishland.raknetify.common.connection.CompatibilityPolicy;
-import com.ishland.raknetify.common.connection.DelayedPacketSender;
-import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;
-import com.velocitypowered.proxy.protocol.packet.KeepAlivePacket;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -36,14 +31,12 @@ import network.ycc.raknet.RakNet;
 
 import java.util.Map;
 
-/** Relays genuine backend keepalives in ordered mode and uses transport RTT replies otherwise. */
-public class RakNetVelocityServerChannelEventListener extends DelayedPacketSender {
+/** Reports backend pipeline failures without intercepting native Velocity keepalives. */
+public class RakNetVelocityServerChannelEventListener
+        extends io.netty.channel.ChannelInboundHandlerAdapter {
 
-    /** Pipeline name for the backend-facing keepalive and connection diagnostic handler. */
+    /** Pipeline name for the backend-facing connection diagnostic handler. */
     public static final String NAME = "raknetify-bungee-downstream-event-listener";
-
-    /** RakNet client connection whose transport RTT determines backend keepalive reply timing. */
-    private final Channel clientChannel;
 
     /**
      * Associates a backend pipeline with the RakNet client it serves.
@@ -52,29 +45,6 @@ public class RakNetVelocityServerChannelEventListener extends DelayedPacketSende
      */
     public RakNetVelocityServerChannelEventListener(final Channel clientChannel) {
         Preconditions.checkArgument(clientChannel.config() instanceof RakNet.Config);
-        this.clientChannel = clientChannel;
-    }
-
-    /**
-     * Forwards every packet in ordered mode. Otherwise answers backend keepalives locally. Replies
-     * are delayed by the client RTT minus four milliseconds, bounded below by zero, to account for
-     * scheduling overhead without involving Minecraft's client keepalive path.
-     *
-     * @param ctx backend-facing context used to schedule and send the reply
-     * @param msg decoded backend packet
-     * @throws Exception if superclass forwarding fails
-     */
-    @Override
-    public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
-        if (msg instanceof KeepAlivePacket && !CompatibilityPolicy.isOrdered(clientChannel)) {
-            if (Constants.DEBUG) {
-                RaknetifyVelocityPlugin.LOGGER.info("Received downstream keepalive, swallowing it");
-            }
-            final long rttNanos = RakNet.config(clientChannel).getRTTNanos();
-            replyAfter(ctx, msg, Math.max(rttNanos - 4_000_000, 0));
-            return; // prevent keepalive from being sent to clients
-        }
-        super.channelRead(ctx, msg);
     }
 
     /**

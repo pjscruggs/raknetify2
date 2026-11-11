@@ -39,7 +39,7 @@ Encrypted RakNet connections require the authenticated encryption protocol on bo
 
 ## Proxy setup
 
-Install the matching plugin on Velocity or BungeeCord and the matching client mod on each connecting client. Allow UDP on the proxy's listening port. Clients use the `raknet;` prefix with the proxy address. Backend servers do not need Raknetify2 for this setup.
+Install the matching plugin on Velocity or BungeeCord and the matching client mod on each connecting client. Allow UDP on the proxy's listening port. Clients use the `raknet;` prefix with the proxy address. Backend servers do not need Raknetify2 for this setup. Both proxy plugins forward backend keepalive requests to the client in both delivery modes.
 
 ## Ordered mode
 
@@ -53,7 +53,7 @@ Create `config/raknetify2-compatibility.json` in the working directory of the se
 {"mode": "ordered"}
 ```
 
-All Minecraft packets use one reliable ordered channel, including bundle delimiters and world transitions. Velocity and BungeeCord forward backend keepalive requests to the real client. Configure this at the proxy even if the anti-cheat runs on a backend. The policy applies across backend switches.
+All Minecraft packets use one reliable ordered channel, including bundle delimiters and world transitions. Configure this at the proxy even if the anti-cheat runs on a backend. The policy applies across backend switches.
 
 Keep anti-cheat checks enabled and validate your particular setup.
 

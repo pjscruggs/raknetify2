@@ -86,37 +86,15 @@ class ProxyPacketOwnershipTest {
     }
 
     /**
-     * Swallowing a wrapped backend keepalive releases its encoded bytes and replies with its ID.
+     * Both delivery modes preserve the original wrapped challenge for the real client.
+     *
+     * @param ordered whether the server requires single-channel delivery
      */
-    @Test
-    void consumesWrapperAndRepliesWithSameKeepaliveId() {
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(booleans = {true, false})
+    void forwardsKeepaliveToRealClient(final boolean ordered) {
         EmbeddedChannel client = new RaknetChannel();
-        EmbeddedChannel backend =
-                new EmbeddedChannel(new RakNetBungeeServerChannelEventListener(client));
-        ByteBuf encoded = Unpooled.buffer().writeLong(42);
-        try {
-            assertFalse(
-                    backend.writeInbound(
-                            new PacketWrapper(new KeepAlive(42), encoded, Protocol.GAME)));
-            assertEquals(0, encoded.refCnt());
-            backend.runScheduledPendingTasks();
-            KeepAlive reply = backend.readOutbound();
-            assertNotNull(reply);
-            assertEquals(42, reply.getRandomId());
-            assertNull(backend.readInbound());
-        } finally {
-            backend.finishAndReleaseAll();
-            client.finishAndReleaseAll();
-        }
-    }
-
-    /**
-     * Ordered compatibility forwards the original backend request without synthesizing a response.
-     */
-    @Test
-    void orderedModeForwardsKeepaliveToRealClient() {
-        EmbeddedChannel client = new RaknetChannel();
-        new com.ishland.raknetify.common.connection.CompatibilityPolicy(true)
+        new com.ishland.raknetify.common.connection.CompatibilityPolicy(ordered)
                 .install(client, client);
         EmbeddedChannel backend =
                 new EmbeddedChannel(new RakNetBungeeServerChannelEventListener(client));

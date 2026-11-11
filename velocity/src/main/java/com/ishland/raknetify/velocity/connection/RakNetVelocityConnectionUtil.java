@@ -189,7 +189,7 @@ public class RakNetVelocityConnectionUtil {
     }
 
     /**
-     * Attaches backend keepalive handling after a RakNet player connects to a server. Missing
+     * Attaches backend connection diagnostics after a RakNet player connects to a server. Missing
      * backend connections are logged and left untouched.
      *
      * @param evt completed backend connection event for the player

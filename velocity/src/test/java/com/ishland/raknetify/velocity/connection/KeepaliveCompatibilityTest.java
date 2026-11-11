@@ -39,10 +39,10 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Verifies that ordered proxy sessions require the real client's keepalive response. */
+/** Verifies that all proxy sessions require the real client's keepalive response. */
 class KeepaliveCompatibilityTest {
     /**
-     * Preserves the exact request in ordered mode and the existing local reply otherwise.
+     * Preserves the exact backend request and verifies that a stalled client produces no reply.
      *
      * @param ordered whether the connection requires stream ordering
      */
@@ -56,15 +56,10 @@ class KeepaliveCompatibilityTest {
         KeepAlivePacket request = new KeepAlivePacket();
         request.setRandomId(42);
         try {
-            assertEquals(ordered, backend.writeInbound(request));
+            assertTrue(backend.writeInbound(request));
+            assertSame(request, backend.readInbound());
             backend.runScheduledPendingTasks();
-            if (ordered) {
-                assertSame(request, backend.readInbound());
-                assertNull(backend.readOutbound());
-            } else {
-                assertSame(request, backend.readOutbound());
-                assertNull(backend.readInbound());
-            }
+            assertNull(backend.readOutbound());
         } finally {
             backend.finishAndReleaseAll();
             client.finishAndReleaseAll();
