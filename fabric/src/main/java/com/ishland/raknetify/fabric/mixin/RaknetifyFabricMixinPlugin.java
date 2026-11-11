@@ -66,16 +66,7 @@ public class RaknetifyFabricMixinPlugin implements IMixinConfigPlugin {
      */
     public static final boolean AFTER_1_21_4;
 
-    /**
-     * Whether Minecraft is newer than 1.21.5, selecting hunger-state copying without the older NBT
-     * serialization methods.
-     */
-    public static final boolean AFTER_1_21_5;
-
-    /**
-     * Whether Minecraft is newer than 1.21.8, selecting the configurable debug HUD and newer entity
-     * world accessor.
-     */
+    /** Whether Minecraft is newer than 1.21.8 and uses the configurable debug HUD. */
     public static final boolean AFTER_1_21_8;
 
     /**
@@ -120,14 +111,6 @@ public class RaknetifyFabricMixinPlugin implements IMixinConfigPlugin {
                                             .getVersion());
             AFTER_1_21_4 =
                     VersionPredicate.parse(">1.21.4")
-                            .test(
-                                    FabricLoader.getInstance()
-                                            .getModContainer("minecraft")
-                                            .get()
-                                            .getMetadata()
-                                            .getVersion());
-            AFTER_1_21_5 =
-                    VersionPredicate.parse(">1.21.5")
                             .test(
                                     FabricLoader.getInstance()
                                             .getModContainer("minecraft")

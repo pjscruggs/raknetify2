@@ -12,7 +12,6 @@
     "access.IPacketCodecDispatcher",
     "access.IPacketCodecDispatcherPacketType",
     "access.IServerPlayNetworkHandler",
-    "access.IWorld",
     "client.MixinClientPlayNetworkHandler",
     "client.MixinConnectionScreen1",
     "client.MixinMultiplayerServerListPinger",
@@ -25,7 +24,6 @@
     "common.MixinClientConnection1",
     "common.MixinClientConnection1_20_2",
     "common.encryption.MixinClientConnection",
-    "common.quirks.MixinPlayerEntity",
     "common.quirks.MixinSampleSubscriptionTracker",
     "compat.fabricapi.MixinServerLoginNetworkAddon",
     "compat.krypton.MixinServerLoginNetworkHandler",
@@ -44,6 +42,7 @@
     "defaultRequire": 1
   },
   "client": [
+    "client.MixinClientFoodPrediction",
     "client.MixinTransferCapability",
     "access.IClientPlayNetworkHandler",
     "access.IDebugHudEntries",

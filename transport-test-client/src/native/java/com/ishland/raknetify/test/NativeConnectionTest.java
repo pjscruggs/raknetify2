@@ -170,9 +170,41 @@ public final class NativeConnectionTest {
         if (!gameplayComplete(level, player, listener)) {
             return;
         }
+        verifyFoodPrediction(player, channel);
         finishing = true;
         closingChannel = channel;
         listener.getConnection().disconnect(Component.literal("Transport fixture complete"));
+    }
+
+    /**
+     * Exercises the local consumption hook after gameplay and verifies independent food data still
+     * accepts ordinary increments on the same client thread.
+     *
+     * @param player actual player on the negotiated connection
+     * @param channel active gameplay channel whose policy controls packet ordering
+     * @throws IllegalStateException if consumption crosses the transport or player boundary
+     */
+    private static void verifyFoodPrediction(final LocalPlayer player, final Channel channel) {
+        final var food = player.getFoodData();
+        final int original = food.getFoodLevel();
+        final float saturation = food.getSaturationLevel();
+        try {
+            food.setFoodLevel(5);
+            food.eat(2, 0.1F);
+            final var other = new net.minecraft.world.food.FoodData();
+            other.setFoodLevel(5);
+            other.eat(2, 0.1F);
+            int expected =
+                    com.ishland.raknetify.common.connection.CompatibilityPolicy.isOrdered(channel)
+                            ? 7
+                            : 5;
+            if (food.getFoodLevel() != expected || other.getFoodLevel() != 7) {
+                throw new IllegalStateException("Incorrect client food prediction");
+            }
+        } finally {
+            food.setFoodLevel(original);
+            food.setSaturation(saturation);
+        }
     }
 
     /**

@@ -31,9 +31,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.HungerManager;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.state.NetworkState;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -77,12 +74,6 @@ public class MultiVersionUtil {
     /** Intermediary name of the holder for clientbound and serverbound play factories. */
     private static final String CLASSNAME_PlayStateFactories = "net.minecraft.class_9095";
 
-    /** Intermediary name used to resolve legacy hunger-state serialization methods. */
-    private static final String CLASSNAME_HungerManager = "net.minecraft.class_1702";
-
-    /** Intermediary name used to resolve the older entity world accessor. */
-    private static final String CLASSNAME_Entity = "net.minecraft.class_1297";
-
     /** Required connection field located structurally in the server play listener hierarchy. */
     public static final VarHandle ServerPlayNetworkHandler$connection;
 
@@ -114,20 +105,6 @@ public class MultiVersionUtil {
 
     /** Optional static clientbound play factory used by the older codec-registration API. */
     public static final @Nullable VarHandle PlayStateFactories$S2C1_20_5;
-
-    /**
-     * Optional legacy hunger-state serializer used when constructing the client hunger replacement.
-     */
-    public static final @Nullable MethodHandle HungerManager$writeNbt1_21_5;
-
-    /** Optional legacy hunger-state reader used to initialize the client hunger replacement. */
-    public static final @Nullable MethodHandle HungerManager$readNbt1_21_5;
-
-    /**
-     * Optional older entity world getter used before the compile target's accessor became
-     * available.
-     */
-    public static final @Nullable MethodHandle Entity$getEntity1_21_8;
 
     static {
         try {
@@ -223,12 +200,6 @@ public class MultiVersionUtil {
             PlayStateFactories$C2S1_20_5 = findServerboundFactory(resolver);
 
             PlayStateFactories$S2C1_20_5 = findClientboundFactory(resolver);
-
-            HungerManager$writeNbt1_21_5 = findHungerWriter(resolver);
-
-            HungerManager$readNbt1_21_5 = findHungerReader(resolver);
-
-            Entity$getEntity1_21_8 = findEntityWorldGetter(resolver);
 
         } catch (Throwable t) {
             throw new RuntimeException(t);
@@ -407,92 +378,6 @@ public class MultiVersionUtil {
             } else {
                 return null;
             }
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Resolves the hunger-state NBT writer used before value input and output replaced NBT access.
-     *
-     * @param resolver mappings for the running Minecraft version
-     * @return handle to the legacy member, or null when that API is absent
-     * @throws IllegalAccessException if an existing member cannot be made accessible
-     */
-    private static @Nullable MethodHandle findHungerWriter(final MappingResolver resolver)
-            throws IllegalAccessException {
-        final Method writeNbt1_21_5 =
-                getOrNull(
-                        () ->
-                                HungerManager.class.getDeclaredMethod(
-                                        resolver.mapMethodName(
-                                                INTERMEDIARY,
-                                                CLASSNAME_HungerManager,
-                                                "method_7582",
-                                                "(Lnet/minecraft/class_2487;)V"),
-                                        NbtCompound.class),
-                        List.of(NoSuchMethodException.class));
-        if (writeNbt1_21_5 != null) {
-            writeNbt1_21_5.setAccessible(true);
-            return MethodHandles.privateLookupIn(HungerManager.class, MethodHandles.lookup())
-                    .unreflect(writeNbt1_21_5);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Resolves the hunger-state NBT reader used before value input and output replaced NBT access.
-     *
-     * @param resolver mappings for the running Minecraft version
-     * @return handle to the legacy member, or null when that API is absent
-     * @throws IllegalAccessException if an existing member cannot be made accessible
-     */
-    private static @Nullable MethodHandle findHungerReader(final MappingResolver resolver)
-            throws IllegalAccessException {
-        final Method readNbt1_21_5 =
-                getOrNull(
-                        () ->
-                                HungerManager.class.getDeclaredMethod(
-                                        resolver.mapMethodName(
-                                                INTERMEDIARY,
-                                                CLASSNAME_HungerManager,
-                                                "method_7584",
-                                                "(Lnet/minecraft/class_2487;)V"),
-                                        NbtCompound.class),
-                        List.of(NoSuchMethodException.class));
-        if (readNbt1_21_5 != null) {
-            readNbt1_21_5.setAccessible(true);
-            return MethodHandles.privateLookupIn(HungerManager.class, MethodHandles.lookup())
-                    .unreflect(readNbt1_21_5);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Resolves the legacy entity world getter used by version-dependent player checks.
-     *
-     * @param resolver mappings for the running Minecraft version
-     * @return handle to the legacy member, or null when that API is absent
-     * @throws IllegalAccessException if an existing member cannot be made accessible
-     */
-    private static @Nullable MethodHandle findEntityWorldGetter(final MappingResolver resolver)
-            throws IllegalAccessException {
-        final Method getEntity1_21_8 =
-                getOrNull(
-                        () ->
-                                Entity.class.getDeclaredMethod(
-                                        resolver.mapFieldName(
-                                                INTERMEDIARY,
-                                                CLASSNAME_Entity,
-                                                "method_37908",
-                                                "()Lnet/minecraft/class_1937;")),
-                        List.of(NoSuchMethodException.class));
-        if (getEntity1_21_8 != null) {
-            getEntity1_21_8.setAccessible(true);
-            return MethodHandles.privateLookupIn(Entity.class, MethodHandles.lookup())
-                    .unreflect(getEntity1_21_8);
         } else {
             return null;
         }
