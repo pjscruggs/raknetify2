@@ -48,6 +48,41 @@ class LargePayloadCompressionTest {
     /** Compressed application frame identifier reserved for this isolated codec pair. */
     private static final int COMPRESSED = 252;
 
+    /**
+     * Checks both sides of the decoded byte limit using multiple zlib output chunks.
+     *
+     * @throws java.io.IOException if the fixture cannot encode the packet
+     * @throws java.util.zip.DataFormatException if the correctly encoded fixture fails to inflate
+     */
+    @Test
+    void decodedFrameBudgetIncludesEveryOutputChunk()
+            throws java.io.IOException, java.util.zip.DataFormatException {
+        var encoded = new java.io.ByteArrayOutputStream();
+        try (var stream = new java.util.zip.DeflaterOutputStream(encoded)) {
+            stream.write(new byte[17]);
+        }
+        for (int capacity : new int[] {16, 17}) {
+            var out = io.netty.buffer.Unpooled.buffer(0, capacity);
+            var inflater = new java.util.zip.Inflater();
+            try {
+                inflater.setInput(encoded.toByteArray());
+                if (capacity == 17) {
+                    MultiChannelingStreamingCompression.inflateInto(inflater, new byte[8], out);
+                    org.junit.jupiter.api.Assertions.assertEquals(17, out.readableBytes());
+                } else {
+                    org.junit.jupiter.api.Assertions.assertThrows(
+                            io.netty.handler.codec.CorruptedFrameException.class,
+                            () ->
+                                    MultiChannelingStreamingCompression.inflateInto(
+                                            inflater, new byte[8], out));
+                }
+            } finally {
+                inflater.end();
+                out.release();
+            }
+        }
+    }
+
     /** Receives an independent channel before the peer's channel-zero handshake arrives. */
     @Test
     void channelStartCanOvertakeCapabilityHandshake() {

@@ -72,11 +72,22 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     /** Delivery of each dictionary marker, which must precede completion of dependent data. */
     private final ChannelFuture[] channelStarts = new ChannelFuture[Constants.ORDER_CHANNEL_COUNT];
 
-    /** Reusable scratch space for draining inflated payload bytes without per-packet arrays. */
-    private final byte[] inflateBuffer = new byte[256 * 1024];
+    /**
+     * Temporary zlib output, allocated on first use and confined to this connection's event loop.
+     */
+    private byte @Nullable [] scratch;
 
-    /** Reusable scratch space for draining compressed output without per-packet arrays. */
-    private final byte[] deflateBuffer = new byte[256 * 1024];
+    /**
+     * Returns scratch for the current drain loop, which ends before any downstream callback.
+     *
+     * @return reusable zlib output chunk
+     */
+    private byte[] scratch() {
+        if (scratch == null) {
+            scratch = new byte[16 * 1024];
+        }
+        return scratch;
+    }
 
     /** Frame identifier recognized before compression and restored after decompression. */
     private final int rawPacketId;
@@ -391,13 +402,8 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
 
             inBytesCompressed.addAndGet(data.readableBytes());
 
-            out = ctx.alloc().buffer();
-            {
-                int inflatedBytes;
-                while ((inflatedBytes = inflater.inflate(inflateBuffer)) != 0) {
-                    out.writeBytes(inflateBuffer, 0, inflatedBytes);
-                }
-            }
+            out = ctx.alloc().buffer(256, Constants.MAX_QUEUED_SIZE - 1);
+            inflateInto(inflater, scratch(), out);
 
             inBytesRaw.addAndGet(out.writerIndex());
 
@@ -407,6 +413,9 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
             ctx.fireChannelRead(rawFrameData);
             rawFrameData = null;
             return;
+        } catch (DataFormatException | CorruptedFrameException invalid) {
+            ctx.close().addListener(network.ycc.raknet.RakNet.INTERNAL_WRITE_LISTENER);
+            throw invalid;
         } finally {
             data.release();
             compressedFrameData.release();
@@ -420,12 +429,34 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     }
 
     /**
+     * Drains one compressed packet within the destination's configured payload ceiling.
+     *
+     * @param inflater channel dictionary positioned at this packet's compressed input
+     * @param scratch reusable transient output from zlib
+     * @param out bounded destination excluding the frame identifier
+     * @throws DataFormatException if the stream is malformed
+     * @throws CorruptedFrameException if decompression exceeds the frame budget
+     */
+    static void inflateInto(final Inflater inflater, final byte[] scratch, final ByteBuf out)
+            throws DataFormatException {
+        int count;
+        while ((count = inflater.inflate(scratch)) != 0) {
+            if (count > out.maxWritableBytes()) {
+                throw new CorruptedFrameException(
+                        "Decompressed RakNet frame exceeds the transport limit");
+            }
+            out.writeBytes(scratch, 0, count);
+        }
+    }
+
+    /**
      * Compresses one frame without resetting its channel's dictionary between packets.
      *
      * @param ctx outbound pipeline context that receives the compressed replacement
      * @param rawFrameData owned raw frame, released after encoding or failure
      * @param promise completion notification transferred to the replacement frame
      * @throws Exception if downstream forwarding of the compressed replacement fails
+     * @throws IllegalArgumentException if the raw payload exceeds the transport frame budget
      */
     private void deflateFrame(
             final ChannelHandlerContext ctx,
@@ -440,6 +471,10 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
         ByteBuf out = null;
         FrameData compressedFrameData = null;
         try {
+            if (data.readableBytes() >= Constants.MAX_QUEUED_SIZE) {
+                throw new IllegalArgumentException("Minecraft frame exceeds the transport limit");
+            }
+            byte[] deflateBuffer = scratch();
             deflater.setInput(data.nioBuffer());
 
             outBytesRaw.addAndGet(data.readableBytes());
