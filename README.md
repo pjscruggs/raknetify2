@@ -4,6 +4,8 @@
 
 Raknetify2 is a Minecraft networking mod that uses RakNet over UDP to help keep multiplayer interactions responsive during packet loss and large world transfers.
 
+[Downloads](https://github.com/pjscruggs/raknetify2/releases) · [Wiki and setup guides](https://github.com/pjscruggs/raknetify2/wiki) · [Choose your language (145 languages)](https://github.com/pjscruggs/raknetify2/wiki/Languages)
+
 ## How it works
 
 Minecraft normally uses TCP, which delivers data in one ordered stream. A missing piece can delay everything behind it. Raknetify2 separates traffic into ordering channels, so a delay in one channel need not hold up unrelated traffic in another.
