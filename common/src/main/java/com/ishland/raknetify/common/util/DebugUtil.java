@@ -40,6 +40,33 @@ import network.ycc.raknet.RakNet;
 public class DebugUtil {
 
     /**
+     * Keeps a recent peer snapshot for a platform that has enabled connection exception reports. A
+     * failing connection may already be unable to deliver a new request. Closing the application
+     * channel cancels its sampling task.
+     *
+     * @param channel modded RakNet connection whose exception logger reads peer diagnostics
+     */
+    public static void sampleForExceptionReports(final Channel channel) {
+        var sample =
+                channel.eventLoop()
+                        .scheduleWithFixedDelay(
+                                () -> {
+                                    if (channel.config() instanceof RakNet.Config config
+                                            && config.getMetrics()
+                                                    instanceof SimpleMetricsLogger logger) {
+                                        var metrics = logger.getMetricsSynchronizationHandler();
+                                        if (metrics != null) {
+                                            metrics.requestSnapshot();
+                                        }
+                                    }
+                                },
+                                0,
+                                1,
+                                java.util.concurrent.TimeUnit.SECONDS);
+        channel.closeFuture().addListener(done -> sample.cancel(false));
+    }
+
+    /**
      * Describes the channel, its optional RakNet metrics, and each parent channel recursively.
      *
      * @param channel connection or transport channel to inspect

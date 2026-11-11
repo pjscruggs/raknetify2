@@ -59,6 +59,12 @@ Keep anti-cheat checks enabled and validate your particular setup.
 
 Older clients can use the ordinary TCP address without `raknet;`. An absent file or `"mode": "multichannel"` retains ordinary behavior. Invalid settings reject RakNet connections.
 
+## Connection diagnostics
+
+The client debug HUD shows RakNet latency, traffic and queue statistics. On Minecraft versions with configurable debug entries, enable `raknetify:raknetify_debug_info` in the debug screen options. The client requests peer statistics while that entry is displayed, including when set to Always On. Earlier versions show the lines in the F3 overlay.
+
+Starting a Fabric, Forge or NeoForge endpoint with `-Draknetify.debug=true` also samples peer statistics for connection exception logs. Updated peers exchange these reports on demand, at most once a second per direction. Older peers can still send unsolicited reports.
+
 ## UDP proxies and PROXY protocol v2
 
 To preserve client IP addresses behind a UDP proxy, create `config/raknetify2-proxy-protocol.json` on the server or Minecraft proxy receiving the forwarded traffic:

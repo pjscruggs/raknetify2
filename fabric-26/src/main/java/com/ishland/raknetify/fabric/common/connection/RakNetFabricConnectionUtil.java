@@ -28,6 +28,7 @@ package com.ishland.raknetify.fabric.common.connection;
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
+import com.ishland.raknetify.common.util.DebugUtil;
 import com.ishland.raknetify.fabric.common.compat.viafabric.ViaFabricCompatInjector;
 
 import io.netty.channel.Channel;
@@ -67,6 +68,9 @@ public class RakNetFabricConnectionUtil {
     public static void initChannel(final Channel channel) {
         if (channel.config() instanceof RakNet.Config) {
             RakNetConnectionUtil.initChannel(channel);
+            if (Constants.DEBUG) {
+                DebugUtil.sampleForExceptionReports(channel);
+            }
             channel.pipeline()
                     .addAfter(
                             com.ishland.raknetify.common.connection.CompatibilityNegotiation.NAME,
