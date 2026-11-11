@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Mhux attiv",
+  "raknetify.hud.active": "Attiv · MTU %1$s",
+  "raknetify.hud.latency": "Attiv · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Fil-kju · Klijent %1$s MiB",
+  "raknetify.hud.queues": "Fil-kju · Klijent %1$s MiB · Server %2$s MiB",
+  "raknetify.hud.traffic": "Traffiku tal-klijent · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Klijent",
+  "raknetify.hud.server": "Server",
+  "raknetify.hud.packets": "%1$s · Intbagħtu mill-ġdid %2$s · ↑ %3$s/s · ↓ %4$s/s · Sensiela ta’ pakketti %5$s",
+  "raknetify.hud.compression": "Kompressjoni · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Konnessjonijiet tan-network permezz ta’ RakNet għall-klijenti u s-servers ta’ Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Konnessjonijiet tan-network permezz ta’ RakNet għall-klijenti u s-servers ta’ Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Ambjent ta’ eżekuzzjoni ta’ Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Konnessjonijiet tan-network permezz ta’ RakNet għall-klijenti u s-servers ta’ Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Konnessjonijiet tan-network permezz ta’ RakNet għall-klijenti u s-servers ta’ Minecraft."
+}

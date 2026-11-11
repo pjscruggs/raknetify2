@@ -31,6 +31,8 @@ jobs:
           distribution: zulu
           java-version: 25
       - uses: ./.github/actions/setup-checks
+      - name: Check Minecraft language coverage and message arguments
+        run: python3 .github/scripts/check-locales.py
       - name: Check every owned source before compiling Minecraft modules
         run: ./gradlew -p quality check --no-daemon --max-workers=2
       - id: network

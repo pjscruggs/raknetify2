@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Ոչ ակտիվ",
+  "raknetify.hud.active": "Ակտիվ · MTU %1$s",
+  "raknetify.hud.latency": "Ակտիվ · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Հերթում · Հաճախորդ %1$s MiB",
+  "raknetify.hud.queues": "Հերթում · Հաճախորդ %1$s MiB · Սերվեր %2$s MiB",
+  "raknetify.hud.traffic": "Հաճախորդի ցանցային հոսք · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Հաճախորդ",
+  "raknetify.hud.server": "Սերվեր",
+  "raknetify.hud.packets": "%1$s · Կրկին ուղարկված %2$s · ↑ %3$s/s · ↓ %4$s/s · Փաթեթների շարք %5$s",
+  "raknetify.hud.compression": "Սեղմում · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Ցանցային կապ RakNet-ի միջոցով Minecraft-ի հաճախորդների և սերվերների համար։",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Ցանցային կապ RakNet-ի միջոցով Minecraft-ի հաճախորդների և սերվերների համար։",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2-ի գործարկման միջավայր",
+  "neoforge.screen.mods.info.description.raknetify": "Ցանցային կապ RakNet-ի միջոցով Minecraft-ի հաճախորդների և սերվերների համար։",
+  "fml.menu.mods.info.description.raknetify": "Ցանցային կապ RakNet-ի միջոցով Minecraft-ի հաճախորդների և սերվերների համար։"
+}

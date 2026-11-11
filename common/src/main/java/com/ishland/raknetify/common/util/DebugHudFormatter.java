@@ -44,85 +44,90 @@ public final class DebugHudFormatter {
     private DebugHudFormatter() {}
 
     /**
-     * Emits the active RakNet connection's HUD lines in their display order.
+     * Emits the active connection's HUD lines or the localized inactive marker.
      *
      * @param consumer destination for complete display lines
-     * @param channel connection channel, or null while the client is disconnected
-     * @return true when RakNet details were emitted, false for a missing or ordinary TCP channel
+     * @param channel network channel, or null while the client is disconnected
+     * @param language formatter bound to the player's current language
      */
-    public static boolean append(final Consumer<String> consumer, final @Nullable Channel channel) {
+    public static void append(
+            final Consumer<String> consumer,
+            final @Nullable Channel channel,
+            final HudLanguage language) {
+        final Consumer<String> line = message -> consumer.accept("[Raknetify2] " + message);
         if (channel == null || !(channel.config() instanceof RakNet.Config config)) {
-            return false;
+            line.accept(language.translate("inactive"));
+            return;
         }
         if (config.getMetrics() instanceof SimpleMetricsLogger logger) {
-            appendConnectionMetrics(consumer, config, logger);
+            appendConnectionMetrics(line, language, config, logger);
         } else {
-            consumer.accept("[Raknetify2] A: true, MTU: %d".formatted(config.getMTU()));
+            line.accept(language.translate("active", config.getMTU()));
         }
         final MultiChannelingStreamingCompression compression =
                 channel.pipeline().get(MultiChannelingStreamingCompression.class);
         if (compression != null && compression.isActive()) {
-            consumer.accept(
-                    "[Raknetify2] CRatio: I: %.2f%%, O: %.2f%%"
-                            .formatted(
-                                    compression.getInCompressionRatio() * 100,
-                                    compression.getOutCompressionRatio() * 100));
+            line.accept(
+                    language.translate(
+                            "compression",
+                            language.ratio(compression.getInCompressionRatio(), false),
+                            language.ratio(compression.getOutCompressionRatio(), false)));
         }
-        return true;
     }
 
     /**
      * Formats local measurements and includes peer statistics only after metrics negotiation.
      *
-     * @param consumer destination for each display line
+     * @param line destination for each display line
+     * @param language formatter bound to the player's current language
      * @param config transport configuration supplying the MTU and pending-frame allowance
      * @param logger local traffic samples and the optional remote metrics report
      */
     private static void appendConnectionMetrics(
-            final Consumer<String> consumer,
+            final Consumer<String> line,
+            final HudLanguage language,
             final RakNet.Config config,
             final SimpleMetricsLogger logger) {
-        consumer.accept(
-                "[Raknetify2] A: true, MTU: %d, RTT: %.2f/%.2fms"
-                        .formatted(
-                                config.getMTU(),
-                                logger.getMeasureRTTns() / 1_000_000.0,
-                                logger.getMeasureRTTnsStdDev() / 1_000_000.0));
+        line.accept(
+                language.translate(
+                        "latency",
+                        config.getMTU(),
+                        language.decimal(logger.getMeasureRTTns() / 1_000_000.0),
+                        language.decimal(logger.getMeasureRTTnsStdDev() / 1_000_000.0)));
         final MetricsSynchronizationHandler serverSync = logger.getMetricsSynchronizationHandler();
+        final String queued = language.decimal(logger.getCurrentQueuedBytes() / 1048576.0);
         if (serverSync != null && serverSync.isRemoteSupported()) {
-            consumer.accept(
-                    "[Raknetify2] C: BUF: %.2fMB; S: BUF: %.2fMB"
-                            .formatted(
-                                    logger.getCurrentQueuedBytes() / 1024.0 / 1024.0,
-                                    serverSync.getQueuedBytes() / 1024.0 / 1024.0));
+            line.accept(
+                    language.translate(
+                            "queues",
+                            queued,
+                            language.decimal(serverSync.getQueuedBytes() / 1048576.0)));
         } else {
-            consumer.accept(
-                    "[Raknetify2] C: BUF: %.2fMB"
-                            .formatted(logger.getCurrentQueuedBytes() / 1024.0 / 1024.0));
+            line.accept(language.translate("queue", queued));
         }
 
-        consumer.accept(
-                "[Raknetify2] C: I: %s, O: %s"
-                        .formatted(
-                                logger.getMeasureTrafficInFormatted(),
-                                logger.getMeasureTrafficOutFormatted()));
-
-        consumer.accept(
-                "[Raknetify2] C: ERR: %.4f%%, %d tx, %d rx, BST: %d"
-                        .formatted(
-                                logger.getMeasureErrorRate() * 100.0,
-                                logger.getMeasureTX(),
-                                logger.getMeasureRX(),
-                                logger.getMeasureBurstTokens()
-                                        + config.getDefaultPendingFrameSets()));
+        line.accept(
+                language.translate(
+                        "traffic",
+                        logger.getMeasureTrafficInFormatted(),
+                        logger.getMeasureTrafficOutFormatted()));
+        line.accept(
+                language.translate(
+                        "packets",
+                        language.translate("client"),
+                        language.ratio(logger.getMeasureErrorRate(), true),
+                        logger.getMeasureTX(),
+                        logger.getMeasureRX(),
+                        logger.getMeasureBurstTokens() + config.getDefaultPendingFrameSets()));
         if (serverSync != null && serverSync.isRemoteSupported()) {
-            consumer.accept(
-                    "[Raknetify2] S: ERR: %.4f%%, %d tx, %d rx, BST: %d"
-                            .formatted(
-                                    serverSync.getErrorRate() * 100.0,
-                                    serverSync.getTX(),
-                                    serverSync.getRX(),
-                                    serverSync.getBurst()));
+            line.accept(
+                    language.translate(
+                            "packets",
+                            language.translate("server"),
+                            language.ratio(serverSync.getErrorRate(), true),
+                            serverSync.getTX(),
+                            serverSync.getRX(),
+                            serverSync.getBurst()));
         }
     }
 }

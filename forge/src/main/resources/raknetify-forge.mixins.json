@@ -4,5 +4,6 @@
   "package": "com.ishland.raknetify.forge.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": ["MixinForgePayloadStorage"],
+  "client": ["MixinModListScreen"],
   "injectors": {"defaultRequire": 1}
 }

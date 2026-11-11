@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "At rest",
+  "raknetify.hud.active": "In service · MTU %1$s",
+  "raknetify.hud.latency": "In service · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Awaiting passage · Client %1$s MiB",
+  "raknetify.hud.queues": "Awaiting passage · Client %1$s MiB · Theatre %2$s MiB",
+  "raknetify.hud.traffic": "The client’s traffic · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Client",
+  "raknetify.hud.server": "Theatre",
+  "raknetify.hud.packets": "%1$s · Dispatched anew %2$s · ↑ %3$s/s · ↓ %4$s/s · Volley %5$s",
+  "raknetify.hud.compression": "Compression · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Through RakNet may Minecraft clients and theatres commune.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Through RakNet may Minecraft clients and theatres commune.",
+  "modmenu.nameTranslation.raknetify_runtime": "The workings of Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Through RakNet may Minecraft clients and theatres commune.",
+  "fml.menu.mods.info.description.raknetify": "Through RakNet may Minecraft clients and theatres commune."
+}

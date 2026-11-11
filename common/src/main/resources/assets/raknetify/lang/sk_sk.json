@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Neaktívne",
+  "raknetify.hud.active": "Aktívne · MTU %1$s",
+  "raknetify.hud.latency": "Aktívne · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Vo fronte · Klient %1$s MiB",
+  "raknetify.hud.queues": "Vo fronte · Klient %1$s MiB · Server %2$s MiB",
+  "raknetify.hud.traffic": "Dátová prevádzka klienta · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Klient",
+  "raknetify.hud.server": "Server",
+  "raknetify.hud.packets": "%1$s · Odoslané znova %2$s · ↑ %3$s/s · ↓ %4$s/s · Dávka paketov %5$s",
+  "raknetify.hud.compression": "Kompresia · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Sieťové spojenia cez RakNet pre klientov a servery Minecraftu.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Sieťové spojenia cez RakNet pre klientov a servery Minecraftu.",
+  "modmenu.nameTranslation.raknetify_runtime": "Behové prostredie Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Sieťové spojenia cez RakNet pre klientov a servery Minecraftu.",
+  "fml.menu.mods.info.description.raknetify": "Sieťové spojenia cez RakNet pre klientov a servery Minecraftu."
+}

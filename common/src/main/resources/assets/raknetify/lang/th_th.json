@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "ไม่ทำงาน",
+  "raknetify.hud.active": "ทำงานอยู่ · MTU %1$s",
+  "raknetify.hud.latency": "ทำงานอยู่ · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "อยู่ในคิว · ไคลเอนต์ %1$s MiB",
+  "raknetify.hud.queues": "อยู่ในคิว · ไคลเอนต์ %1$s MiB · เซิร์ฟเวอร์ %2$s MiB",
+  "raknetify.hud.traffic": "ปริมาณข้อมูลของไคลเอนต์ · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "ไคลเอนต์",
+  "raknetify.hud.server": "เซิร์ฟเวอร์",
+  "raknetify.hud.packets": "%1$s · ส่งซ้ำ %2$s · ↑ %3$s/s · ↓ %4$s/s · ชุดแพ็กเก็ต %5$s",
+  "raknetify.hud.compression": "การบีบอัด · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "เชื่อมต่อไคลเอนต์และเซิร์ฟเวอร์ Minecraft ผ่านเครือข่าย RakNet",
+  "modmenu.descriptionTranslation.raknetify_runtime": "เชื่อมต่อไคลเอนต์และเซิร์ฟเวอร์ Minecraft ผ่านเครือข่าย RakNet",
+  "modmenu.nameTranslation.raknetify_runtime": "สภาพแวดล้อมรันไทม์ของ Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "เชื่อมต่อไคลเอนต์และเซิร์ฟเวอร์ Minecraft ผ่านเครือข่าย RakNet",
+  "fml.menu.mods.info.description.raknetify": "เชื่อมต่อไคลเอนต์และเซิร์ฟเวอร์ Minecraft ผ่านเครือข่าย RakNet"
+}

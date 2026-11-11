@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Óvirkt",
+  "raknetify.hud.active": "Virkt · MTU %1$s",
+  "raknetify.hud.latency": "Virkt · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Í biðröð · Biðlari %1$s MiB",
+  "raknetify.hud.queues": "Í biðröð · Biðlari %1$s MiB · Þjónn %2$s MiB",
+  "raknetify.hud.traffic": "Umferð biðlara · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Biðlari",
+  "raknetify.hud.server": "Þjónn",
+  "raknetify.hud.packets": "%1$s · Endursent %2$s · ↑ %3$s/s · ↓ %4$s/s · Pakkahrina %5$s",
+  "raknetify.hud.compression": "Þjöppun · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Nettengingar um RakNet fyrir biðlara og þjóna í Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Nettengingar um RakNet fyrir biðlara og þjóna í Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Keyrsluumhverfi Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Nettengingar um RakNet fyrir biðlara og þjóna í Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Nettengingar um RakNet fyrir biðlara og þjóna í Minecraft."
+}

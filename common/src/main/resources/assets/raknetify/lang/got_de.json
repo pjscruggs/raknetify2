@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "𐌽𐌹 𐍄𐌰𐌿𐌾𐌰𐌽𐌳𐍃",
+  "raknetify.hud.active": "𐍄𐌰𐌿𐌾𐌰𐌽𐌳𐍃 · MTU %1$s",
+  "raknetify.hud.latency": "𐍄𐌰𐌿𐌾𐌰𐌽𐌳𐍃 · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "𐌱𐌴𐌹𐌳𐌰𐌽𐌳𐌰 · 𐌰𐌽𐌳𐌽𐌿𐌼𐌾𐌰 %1$s MiB",
+  "raknetify.hud.queues": "𐌱𐌴𐌹𐌳𐌰𐌽𐌳𐌰 · 𐌰𐌽𐌳𐌽𐌿𐌼𐌾𐌰 %1$s MiB · 𐌽𐌰𐍄𐌾𐌰𐌸𐌹𐌿𐍃 %2$s MiB",
+  "raknetify.hud.traffic": "𐌳𐌰𐍄𐌰 𐌰𐌽𐌳𐌽𐌿𐌼𐌾𐌹𐌽𐍃 · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "𐌰𐌽𐌳𐌽𐌿𐌼𐌾𐌰",
+  "raknetify.hud.server": "𐌽𐌰𐍄𐌾𐌰𐌸𐌹𐌿𐍃",
+  "raknetify.hud.packets": "%1$s · 𐌰𐍆𐍄𐍂𐌰 𐌹𐌽𐍃𐌰𐌽𐌳𐌹𐌸 %2$s · ↑ %3$s/s · ↓ %4$s/s · 𐍀𐌰𐌺𐌺𐌾𐌿𐍃 𐍃𐌰𐌼𐌰𐌽𐌰 %5$s",
+  "raknetify.hud.compression": "𐌼𐌹𐌽𐌽𐌹𐌶𐌰 𐌳𐌰𐍄𐌰 · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "RakNet 𐌲𐌰𐌷𐌰𐍆𐍄𐌴𐌹𐌸 𐌰𐌽𐌳𐌽𐌿𐌼𐌾𐌰𐌽𐍃 𐌾𐌰𐌷 𐌽𐌰𐍄𐌾𐌰𐌸𐌴𐍅𐌰𐌽𐍃 𐌼𐌰𐌾𐌽𐌺𐍂𐌰𐍆𐍄𐌹𐍃.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "RakNet 𐌲𐌰𐌷𐌰𐍆𐍄𐌴𐌹𐌸 𐌰𐌽𐌳𐌽𐌿𐌼𐌾𐌰𐌽𐍃 𐌾𐌰𐌷 𐌽𐌰𐍄𐌾𐌰𐌸𐌴𐍅𐌰𐌽𐍃 𐌼𐌰𐌾𐌽𐌺𐍂𐌰𐍆𐍄𐌹𐍃.",
+  "modmenu.nameTranslation.raknetify_runtime": "𐍃𐍄𐌰𐌸𐍃 𐌳𐌿 𐌱𐍂𐌿𐌺𐌾𐌰𐌽 Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "RakNet 𐌲𐌰𐌷𐌰𐍆𐍄𐌴𐌹𐌸 𐌰𐌽𐌳𐌽𐌿𐌼𐌾𐌰𐌽𐍃 𐌾𐌰𐌷 𐌽𐌰𐍄𐌾𐌰𐌸𐌴𐍅𐌰𐌽𐍃 𐌼𐌰𐌾𐌽𐌺𐍂𐌰𐍆𐍄𐌹𐍃.",
+  "fml.menu.mods.info.description.raknetify": "RakNet 𐌲𐌰𐌷𐌰𐍆𐍄𐌴𐌹𐌸 𐌰𐌽𐌳𐌽𐌿𐌼𐌾𐌰𐌽𐍃 𐌾𐌰𐌷 𐌽𐌰𐍄𐌾𐌰𐌸𐌴𐍅𐌰𐌽𐍃 𐌼𐌰𐌾𐌽𐌺𐍂𐌰𐍆𐍄𐌹𐍃."
+}

@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Inactivu",
+  "raknetify.hud.active": "Activu · MTU %1$s",
+  "raknetify.hud.latency": "Activu · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Na cola · Veceru %1$s MiB",
+  "raknetify.hud.queues": "Na cola · Veceru %1$s MiB · Sirvidor %2$s MiB",
+  "raknetify.hud.traffic": "Tráficu del veceru · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Veceru",
+  "raknetify.hud.server": "Sirvidor",
+  "raknetify.hud.packets": "%1$s · Reunviaos %2$s · ↑ %3$s/s · ↓ %4$s/s · Ráfaga %5$s",
+  "raknetify.hud.compression": "Compresión · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Conexones de rede con RakNet pa veceros y sirvidores de Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Conexones de rede con RakNet pa veceros y sirvidores de Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Entornu d'execución de Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Conexones de rede con RakNet pa veceros y sirvidores de Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Conexones de rede con RakNet pa veceros y sirvidores de Minecraft."
+}

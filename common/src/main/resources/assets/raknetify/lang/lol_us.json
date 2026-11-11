@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Turnd off",
+  "raknetify.hud.active": "Iz workin · MTU %1$s",
+  "raknetify.hud.latency": "Iz workin · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Watin in line · Klient %1$s MiB",
+  "raknetify.hud.queues": "Watin in line · Klient %1$s MiB · Survr %2$s MiB",
+  "raknetify.hud.traffic": "Klient traffik · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Klient",
+  "raknetify.hud.server": "Survr",
+  "raknetify.hud.packets": "%1$s · Sended agin %2$s · ↑ %3$s/s · ↓ %4$s/s · Buncha paketz %5$s",
+  "raknetify.hud.compression": "Squishin · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "RakNet letz Minecraft klientz an survrz send stuffz to each othr.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "RakNet letz Minecraft klientz an survrz send stuffz to each othr.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 runnin bitz",
+  "neoforge.screen.mods.info.description.raknetify": "RakNet letz Minecraft klientz an survrz send stuffz to each othr.",
+  "fml.menu.mods.info.description.raknetify": "RakNet letz Minecraft klientz an survrz send stuffz to each othr."
+}

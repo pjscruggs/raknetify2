@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "تيدق اکتيف",
+  "raknetify.hud.active": "اکتيف · MTU %1$s",
+  "raknetify.hud.latency": "اکتيف · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "دالم باريس ݢيلير · ڤلڠݢن %1$s MiB",
+  "raknetify.hud.queues": "دالم باريس ݢيلير · ڤلڠݢن %1$s MiB · ڤلاين %2$s MiB",
+  "raknetify.hud.traffic": "ترافيک ڤلڠݢن · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "ڤلڠݢن",
+  "raknetify.hud.server": "ڤلاين",
+  "raknetify.hud.packets": "%1$s · دهانتر سمولا %2$s · ↑ %3$s/s · ↓ %4$s/s · رنتيتن ڤاکت %5$s",
+  "raknetify.hud.compression": "ڤممڤتن · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "سمبوڠن رڠکاين ملالوءي RakNet اونتوق ڤلڠݢن دان ڤلاين Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "سمبوڠن رڠکاين ملالوءي RakNet اونتوق ڤلڠݢن دان ڤلاين Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "ڤرسکيترن ماس جالن Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "سمبوڠن رڠکاين ملالوءي RakNet اونتوق ڤلڠݢن دان ڤلاين Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "سمبوڠن رڠکاين ملالوءي RakNet اونتوق ڤلڠݢن دان ڤلاين Minecraft."
+}

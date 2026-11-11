@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "pali ala",
+  "raknetify.hud.active": "pali · MTU %1$s",
+  "raknetify.hud.latency": "pali · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "awen · ilo sina %1$s MiB",
+  "raknetify.hud.queues": "awen · ilo sina %1$s MiB · ma kulupu %2$s MiB",
+  "raknetify.hud.traffic": "tawa sona pi ilo sina · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "ilo sina",
+  "raknetify.hud.server": "ma kulupu",
+  "raknetify.hud.packets": "%1$s · pana sin %2$s · ↑ %3$s/s · ↓ %4$s/s · kulupu pi poki sona %5$s",
+  "raknetify.hud.compression": "lili sona · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "ilo RakNet li wan e ilo sina e ma kulupu lon musi Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "ilo RakNet li wan e ilo sina e ma kulupu lon musi Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "ilo pi lawa ilo Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "ilo RakNet li wan e ilo sina e ma kulupu lon musi Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "ilo RakNet li wan e ilo sina e ma kulupu lon musi Minecraft."
+}

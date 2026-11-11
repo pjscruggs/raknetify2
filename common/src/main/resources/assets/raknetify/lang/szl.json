@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Niyaktywny",
+  "raknetify.hud.active": "Aktywny · MTU %1$s",
+  "raknetify.hud.latency": "Aktywny · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "We rajce · Klijynt %1$s MiB",
+  "raknetify.hud.queues": "We rajce · Klijynt %1$s MiB · Serwer %2$s MiB",
+  "raknetify.hud.traffic": "Ruch klijynta · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Klijynt",
+  "raknetify.hud.server": "Serwer",
+  "raknetify.hud.packets": "%1$s · Posłane zaś %2$s · ↑ %3$s/s · ↓ %4$s/s · Seryjo paketōw %5$s",
+  "raknetify.hud.compression": "Kōmpresyjo · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Necowe połōnczynia bez RakNet dlo klijyntōw i serwerōw Minecrafta.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Necowe połōnczynia bez RakNet dlo klijyntōw i serwerōw Minecrafta.",
+  "modmenu.nameTranslation.raknetify_runtime": "Strzodowisko ôdpalanio Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Necowe połōnczynia bez RakNet dlo klijyntōw i serwerōw Minecrafta.",
+  "fml.menu.mods.info.description.raknetify": "Necowe połōnczynia bez RakNet dlo klijyntōw i serwerōw Minecrafta."
+}

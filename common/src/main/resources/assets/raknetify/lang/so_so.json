@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Ma shaqaynayo",
+  "raknetify.hud.active": "Wuu shaqaynayaa · MTU %1$s",
+  "raknetify.hud.latency": "Wuu shaqaynayaa · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Saf ku jira · Macmiil %1$s MiB",
+  "raknetify.hud.queues": "Saf ku jira · Macmiil %1$s MiB · Seerfar %2$s MiB",
+  "raknetify.hud.traffic": "Xogta macmiilka · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Macmiil",
+  "raknetify.hud.server": "Seerfar",
+  "raknetify.hud.packets": "%1$s · Mar kale la diray %2$s · ↑ %3$s/s · ↓ %4$s/s · Xirmooyin isdaba jooga %5$s",
+  "raknetify.hud.compression": "Cadaadis xogeed · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Isku xirka shabakadda RakNet ee macaamiisha iyo seerfarrada Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Isku xirka shabakadda RakNet ee macaamiisha iyo seerfarrada Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Deegaanka lagu socodsiiyo Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Isku xirka shabakadda RakNet ee macaamiisha iyo seerfarrada Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Isku xirka shabakadda RakNet ee macaamiisha iyo seerfarrada Minecraft."
+}

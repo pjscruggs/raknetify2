@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Inaktiv",
+  "raknetify.hud.active": "Aktiv · MTU %1$s",
+  "raknetify.hud.latency": "Aktiv · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "I kö · Klient %1$s MiB",
+  "raknetify.hud.queues": "I kö · Klient %1$s MiB · Server %2$s MiB",
+  "raknetify.hud.traffic": "Trafik i klientem · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Klient",
+  "raknetify.hud.server": "Server",
+  "raknetify.hud.packets": "%1$s · Stjikkað umað %2$s · ↑ %3$s/s · ↓ %4$s/s · Pakiet åv iett ferð %5$s",
+  "raknetify.hud.compression": "Samanpressning · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "RakNet bind ihop Minecraft-klienter og serverer yvir nätet.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "RakNet bind ihop Minecraft-klienter og serverer yvir nätet.",
+  "modmenu.nameTranslation.raknetify_runtime": "Miljö fyr tä kjöra Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "RakNet bind ihop Minecraft-klienter og serverer yvir nätet.",
+  "fml.menu.mods.info.description.raknetify": "RakNet bind ihop Minecraft-klienter og serverer yvir nätet."
+}

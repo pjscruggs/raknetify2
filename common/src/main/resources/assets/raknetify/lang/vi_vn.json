@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Không hoạt động",
+  "raknetify.hud.active": "Đang hoạt động · MTU %1$s",
+  "raknetify.hud.latency": "Đang hoạt động · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Đang xếp hàng · Máy khách %1$s MiB",
+  "raknetify.hud.queues": "Đang xếp hàng · Máy khách %1$s MiB · Máy chủ %2$s MiB",
+  "raknetify.hud.traffic": "Lưu lượng máy khách · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Máy khách",
+  "raknetify.hud.server": "Máy chủ",
+  "raknetify.hud.packets": "%1$s · Đã gửi lại %2$s · ↑ %3$s/s · ↓ %4$s/s · Loạt gói tin %5$s",
+  "raknetify.hud.compression": "Nén · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Kết nối mạng qua RakNet cho máy khách và máy chủ Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Kết nối mạng qua RakNet cho máy khách và máy chủ Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Môi trường thực thi Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Kết nối mạng qua RakNet cho máy khách và máy chủ Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Kết nối mạng qua RakNet cho máy khách và máy chủ Minecraft."
+}

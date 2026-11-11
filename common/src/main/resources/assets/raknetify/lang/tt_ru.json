@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Актив түгел",
+  "raknetify.hud.active": "Актив · MTU %1$s",
+  "raknetify.hud.latency": "Актив · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Чиратта · Клиент %1$s MiB",
+  "raknetify.hud.queues": "Чиратта · Клиент %1$s MiB · Сервер %2$s MiB",
+  "raknetify.hud.traffic": "Клиент трафигы · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Клиент",
+  "raknetify.hud.server": "Сервер",
+  "raknetify.hud.packets": "%1$s · Кабат җибәрелгән %2$s · ↑ %3$s/s · ↓ %4$s/s · Пакетлар төркеме %5$s",
+  "raknetify.hud.compression": "Кысу · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Minecraft клиентлары һәм серверлары өчен RakNet аша челтәр тоташуы.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Minecraft клиентлары һәм серверлары өчен RakNet аша челтәр тоташуы.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 башкару мохите",
+  "neoforge.screen.mods.info.description.raknetify": "Minecraft клиентлары һәм серверлары өчен RakNet аша челтәр тоташуы.",
+  "fml.menu.mods.info.description.raknetify": "Minecraft клиентлары һәм серверлары өчен RakNet аша челтәр тоташуы."
+}

@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "ບໍ່ເຮັດວຽກ",
+  "raknetify.hud.active": "ກຳລັງເຮັດວຽກ · MTU %1$s",
+  "raknetify.hud.latency": "ກຳລັງເຮັດວຽກ · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "ຢູ່ໃນຄິວ · ໄຄລແອນ %1$s MiB",
+  "raknetify.hud.queues": "ຢູ່ໃນຄິວ · ໄຄລແອນ %1$s MiB · ເຊີບເວີ %2$s MiB",
+  "raknetify.hud.traffic": "ການຮັບສົ່ງຂໍ້ມູນຂອງໄຄລແອນ · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "ໄຄລແອນ",
+  "raknetify.hud.server": "ເຊີບເວີ",
+  "raknetify.hud.packets": "%1$s · ສົ່ງຄືນໃໝ່ %2$s · ↑ %3$s/s · ↓ %4$s/s · ຊຸດແພັກເກັດ %5$s",
+  "raknetify.hud.compression": "ການບີບອັດ · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "ການເຊື່ອມຕໍ່ເຄືອຂ່າຍຜ່ານ RakNet ສຳລັບໄຄລແອນ ແລະ ເຊີບເວີຂອງ Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "ການເຊື່ອມຕໍ່ເຄືອຂ່າຍຜ່ານ RakNet ສຳລັບໄຄລແອນ ແລະ ເຊີບເວີຂອງ Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "ສະພາບແວດລ້ອມສຳລັບແລ່ນ Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "ການເຊື່ອມຕໍ່ເຄືອຂ່າຍຜ່ານ RakNet ສຳລັບໄຄລແອນ ແລະ ເຊີບເວີຂອງ Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "ການເຊື່ອມຕໍ່ເຄືອຂ່າຍຜ່ານ RakNet ສຳລັບໄຄລແອນ ແລະ ເຊີບເວີຂອງ Minecraft."
+}

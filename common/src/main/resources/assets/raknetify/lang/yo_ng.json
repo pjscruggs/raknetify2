@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Kò ṣiṣẹ́",
+  "raknetify.hud.active": "Ń ṣiṣẹ́ · MTU %1$s",
+  "raknetify.hud.latency": "Ń ṣiṣẹ́ · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Lórí ìlà · Oníbàárà %1$s MiB",
+  "raknetify.hud.queues": "Lórí ìlà · Oníbàárà %1$s MiB · Olùpín %2$s MiB",
+  "raknetify.hud.traffic": "Ìṣàn dátà oníbàárà · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Oníbàárà",
+  "raknetify.hud.server": "Olùpín",
+  "raknetify.hud.packets": "%1$s · A tún fi ránṣẹ́ %2$s · ↑ %3$s/s · ↓ %4$s/s · Àkójọpọ̀ ìdì dátà %5$s",
+  "raknetify.hud.compression": "Fífún dátà pọ̀ · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Àwọn ìsopọ̀ nẹ́tíwọ́ọ̀kì nípasẹ̀ RakNet fún àwọn oníbàárà àti olùpín Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Àwọn ìsopọ̀ nẹ́tíwọ́ọ̀kì nípasẹ̀ RakNet fún àwọn oníbàárà àti olùpín Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Àyíká ìṣiṣẹ́ Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Àwọn ìsopọ̀ nẹ́tíwọ́ọ̀kì nípasẹ̀ RakNet fún àwọn oníbàárà àti olùpín Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Àwọn ìsopọ̀ nẹ́tíwọ́ọ̀kì nípasẹ̀ RakNet fún àwọn oníbàárà àti olùpín Minecraft."
+}

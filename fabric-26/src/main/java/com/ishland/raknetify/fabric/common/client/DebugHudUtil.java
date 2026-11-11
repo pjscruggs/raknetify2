@@ -26,18 +26,23 @@
 package com.ishland.raknetify.fabric.common.client;
 
 import com.ishland.raknetify.common.util.DebugHudFormatter;
+import com.ishland.raknetify.common.util.HudLanguage;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
 
 import io.netty.channel.Channel;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.Connection;
 
 import java.util.function.Consumer;
 
 /** Connects the active Minecraft client connection to the shared transport HUD formatter. */
 public class DebugHudUtil {
+
+    /** Render-thread formatter that honors the active game resource packs. */
+    private static final HudLanguage LANGUAGE = new HudLanguage(I18n::get);
 
     /**
      * Emits transport diagnostics for the active connection or an inactive marker when no RakNet
@@ -47,13 +52,12 @@ public class DebugHudUtil {
      */
     public static void getDebugString(final Consumer<String> consumer) {
         final ClientPacketListener networkHandler = Minecraft.getInstance().getConnection();
+        LANGUAGE.select(Minecraft.getInstance().options.languageCode);
+        Channel channel = null;
         if (networkHandler != null) {
             final Connection connection = networkHandler.getConnection();
-            final Channel channel = ((IClientConnection) connection).getChannel();
-            if (DebugHudFormatter.append(consumer, channel)) {
-                return;
-            }
+            channel = ((IClientConnection) connection).getChannel();
         }
-        consumer.accept("[Raknetify2] A: false");
+        DebugHudFormatter.append(consumer, channel, LANGUAGE);
     }
 }

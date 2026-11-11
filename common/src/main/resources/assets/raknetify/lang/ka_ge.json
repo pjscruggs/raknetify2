@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "არააქტიური",
+  "raknetify.hud.active": "აქტიური · MTU %1$s",
+  "raknetify.hud.latency": "აქტიური · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "რიგში · კლიენტი %1$s MiB",
+  "raknetify.hud.queues": "რიგში · კლიენტი %1$s MiB · სერვერი %2$s MiB",
+  "raknetify.hud.traffic": "კლიენტის ტრაფიკი · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "კლიენტი",
+  "raknetify.hud.server": "სერვერი",
+  "raknetify.hud.packets": "%1$s · ხელახლა გაგზავნილი %2$s · ↑ %3$s/s · ↓ %4$s/s · პაკეტების სერია %5$s",
+  "raknetify.hud.compression": "შეკუმშვა · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "ქსელური კავშირები RakNet-ის მეშვეობით Minecraft-ის კლიენტებისა და სერვერებისთვის.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "ქსელური კავშირები RakNet-ის მეშვეობით Minecraft-ის კლიენტებისა და სერვერებისთვის.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2-ის გაშვების გარემო",
+  "neoforge.screen.mods.info.description.raknetify": "ქსელური კავშირები RakNet-ის მეშვეობით Minecraft-ის კლიენტებისა და სერვერებისთვის.",
+  "fml.menu.mods.info.description.raknetify": "ქსელური კავშირები RakNet-ის მეშვეობით Minecraft-ის კლიენტებისა და სერვერებისთვის."
+}

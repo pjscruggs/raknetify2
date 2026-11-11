@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "غیرفعال",
+  "raknetify.hud.active": "فعال · MTU %1$s",
+  "raknetify.hud.latency": "فعال · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "در صف · کارخواه %1$s MiB",
+  "raknetify.hud.queues": "در صف · کارخواه %1$s MiB · سرور %2$s MiB",
+  "raknetify.hud.traffic": "ترافیک کارخواه · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "کارخواه",
+  "raknetify.hud.server": "سرور",
+  "raknetify.hud.packets": "%1$s · ارسال مجدد %2$s · ↑ %3$s/s · ↓ %4$s/s · دستهٔ بسته‌ها %5$s",
+  "raknetify.hud.compression": "فشرده‌سازی · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "اتصال شبکه از طریق RakNet برای کارخواه‌ها و سرورهای Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "اتصال شبکه از طریق RakNet برای کارخواه‌ها و سرورهای Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "محیط اجرای Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "اتصال شبکه از طریق RakNet برای کارخواه‌ها و سرورهای Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "اتصال شبکه از طریق RakNet برای کارخواه‌ها و سرورهای Minecraft."
+}

@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "na selpli",
+  "raknetify.hud.active": "selpli · MTU %1$s",
+  "raknetify.hud.latency": "selpli · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "denpa · se servero %1$s MiB",
+  "raknetify.hud.queues": "denpa · se servero %1$s MiB · servero %2$s MiB",
+  "raknetify.hud.traffic": "lo datni poi lo se servero cu benji gi'a te benji · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "se servero",
+  "raknetify.hud.server": "servero",
+  "raknetify.hud.packets": "%1$s · za'u re'u benji %2$s · ↑ %3$s/s · ↓ %4$s/s · lo gunma be lo datni bakfu %5$s",
+  "raknetify.hud.compression": "cmagau lo datni · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": ".i la .raknet. cu jorne lo se servero lo servero be la .mainkraft. lo skami tcana ciste",
+  "modmenu.descriptionTranslation.raknetify_runtime": ".i la .raknet. cu jorne lo se servero lo servero be la .mainkraft. lo skami tcana ciste",
+  "modmenu.nameTranslation.raknetify_runtime": "lo skami vanbi be la .raknetifaitu.",
+  "neoforge.screen.mods.info.description.raknetify": ".i la .raknet. cu jorne lo se servero lo servero be la .mainkraft. lo skami tcana ciste",
+  "fml.menu.mods.info.description.raknetify": ".i la .raknet. cu jorne lo se servero lo servero be la .mainkraft. lo skami tcana ciste"
+}

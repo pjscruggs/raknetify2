@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "ǝʌᴉʇɔɐuI",
+  "raknetify.hud.active": "%1$s ∩⟘W · ǝʌᴉʇɔⱯ",
+  "raknetify.hud.latency": "sɯ %3$s ± %2$s ⟘⟘ᴚ · %1$s ∩⟘W · ǝʌᴉʇɔⱯ",
+  "raknetify.hud.queue": "ᗺᴉW %1$s ʇuǝᴉꞁƆ · pǝnǝnꝹ",
+  "raknetify.hud.queues": "ᗺᴉW %2$s ɹǝʌɹǝS · ᗺᴉW %1$s ʇuǝᴉꞁƆ · pǝnǝnꝹ",
+  "raknetify.hud.traffic": "%2$s ↓ · %1$s ↑ · ɔᴉɟɟɐɹʇ ʇuǝᴉꞁƆ",
+  "raknetify.hud.client": "ʇuǝᴉꞁƆ",
+  "raknetify.hud.server": "ɹǝʌɹǝS",
+  "raknetify.hud.packets": "%5$s ʇsɹnᗺ · s/%4$s ↑ · s/%3$s ↓ · %2$s pǝʇʇᴉɯsuɐɹʇǝᴚ · %1$s",
+  "raknetify.hud.compression": "%2$s ↓ · %1$s ↑ · uoᴉssǝɹdɯoƆ",
+  "modmenu.descriptionTranslation.raknetify": "˙sɹǝʌɹǝs puɐ sʇuǝᴉꞁɔ ʇɟɐɹɔǝuᴉW ɹoɟ ᵷuᴉʞɹoʍʇǝu ʇǝNʞɐᴚ",
+  "modmenu.descriptionTranslation.raknetify_runtime": "˙sɹǝʌɹǝs puɐ sʇuǝᴉꞁɔ ʇɟɐɹɔǝuᴉW ɹoɟ ᵷuᴉʞɹoʍʇǝu ʇǝNʞɐᴚ",
+  "modmenu.nameTranslation.raknetify_runtime": "ǝɯᴉʇunɹ ᘔʎɟᴉʇǝuʞɐᴚ",
+  "neoforge.screen.mods.info.description.raknetify": "˙sɹǝʌɹǝs puɐ sʇuǝᴉꞁɔ ʇɟɐɹɔǝuᴉW ɹoɟ ᵷuᴉʞɹoʍʇǝu ʇǝNʞɐᴚ",
+  "fml.menu.mods.info.description.raknetify": "˙sɹǝʌɹǝs puɐ sʇuǝᴉꞁɔ ʇɟɐɹɔǝuᴉW ɹoɟ ᵷuᴉʞɹoʍʇǝu ʇǝNʞɐᴚ"
+}

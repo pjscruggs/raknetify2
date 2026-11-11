@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "비활성",
+  "raknetify.hud.active": "활성 · MTU %1$s",
+  "raknetify.hud.latency": "활성 · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "대기열 · 클라이언트 %1$s MiB",
+  "raknetify.hud.queues": "대기열 · 클라이언트 %1$s MiB · 서버 %2$s MiB",
+  "raknetify.hud.traffic": "클라이언트 트래픽 · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "클라이언트",
+  "raknetify.hud.server": "서버",
+  "raknetify.hud.packets": "%1$s · 재전송 %2$s · ↑ %3$s/s · ↓ %4$s/s · 버스트 %5$s",
+  "raknetify.hud.compression": "압축 · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Minecraft 클라이언트와 서버를 RakNet으로 연결합니다.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Minecraft 클라이언트와 서버를 RakNet으로 연결합니다.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 런타임",
+  "neoforge.screen.mods.info.description.raknetify": "Minecraft 클라이언트와 서버를 RakNet으로 연결합니다.",
+  "fml.menu.mods.info.description.raknetify": "Minecraft 클라이언트와 서버를 RakNet으로 연결합니다."
+}

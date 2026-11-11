@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Бездѣйствуетъ",
+  "raknetify.hud.active": "Дѣйствуетъ · MTU %1$s",
+  "raknetify.hud.latency": "Дѣйствуетъ · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Въ очереди · Кліентъ %1$s MiB",
+  "raknetify.hud.queues": "Въ очереди · Кліентъ %1$s MiB · Салонъ %2$s MiB",
+  "raknetify.hud.traffic": "Обмѣнъ данными кліента · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Кліентъ",
+  "raknetify.hud.server": "Салонъ",
+  "raknetify.hud.packets": "%1$s · Отправлено повторно %2$s · ↑ %3$s/s · ↓ %4$s/s · Серія пакетовъ %5$s",
+  "raknetify.hud.compression": "Сжатіе · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Сѣтевыя соединенія чрезъ RakNet для кліентовъ и салоновъ Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Сѣтевыя соединенія чрезъ RakNet для кліентовъ и салоновъ Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Среда исполненія Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Сѣтевыя соединенія чрезъ RakNet для кліентовъ и салоновъ Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Сѣтевыя соединенія чрезъ RakNet для кліентовъ и салоновъ Minecraft."
+}

@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "chu'be'lu'",
+  "raknetify.hud.active": "chu'lu' · MTU %1$s",
+  "raknetify.hud.latency": "chu'lu' · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "loStaH · De'wI' %1$s MiB",
+  "raknetify.hud.queues": "loStaH · De'wI' %1$s MiB · turwI' %2$s MiB",
+  "raknetify.hud.traffic": "De'wI' De' Qaylu'bogh · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "De'wI'",
+  "raknetify.hud.server": "turwI'",
+  "raknetify.hud.packets": "%1$s · ngeHqa'lu'bogh %2$s · ↑ %3$s/s · ↓ %4$s/s · nItebHa' ngeHlu'bogh De' veyHommey %5$s",
+  "raknetify.hud.compression": "De' machmoHmeH mIw · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Minecraft De'wI'mey turwI'mey je rarmoH RakNet.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Minecraft De'wI'mey turwI'mey je rarmoH RakNet.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 QapmoHmeH pat",
+  "neoforge.screen.mods.info.description.raknetify": "Minecraft De'wI'mey turwI'mey je rarmoH RakNet.",
+  "fml.menu.mods.info.description.raknetify": "Minecraft De'wI'mey turwI'mey je rarmoH RakNet."
+}

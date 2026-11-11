@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Неактивно",
+  "raknetify.hud.active": "Активно · MTU %1$s",
+  "raknetify.hud.latency": "Активно · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "На опашката · Клиент %1$s MiB",
+  "raknetify.hud.queues": "На опашката · Клиент %1$s MiB · Сървър %2$s MiB",
+  "raknetify.hud.traffic": "Трафик на клиента · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Клиент",
+  "raknetify.hud.server": "Сървър",
+  "raknetify.hud.packets": "%1$s · Предадени повторно %2$s · ↑ %3$s/s · ↓ %4$s/s · Поредица от пакети %5$s",
+  "raknetify.hud.compression": "Компресия · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Мрежови връзки чрез RakNet за клиенти и сървъри на Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Мрежови връзки чрез RakNet за клиенти и сървъри на Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Среда за изпълнение на Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Мрежови връзки чрез RakNet за клиенти и сървъри на Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Мрежови връзки чрез RakNet за клиенти и сървъри на Minecraft."
+}

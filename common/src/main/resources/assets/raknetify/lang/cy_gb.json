@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Anweithredol",
+  "raknetify.hud.active": "Gweithredol · MTU %1$s",
+  "raknetify.hud.latency": "Gweithredol · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Yn y ciw · Cleient %1$s MiB",
+  "raknetify.hud.queues": "Yn y ciw · Cleient %1$s MiB · Gweinydd %2$s MiB",
+  "raknetify.hud.traffic": "Traffig y cleient · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Cleient",
+  "raknetify.hud.server": "Gweinydd",
+  "raknetify.hud.packets": "%1$s · Ailanfonwyd %2$s · ↑ %3$s/s · ↓ %4$s/s · Swp o becynnau %5$s",
+  "raknetify.hud.compression": "Cywasgu · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Cysylltiadau rhwydwaith RakNet ar gyfer cleientiaid a gweinyddion Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Cysylltiadau rhwydwaith RakNet ar gyfer cleientiaid a gweinyddion Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Amgylchedd rhedeg Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Cysylltiadau rhwydwaith RakNet ar gyfer cleientiaid a gweinyddion Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Cysylltiadau rhwydwaith RakNet ar gyfer cleientiaid a gweinyddion Minecraft."
+}

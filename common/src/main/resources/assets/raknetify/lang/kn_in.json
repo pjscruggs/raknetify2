@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "ನಿಷ್ಕ್ರಿಯ",
+  "raknetify.hud.active": "ಸಕ್ರಿಯ · MTU %1$s",
+  "raknetify.hud.latency": "ಸಕ್ರಿಯ · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "ಸರದಿಯಲ್ಲಿ · ಕ್ಲೈಂಟ್ %1$s MiB",
+  "raknetify.hud.queues": "ಸರದಿಯಲ್ಲಿ · ಕ್ಲೈಂಟ್ %1$s MiB · ಸರ್ವರ್ %2$s MiB",
+  "raknetify.hud.traffic": "ಕ್ಲೈಂಟ್‌ನ ಜಾಲ ಸಂಚಾರ · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "ಕ್ಲೈಂಟ್",
+  "raknetify.hud.server": "ಸರ್ವರ್",
+  "raknetify.hud.packets": "%1$s · ಮತ್ತೆ ಕಳುಹಿಸಿದ್ದು %2$s · ↑ %3$s/s · ↓ %4$s/s · ಪ್ಯಾಕೆಟ್‌ಗಳ ಗುಂಪು %5$s",
+  "raknetify.hud.compression": "ಸಂಕುಚನ · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Minecraft ಕ್ಲೈಂಟ್‌ಗಳು ಮತ್ತು ಸರ್ವರ್‌ಗಳಿಗೆ RakNet ಮೂಲಕ ಜಾಲ ಸಂಪರ್ಕ.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Minecraft ಕ್ಲೈಂಟ್‌ಗಳು ಮತ್ತು ಸರ್ವರ್‌ಗಳಿಗೆ RakNet ಮೂಲಕ ಜಾಲ ಸಂಪರ್ಕ.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 ಕಾರ್ಯನಿರ್ವಹಣಾ ಪರಿಸರ",
+  "neoforge.screen.mods.info.description.raknetify": "Minecraft ಕ್ಲೈಂಟ್‌ಗಳು ಮತ್ತು ಸರ್ವರ್‌ಗಳಿಗೆ RakNet ಮೂಲಕ ಜಾಲ ಸಂಪರ್ಕ.",
+  "fml.menu.mods.info.description.raknetify": "Minecraft ಕ್ಲೈಂಟ್‌ಗಳು ಮತ್ತು ಸರ್ವರ್‌ಗಳಿಗೆ RakNet ಮೂಲಕ ಜಾಲ ಸಂಪರ್ಕ."
+}

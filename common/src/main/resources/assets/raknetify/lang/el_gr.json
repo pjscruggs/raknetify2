@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Ανενεργό",
+  "raknetify.hud.active": "Ενεργό · MTU %1$s",
+  "raknetify.hud.latency": "Ενεργό · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Σε αναμονή · Πελάτης %1$s MiB",
+  "raknetify.hud.queues": "Σε αναμονή · Πελάτης %1$s MiB · Διακομιστής %2$s MiB",
+  "raknetify.hud.traffic": "Κίνηση πελάτη · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Πελάτης",
+  "raknetify.hud.server": "Διακομιστής",
+  "raknetify.hud.packets": "%1$s · Επαναμεταδόθηκαν %2$s · ↑ %3$s/s · ↓ %4$s/s · Ριπή %5$s",
+  "raknetify.hud.compression": "Συμπίεση · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Συνδέσεις δικτύου μέσω RakNet για πελάτες και διακομιστές του Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Συνδέσεις δικτύου μέσω RakNet για πελάτες και διακομιστές του Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Περιβάλλον εκτέλεσης του Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Συνδέσεις δικτύου μέσω RakNet για πελάτες και διακομιστές του Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Συνδέσεις δικτύου μέσω RakNet για πελάτες και διακομιστές του Minecraft."
+}

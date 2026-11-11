@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Dizoberiant",
+  "raknetify.hud.active": "Oberiant · MTU %1$s",
+  "raknetify.hud.latency": "Oberiant · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Er steudad gortoz · Arval %1$s MiB",
+  "raknetify.hud.queues": "Er steudad gortoz · Arval %1$s MiB · Servijer %2$s MiB",
+  "raknetify.hud.traffic": "Tremenerezh an arval · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Arval",
+  "raknetify.hud.server": "Servijer",
+  "raknetify.hud.packets": "%1$s · Kaset en-dro %2$s · ↑ %3$s/s · ↓ %4$s/s · Steudad pakadoù %5$s",
+  "raknetify.hud.compression": "Koazhañ · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Kennaskoù rouedad dre RakNet evit arvalioù ha servijerioù Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Kennaskoù rouedad dre RakNet evit arvalioù ha servijerioù Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Endro seveniñ Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Kennaskoù rouedad dre RakNet evit arvalioù ha servijerioù Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Kennaskoù rouedad dre RakNet evit arvalioù ha servijerioù Minecraft."
+}

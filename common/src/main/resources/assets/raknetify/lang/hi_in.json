@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "निष्क्रिय",
+  "raknetify.hud.active": "सक्रिय · MTU %1$s",
+  "raknetify.hud.latency": "सक्रिय · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "कतार में · क्लाइंट %1$s MiB",
+  "raknetify.hud.queues": "कतार में · क्लाइंट %1$s MiB · सर्वर %2$s MiB",
+  "raknetify.hud.traffic": "क्लाइंट का नेटवर्क ट्रैफ़िक · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "क्लाइंट",
+  "raknetify.hud.server": "सर्वर",
+  "raknetify.hud.packets": "%1$s · दोबारा भेजे गए %2$s · ↑ %3$s/s · ↓ %4$s/s · पैकेट समूह %5$s",
+  "raknetify.hud.compression": "संपीड़न · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Minecraft क्लाइंट और सर्वर के लिए RakNet के ज़रिए नेटवर्क कनेक्शन।",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Minecraft क्लाइंट और सर्वर के लिए RakNet के ज़रिए नेटवर्क कनेक्शन।",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 का रनटाइम परिवेश",
+  "neoforge.screen.mods.info.description.raknetify": "Minecraft क्लाइंट और सर्वर के लिए RakNet के ज़रिए नेटवर्क कनेक्शन।",
+  "fml.menu.mods.info.description.raknetify": "Minecraft क्लाइंट और सर्वर के लिए RakNet के ज़रिए नेटवर्क कनेक्शन।"
+}

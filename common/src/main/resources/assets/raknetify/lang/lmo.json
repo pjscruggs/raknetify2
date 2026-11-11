@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Minga attiv",
+  "raknetify.hud.active": "Attiv · MTU %1$s",
+  "raknetify.hud.latency": "Attiv · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "In coa · Client %1$s MiB",
+  "raknetify.hud.queues": "In coa · Client %1$s MiB · Server %2$s MiB",
+  "raknetify.hud.traffic": "Trafegh del client · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Client",
+  "raknetify.hud.server": "Server",
+  "raknetify.hud.packets": "%1$s · Mandad ancamò %2$s · ↑ %3$s/s · ↓ %4$s/s · Pachet in d'on colp %5$s",
+  "raknetify.hud.compression": "Compression · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Conession de red con RakNet per i client e i server de Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Conession de red con RakNet per i client e i server de Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Ambient d'esecuzion de Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Conession de red con RakNet per i client e i server de Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Conession de red con RakNet per i client e i server de Minecraft."
+}

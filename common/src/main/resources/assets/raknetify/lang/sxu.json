@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Nisch agdiev",
+  "raknetify.hud.active": "Agdiev · MTU %1$s",
+  "raknetify.hud.latency": "Agdiev · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "In dorr Wardeschlange · Client %1$s MiB",
+  "raknetify.hud.queues": "In dorr Wardeschlange · Client %1$s MiB · Sörvorr %2$s MiB",
+  "raknetify.hud.traffic": "Dadnvergehr vom Client · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Client",
+  "raknetify.hud.server": "Sörvorr",
+  "raknetify.hud.packets": "%1$s · Nochma geschiggd %2$s · ↑ %3$s/s · ↓ %4$s/s · Bagede uff eemal %5$s",
+  "raknetify.hud.compression": "Gombrimierung · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Nedzwerkgorbindunge ieber RakNet fier Minecraft-Clients un -Sörvorr.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Nedzwerkgorbindunge ieber RakNet fier Minecraft-Clients un -Sörvorr.",
+  "modmenu.nameTranslation.raknetify_runtime": "Loofzeidumgebung fier Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Nedzwerkgorbindunge ieber RakNet fier Minecraft-Clients un -Sörvorr.",
+  "fml.menu.mods.info.description.raknetify": "Nedzwerkgorbindunge ieber RakNet fier Minecraft-Clients un -Sörvorr."
+}

@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Идэвхгүй",
+  "raknetify.hud.active": "Идэвхтэй · MTU %1$s",
+  "raknetify.hud.latency": "Идэвхтэй · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Дараалалд · Клиент %1$s MiB",
+  "raknetify.hud.queues": "Дараалалд · Клиент %1$s MiB · Сервер %2$s MiB",
+  "raknetify.hud.traffic": "Клиентийн сүлжээний урсгал · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Клиент",
+  "raknetify.hud.server": "Сервер",
+  "raknetify.hud.packets": "%1$s · Дахин илгээсэн %2$s · ↑ %3$s/s · ↓ %4$s/s · Багцын цуваа %5$s",
+  "raknetify.hud.compression": "Шахалт · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Minecraft клиент болон серверт зориулсан RakNet сүлжээний холболт.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Minecraft клиент болон серверт зориулсан RakNet сүлжээний холболт.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 ажиллах орчин",
+  "neoforge.screen.mods.info.description.raknetify": "Minecraft клиент болон серверт зориулсан RakNet сүлжээний холболт.",
+  "fml.menu.mods.info.description.raknetify": "Minecraft клиент болон серверт зориулсан RakNet сүлжээний холболт."
+}

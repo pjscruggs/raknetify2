@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Becalmed",
+  "raknetify.hud.active": "Under way · MTU %1$s",
+  "raknetify.hud.latency": "Under way · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Waitin’ in line · Yer ship %1$s MiB",
+  "raknetify.hud.queues": "Waitin’ in line · Yer ship %1$s MiB · Island %2$s MiB",
+  "raknetify.hud.traffic": "Yer ship’s cargo · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Yer ship",
+  "raknetify.hud.server": "Island",
+  "raknetify.hud.packets": "%1$s · Sent again %2$s · ↑ %3$s/s · ↓ %4$s/s · Broadside %5$s",
+  "raknetify.hud.compression": "Cargo packin’ · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "RakNet links yer Minecraft ships with their islands.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "RakNet links yer Minecraft ships with their islands.",
+  "modmenu.nameTranslation.raknetify_runtime": "Riggin’ fer Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "RakNet links yer Minecraft ships with their islands.",
+  "fml.menu.mods.info.description.raknetify": "RakNet links yer Minecraft ships with their islands."
+}

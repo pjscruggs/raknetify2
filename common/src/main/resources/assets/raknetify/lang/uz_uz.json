@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Faol emas",
+  "raknetify.hud.active": "Faol · MTU %1$s",
+  "raknetify.hud.latency": "Faol · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Navbatda · Mijoz %1$s MiB",
+  "raknetify.hud.queues": "Navbatda · Mijoz %1$s MiB · Server %2$s MiB",
+  "raknetify.hud.traffic": "Mijoz trafigi · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Mijoz",
+  "raknetify.hud.server": "Server",
+  "raknetify.hud.packets": "%1$s · Qayta yuborilgan %2$s · ↑ %3$s/s · ↓ %4$s/s · Paketlar ketma-ketligi %5$s",
+  "raknetify.hud.compression": "Siqiş · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Minecraft mijozlari va serverlari uçun RakNet orqali tarmoq ulanişlari.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Minecraft mijozlari va serverlari uçun RakNet orqali tarmoq ulanişlari.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 ijro muhiti",
+  "neoforge.screen.mods.info.description.raknetify": "Minecraft mijozlari va serverlari uçun RakNet orqali tarmoq ulanişlari.",
+  "fml.menu.mods.info.description.raknetify": "Minecraft mijozlari va serverlari uçun RakNet orqali tarmoq ulanişlari."
+}

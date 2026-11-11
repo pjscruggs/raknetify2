@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "נישט אַקטיוו",
+  "raknetify.hud.active": "אַקטיוו · MTU %1$s",
+  "raknetify.hud.latency": "אַקטיוו · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "אין דער ריי · קליענט %1$s MiB",
+  "raknetify.hud.queues": "אין דער ריי · קליענט %1$s MiB · סערווער %2$s MiB",
+  "raknetify.hud.traffic": "דאַטן־פֿאַרקער פֿונעם קליענט · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "קליענט",
+  "raknetify.hud.server": "סערווער",
+  "raknetify.hud.packets": "%1$s · ווידער געשיקט %2$s · ↑ %3$s/s · ↓ %4$s/s · סעריע פּאַקעטן %5$s",
+  "raknetify.hud.compression": "קאָמפּרעסיע · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "נעץ־פֿאַרבינדונגען דורך RakNet פֿאַר Minecraft־קליענטן און סערווערס.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "נעץ־פֿאַרבינדונגען דורך RakNet פֿאַר Minecraft־קליענטן און סערווערס.",
+  "modmenu.nameTranslation.raknetify_runtime": "לויף־סבֿיבֿה פֿאַר Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "נעץ־פֿאַרבינדונגען דורך RakNet פֿאַר Minecraft־קליענטן און סערווערס.",
+  "fml.menu.mods.info.description.raknetify": "נעץ־פֿאַרבינדונגען דורך RakNet פֿאַר Minecraft־קליענטן און סערווערס."
+}

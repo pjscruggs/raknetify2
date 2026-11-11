@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "செயலற்றது",
+  "raknetify.hud.active": "செயலில் · MTU %1$s",
+  "raknetify.hud.latency": "செயலில் · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "வரிசையில் · கிளையன்ட் %1$s MiB",
+  "raknetify.hud.queues": "வரிசையில் · கிளையன்ட் %1$s MiB · சேவையகம் %2$s MiB",
+  "raknetify.hud.traffic": "கிளையன்ட் தரவுப் போக்குவரத்து · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "கிளையன்ட்",
+  "raknetify.hud.server": "சேவையகம்",
+  "raknetify.hud.packets": "%1$s · மீண்டும் அனுப்பியவை %2$s · ↑ %3$s/s · ↓ %4$s/s · பொட்டலத் தொகுப்பு %5$s",
+  "raknetify.hud.compression": "சுருக்கம் · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Minecraft கிளையன்ட்கள் மற்றும் சேவையகங்களுக்கான RakNet வலை இணைப்புகள்.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Minecraft கிளையன்ட்கள் மற்றும் சேவையகங்களுக்கான RakNet வலை இணைப்புகள்.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 இயக்கச் சூழல்",
+  "neoforge.screen.mods.info.description.raknetify": "Minecraft கிளையன்ட்கள் மற்றும் சேவையகங்களுக்கான RakNet வலை இணைப்புகள்.",
+  "fml.menu.mods.info.description.raknetify": "Minecraft கிளையன்ட்கள் மற்றும் சேவையகங்களுக்கான RakNet வலை இணைப்புகள்."
+}

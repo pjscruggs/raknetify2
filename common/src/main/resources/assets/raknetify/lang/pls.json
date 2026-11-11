@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Danga",
+  "raknetify.hud.active": "Dakaun · MTU %1$s",
+  "raknetify.hud.latency": "Dakaun · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Jíchuꞌen · Kilieente %1$s MiB",
+  "raknetify.hud.queues": "Jíchuꞌen · Kilieente %1$s MiB · Saala %2$s MiB",
+  "raknetify.hud.traffic": "Daato íxin kilieente · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Kilieente",
+  "raknetify.hud.server": "Saala",
+  "raknetify.hud.packets": "%1$s · Rueꞌen inaa %2$s · ↑ %3$s/s · ↓ %4$s/s · Pakeete ndaxeꞌen %5$s",
+  "raknetify.hud.compression": "Nchixruꞌì daato · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "RakNet jídixiꞌin kilieente ngaìn saala íxin Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "RakNet jídixiꞌin kilieente ngaìn saala íxin Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Ìnché jian Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "RakNet jídixiꞌin kilieente ngaìn saala íxin Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "RakNet jídixiꞌin kilieente ngaìn saala íxin Minecraft."
+}

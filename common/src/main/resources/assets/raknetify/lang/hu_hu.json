@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Inaktív",
+  "raknetify.hud.active": "Aktív · MTU %1$s",
+  "raknetify.hud.latency": "Aktív · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Sorban áll · Kliens %1$s MiB",
+  "raknetify.hud.queues": "Sorban áll · Kliens %1$s MiB · Szerver %2$s MiB",
+  "raknetify.hud.traffic": "Kliens adatforgalma · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Kliens",
+  "raknetify.hud.server": "Szerver",
+  "raknetify.hud.packets": "%1$s · Újraküldve %2$s · ↑ %3$s/s · ↓ %4$s/s · Csomagsorozat %5$s",
+  "raknetify.hud.compression": "Tömörítés · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "RakNet hálózati kapcsolatok Minecraft-kliensek és -szerverek számára.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "RakNet hálózati kapcsolatok Minecraft-kliensek és -szerverek számára.",
+  "modmenu.nameTranslation.raknetify_runtime": "A Raknetify2 futtatókörnyezete",
+  "neoforge.screen.mods.info.description.raknetify": "RakNet hálózati kapcsolatok Minecraft-kliensek és -szerverek számára.",
+  "fml.menu.mods.info.description.raknetify": "RakNet hálózati kapcsolatok Minecraft-kliensek és -szerverek számára."
+}

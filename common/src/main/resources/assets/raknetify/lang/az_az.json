@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Qeyri-aktiv",
+  "raknetify.hud.active": "Aktiv · MTU %1$s",
+  "raknetify.hud.latency": "Aktiv · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Növbədə · Müştəri %1$s MiB",
+  "raknetify.hud.queues": "Növbədə · Müştəri %1$s MiB · Server %2$s MiB",
+  "raknetify.hud.traffic": "Müştəri trafiki · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Müştəri",
+  "raknetify.hud.server": "Server",
+  "raknetify.hud.packets": "%1$s · Təkrar göndərilən %2$s · ↑ %3$s/s · ↓ %4$s/s · Paket dəstəsi %5$s",
+  "raknetify.hud.compression": "Sıxılma · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Minecraft müştəriləri və serverləri üçün RakNet şəbəkə bağlantıları.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Minecraft müştəriləri və serverləri üçün RakNet şəbəkə bağlantıları.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 icra mühiti",
+  "neoforge.screen.mods.info.description.raknetify": "Minecraft müştəriləri və serverləri üçün RakNet şəbəkə bağlantıları.",
+  "fml.menu.mods.info.description.raknetify": "Minecraft müştəriləri və serverləri üçün RakNet şəbəkə bağlantıları."
+}

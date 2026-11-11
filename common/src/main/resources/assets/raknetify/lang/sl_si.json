@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Nedejavno",
+  "raknetify.hud.active": "Dejavno · MTU %1$s",
+  "raknetify.hud.latency": "Dejavno · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "V čakalni vrsti · Odjemalec %1$s MiB",
+  "raknetify.hud.queues": "V čakalni vrsti · Odjemalec %1$s MiB · Strežnik %2$s MiB",
+  "raknetify.hud.traffic": "Promet odjemalca · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Odjemalec",
+  "raknetify.hud.server": "Strežnik",
+  "raknetify.hud.packets": "%1$s · Poslano znova %2$s · ↑ %3$s/s · ↓ %4$s/s · Niz paketov %5$s",
+  "raknetify.hud.compression": "Stiskanje · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Omrežne povezave prek RakNeta za odjemalce in strežnike za Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Omrežne povezave prek RakNeta za odjemalce in strežnike za Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Izvajalno okolje Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Omrežne povezave prek RakNeta za odjemalce in strežnike za Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Omrežne povezave prek RakNeta za odjemalce in strežnike za Minecraft."
+}

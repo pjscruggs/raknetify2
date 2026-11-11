@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Pio",
+  "raknetify.hud.active": "ʻĀ · MTU %1$s",
+  "raknetify.hud.latency": "ʻĀ · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Ke kali nei · Polokalamu pāʻani %1$s MiB",
+  "raknetify.hud.queues": "Ke kali nei · Polokalamu pāʻani %1$s MiB · Kikowaena %2$s MiB",
+  "raknetify.hud.traffic": "Ka ʻikepili o ka polokalamu pāʻani · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Polokalamu pāʻani",
+  "raknetify.hud.server": "Kikowaena",
+  "raknetify.hud.packets": "%1$s · Hoʻouna hou ʻia %2$s · ↑ %3$s/s · ↓ %4$s/s · Pūʻulu pūʻolo %5$s",
+  "raknetify.hud.compression": "Hoʻēmi nui ʻikepili · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Hoʻohui ʻo RakNet i nā polokalamu pāʻani a me nā kikowaena o Minecraft ma ka ʻupena.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Hoʻohui ʻo RakNet i nā polokalamu pāʻani a me nā kikowaena o Minecraft ma ka ʻupena.",
+  "modmenu.nameTranslation.raknetify_runtime": "Ke kaiapuni holo o Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Hoʻohui ʻo RakNet i nā polokalamu pāʻani a me nā kikowaena o Minecraft ma ka ʻupena.",
+  "fml.menu.mods.info.description.raknetify": "Hoʻohui ʻo RakNet i nā polokalamu pāʻani a me nā kikowaena o Minecraft ma ka ʻupena."
+}

@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Lacaraitë",
+  "raknetify.hud.active": "Caraitë · MTU %1$s",
+  "raknetify.hud.latency": "Caraitë · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Horaina · Celient %1$s MiB",
+  "raknetify.hud.queues": "Horaina · Celient %1$s MiB · Server %2$s MiB",
+  "raknetify.hud.traffic": "Mentië ar camië celiento · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Celient",
+  "raknetify.hud.server": "Server",
+  "raknetify.hud.packets": "%1$s · Mentaina ata %2$s · ↑ %3$s/s · ↓ %4$s/s · Ocombeli er lúmessë %5$s",
+  "raknetify.hud.compression": "Pícin carië · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "RakNet yanta i celient ar i server Minecrafto.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "RakNet yanta i celient ar i server Minecrafto.",
+  "modmenu.nameTranslation.raknetify_runtime": "I nómë yassë Raknetify2 cara",
+  "neoforge.screen.mods.info.description.raknetify": "RakNet yanta i celient ar i server Minecrafto.",
+  "fml.menu.mods.info.description.raknetify": "RakNet yanta i celient ar i server Minecrafto."
+}

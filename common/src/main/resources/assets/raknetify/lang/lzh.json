@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "未啟",
+  "raknetify.hud.active": "已啟 · MTU %1$s",
+  "raknetify.hud.latency": "已啟 · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "待傳 · 客端 %1$s MiB",
+  "raknetify.hud.queues": "待傳 · 客端 %1$s MiB · 伺服器 %2$s MiB",
+  "raknetify.hud.traffic": "客端傳量 · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "客端",
+  "raknetify.hud.server": "伺服器",
+  "raknetify.hud.packets": "%1$s · 重傳 %2$s · ↑ %3$s/s · ↓ %4$s/s · 連發 %5$s",
+  "raknetify.hud.compression": "壓縮 · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "以 RakNet 通 Minecraft 之客端與伺服器。",
+  "modmenu.descriptionTranslation.raknetify_runtime": "以 RakNet 通 Minecraft 之客端與伺服器。",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 行境",
+  "neoforge.screen.mods.info.description.raknetify": "以 RakNet 通 Minecraft 之客端與伺服器。",
+  "fml.menu.mods.info.description.raknetify": "以 RakNet 通 Minecraft 之客端與伺服器。"
+}

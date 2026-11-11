@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Etkin değil",
+  "raknetify.hud.active": "Etkin · MTU %1$s",
+  "raknetify.hud.latency": "Etkin · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Kuyrukta · İstemci %1$s MiB",
+  "raknetify.hud.queues": "Kuyrukta · İstemci %1$s MiB · Sunucu %2$s MiB",
+  "raknetify.hud.traffic": "İstemci trafiği · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "İstemci",
+  "raknetify.hud.server": "Sunucu",
+  "raknetify.hud.packets": "%1$s · Yeniden gönderilen %2$s · ↑ %3$s/s · ↓ %4$s/s · Paket dizisi %5$s",
+  "raknetify.hud.compression": "Sıkıştırma · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Minecraft istemcileri ve sunucuları için RakNet ağ bağlantıları.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Minecraft istemcileri ve sunucuları için RakNet ağ bağlantıları.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 çalışma ortamı",
+  "neoforge.screen.mods.info.description.raknetify": "Minecraft istemcileri ve sunucuları için RakNet ağ bağlantıları.",
+  "fml.menu.mods.info.description.raknetify": "Minecraft istemcileri ve sunucuları için RakNet ağ bağlantıları."
+}

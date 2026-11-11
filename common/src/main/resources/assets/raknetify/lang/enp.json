@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Idle",
+  "raknetify.hud.active": "At work · MTU %1$s",
+  "raknetify.hud.latency": "At work · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "In line · Guest %1$s MiB",
+  "raknetify.hud.queues": "In line · Guest %1$s MiB · Webthew %2$s MiB",
+  "raknetify.hud.traffic": "Guest data flow · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Guest",
+  "raknetify.hud.server": "Webthew",
+  "raknetify.hud.packets": "%1$s · Sent anew %2$s · ↑ %3$s/s · ↓ %4$s/s · Burst %5$s",
+  "raknetify.hud.compression": "Packing · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "RakNet links Minecraft guests and webthews over the net.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "RakNet links Minecraft guests and webthews over the net.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 running gear",
+  "neoforge.screen.mods.info.description.raknetify": "RakNet links Minecraft guests and webthews over the net.",
+  "fml.menu.mods.info.description.raknetify": "RakNet links Minecraft guests and webthews over the net."
+}

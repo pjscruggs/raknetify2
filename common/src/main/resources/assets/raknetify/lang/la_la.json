@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Iners",
+  "raknetify.hud.active": "Agens · MTU %1$s",
+  "raknetify.hud.latency": "Agens · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "In ordine exspectant · Cliens %1$s MiB",
+  "raknetify.hud.queues": "In ordine exspectant · Cliens %1$s MiB · Moderatrum %2$s MiB",
+  "raknetify.hud.traffic": "Commeatus clientis · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Cliens",
+  "raknetify.hud.server": "Moderatrum",
+  "raknetify.hud.packets": "%1$s · Iterum missa %2$s · ↑ %3$s/s · ↓ %4$s/s · Series fasciculorum %5$s",
+  "raknetify.hud.compression": "Compressio · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Nexus retiales per RakNet clientibus moderatrisque Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Nexus retiales per RakNet clientibus moderatrisque Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Ambitus quo Raknetify2 currit",
+  "neoforge.screen.mods.info.description.raknetify": "Nexus retiales per RakNet clientibus moderatrisque Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Nexus retiales per RakNet clientibus moderatrisque Minecraft."
+}

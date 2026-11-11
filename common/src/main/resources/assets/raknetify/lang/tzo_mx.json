@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Tubbil",
+  "raknetify.hud.active": "Tsakal · MTU %1$s",
+  "raknetify.hud.latency": "Tsakal · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Yakal tsmala · Kiliente %1$s MiB",
+  "raknetify.hud.queues": "Yakal tsmala · Kiliente %1$s MiB · Servilor %2$s MiB",
+  "raknetify.hud.traffic": "Yalelal kiliente · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Kiliente",
+  "raknetify.hud.server": "Servilor",
+  "raknetify.hud.packets": "%1$s · Takbil nixtok %2$s · ↑ %3$s/s · ↓ %4$s/s · Pakete ta jun bu %5$s",
+  "raknetify.hud.compression": "Sbik'itubtasel alelaletik · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Ta RakNet tsts'ak sba kiliente xchi'uk servilor yu'un Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Ta RakNet tsts'ak sba kiliente xchi'uk servilor yu'un Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Snaul yabtel Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Ta RakNet tsts'ak sba kiliente xchi'uk servilor yu'un Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Ta RakNet tsts'ak sba kiliente xchi'uk servilor yu'un Minecraft."
+}

@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Tidak aktif",
+  "raknetify.hud.active": "Aktif · MTU %1$s",
+  "raknetify.hud.latency": "Aktif · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Dalam antrean · Klien %1$s MiB",
+  "raknetify.hud.queues": "Dalam antrean · Klien %1$s MiB · Peladen %2$s MiB",
+  "raknetify.hud.traffic": "Lalu lintas klien · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Klien",
+  "raknetify.hud.server": "Peladen",
+  "raknetify.hud.packets": "%1$s · Dikirim ulang %2$s · ↑ %3$s/s · ↓ %4$s/s · Rentetan paket %5$s",
+  "raknetify.hud.compression": "Kompresi · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Koneksi jaringan melalui RakNet untuk klien dan peladen Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Koneksi jaringan melalui RakNet untuk klien dan peladen Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Lingkungan eksekusi Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Koneksi jaringan melalui RakNet untuk klien dan peladen Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Koneksi jaringan melalui RakNet untuk klien dan peladen Minecraft."
+}

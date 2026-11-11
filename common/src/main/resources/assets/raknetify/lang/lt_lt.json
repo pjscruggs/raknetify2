@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Neaktyvus",
+  "raknetify.hud.active": "Aktyvus · MTU %1$s",
+  "raknetify.hud.latency": "Aktyvus · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Eilėje · Klientas %1$s MiB",
+  "raknetify.hud.queues": "Eilėje · Klientas %1$s MiB · Serveris %2$s MiB",
+  "raknetify.hud.traffic": "Kliento duomenų srautas · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Klientas",
+  "raknetify.hud.server": "Serveris",
+  "raknetify.hud.packets": "%1$s · Pakartotinai išsiųsta %2$s · ↑ %3$s/s · ↓ %4$s/s · Paketų serija %5$s",
+  "raknetify.hud.compression": "Glaudinimas · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "„RakNet“ tinklo ryšiai „Minecraft“ klientams ir serveriams.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "„RakNet“ tinklo ryšiai „Minecraft“ klientams ir serveriams.",
+  "modmenu.nameTranslation.raknetify_runtime": "„Raknetify2“ vykdymo aplinka",
+  "neoforge.screen.mods.info.description.raknetify": "„RakNet“ tinklo ryšiai „Minecraft“ klientams ir serveriams.",
+  "fml.menu.mods.info.description.raknetify": "„RakNet“ tinklo ryšiai „Minecraft“ klientams ir serveriams."
+}

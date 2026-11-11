@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Ora aktif",
+  "raknetify.hud.active": "Aktif · MTU %1$s",
+  "raknetify.hud.latency": "Aktif · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Ing antréan · Jaringlenggan %1$s MiB",
+  "raknetify.hud.queues": "Ing antréan · Jaringlenggan %1$s MiB · Jaringladi %2$s MiB",
+  "raknetify.hud.traffic": "Lalu lintas jaringlenggan · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Jaringlenggan",
+  "raknetify.hud.server": "Jaringladi",
+  "raknetify.hud.packets": "%1$s · Dikirim manèh %2$s · ↑ %3$s/s · ↓ %4$s/s · Rerangkening pakèt %5$s",
+  "raknetify.hud.compression": "Kompresi · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Sambungan jaringan nganggo RakNet kanggo jaringlenggan lan jaringladi Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Sambungan jaringan nganggo RakNet kanggo jaringlenggan lan jaringladi Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Lingkungan kanggo nglakokaké Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Sambungan jaringan nganggo RakNet kanggo jaringlenggan lan jaringladi Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Sambungan jaringan nganggo RakNet kanggo jaringlenggan lan jaringladi Minecraft."
+}

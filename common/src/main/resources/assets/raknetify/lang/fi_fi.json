@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Ei käytössä",
+  "raknetify.hud.active": "Käytössä · MTU %1$s",
+  "raknetify.hud.latency": "Käytössä · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Jonossa · Asiakas %1$s MiB",
+  "raknetify.hud.queues": "Jonossa · Asiakas %1$s MiB · Palvelin %2$s MiB",
+  "raknetify.hud.traffic": "Asiakkaan verkkoliikenne · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Asiakas",
+  "raknetify.hud.server": "Palvelin",
+  "raknetify.hud.packets": "%1$s · Lähetetty uudelleen %2$s · ↑ %3$s/s · ↓ %4$s/s · Pakettiryöppy %5$s",
+  "raknetify.hud.compression": "Pakkaus · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "RakNet-verkkoyhteydet Minecraftin asiakkaille ja palvelimille.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "RakNet-verkkoyhteydet Minecraftin asiakkaille ja palvelimille.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2:n ajoympäristö",
+  "neoforge.screen.mods.info.description.raknetify": "RakNet-verkkoyhteydet Minecraftin asiakkaille ja palvelimille.",
+  "fml.menu.mods.info.description.raknetify": "RakNet-verkkoyhteydet Minecraftin asiakkaille ja palvelimille."
+}

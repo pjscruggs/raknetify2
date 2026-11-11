@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "לא פעיל",
+  "raknetify.hud.active": "פעיל · MTU %1$s",
+  "raknetify.hud.latency": "פעיל · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "בתור · לקוח %1$s MiB",
+  "raknetify.hud.queues": "בתור · לקוח %1$s MiB · שרת %2$s MiB",
+  "raknetify.hud.traffic": "תעבורת הלקוח · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "לקוח",
+  "raknetify.hud.server": "שרת",
+  "raknetify.hud.packets": "%1$s · נשלחו מחדש %2$s · ↑ %3$s/s · ↓ %4$s/s · צרור מנות %5$s",
+  "raknetify.hud.compression": "דחיסה · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "חיבורי רשת באמצעות RakNet ללקוחות ולשרתים של Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "חיבורי רשת באמצעות RakNet ללקוחות ולשרתים של Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "סביבת הריצה של Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "חיבורי רשת באמצעות RakNet ללקוחות ולשרתים של Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "חיבורי רשת באמצעות RakNet ללקוחות ולשרתים של Minecraft."
+}

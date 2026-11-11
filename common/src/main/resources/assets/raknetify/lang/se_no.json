@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Ii doaimmas",
+  "raknetify.hud.active": "Doaimmas · MTU %1$s",
+  "raknetify.hud.latency": "Doaimmas · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Vuordimis · Geavaheaddji %1$s MiB",
+  "raknetify.hud.queues": "Vuordimis · Geavaheaddji %1$s MiB · Bálvá %2$s MiB",
+  "raknetify.hud.traffic": "Geavaheaddji datjohtolat · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Geavaheaddji",
+  "raknetify.hud.server": "Bálvá",
+  "raknetify.hud.packets": "%1$s · Sáddejuvvon ođđasit %2$s · ↑ %3$s/s · ↓ %4$s/s · Páhkat seammás %5$s",
+  "raknetify.hud.compression": "Čoahkkáibáhkken · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Fierpmádatoktavuođat RakNet bokte Minecraft-geavaheddjiide ja -bálvváide.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Fierpmádatoktavuođat RakNet bokte Minecraft-geavaheddjiide ja -bálvváide.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 vuodjinbiras",
+  "neoforge.screen.mods.info.description.raknetify": "Fierpmádatoktavuođat RakNet bokte Minecraft-geavaheddjiide ja -bálvváide.",
+  "fml.menu.mods.info.description.raknetify": "Fierpmádatoktavuođat RakNet bokte Minecraft-geavaheddjiide ja -bálvváide."
+}

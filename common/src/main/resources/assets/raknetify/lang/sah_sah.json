@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Үлэлиирэ суох",
+  "raknetify.hud.active": "Үлэлиир · MTU %1$s",
+  "raknetify.hud.latency": "Үлэлиир · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Уочаратта · Клиент %1$s MiB",
+  "raknetify.hud.queues": "Уочаратта · Клиент %1$s MiB · Сервер %2$s MiB",
+  "raknetify.hud.traffic": "Клиент трафига · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Клиент",
+  "raknetify.hud.server": "Сервер",
+  "raknetify.hud.packets": "%1$s · Хат ыытыллыбыт %2$s · ↑ %3$s/s · ↓ %4$s/s · Бакыаттар бөлөхтөрө %5$s",
+  "raknetify.hud.compression": "Кысыы · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Minecraft клиенттарын уонна сервердэрин RakNet нөҥүө ситимҥэ холбооһун.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Minecraft клиенттарын уонна сервердэрин RakNet нөҥүө ситимҥэ холбооһун.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 үлэлиир эйгэтэ",
+  "neoforge.screen.mods.info.description.raknetify": "Minecraft клиенттарын уонна сервердэрин RakNet нөҥүө ситимҥэ холбооһун.",
+  "fml.menu.mods.info.description.raknetify": "Minecraft клиенттарын уонна сервердэрин RakNet нөҥүө ситимҥэ холбооһун."
+}

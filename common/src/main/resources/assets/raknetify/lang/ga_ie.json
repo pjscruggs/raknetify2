@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Neamhghníomhach",
+  "raknetify.hud.active": "Gníomhach · MTU %1$s",
+  "raknetify.hud.latency": "Gníomhach · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Sa scuaine · Cliant %1$s MiB",
+  "raknetify.hud.queues": "Sa scuaine · Cliant %1$s MiB · Freastalaí %2$s MiB",
+  "raknetify.hud.traffic": "Trácht an chliaint · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Cliant",
+  "raknetify.hud.server": "Freastalaí",
+  "raknetify.hud.packets": "%1$s · Athsheolta %2$s · ↑ %3$s/s · ↓ %4$s/s · Ráig paicéad %5$s",
+  "raknetify.hud.compression": "Comhbhrú · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Naisc líonra trí RakNet do chliaint agus d’fhreastalaithe Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Naisc líonra trí RakNet do chliaint agus d’fhreastalaithe Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Timpeallacht rite Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Naisc líonra trí RakNet do chliaint agus d’fhreastalaithe Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Naisc líonra trí RakNet do chliaint agus d’fhreastalaithe Minecraft."
+}

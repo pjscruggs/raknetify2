@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Net aktyf",
+  "raknetify.hud.active": "Aktyf · MTU %1$s",
+  "raknetify.hud.latency": "Aktyf · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Yn de wachtrige · Kliïnt %1$s MiB",
+  "raknetify.hud.queues": "Yn de wachtrige · Kliïnt %1$s MiB · Tsjinner %2$s MiB",
+  "raknetify.hud.traffic": "Ferkear fan de kliïnt · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Kliïnt",
+  "raknetify.hud.server": "Tsjinner",
+  "raknetify.hud.packets": "%1$s · Opnij ferstjoerd %2$s · ↑ %3$s/s · ↓ %4$s/s · Rige pakketten %5$s",
+  "raknetify.hud.compression": "Kompresje · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Netwurkferbiningen mei RakNet foar Minecraft-kliïnten en -tsjinners.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Netwurkferbiningen mei RakNet foar Minecraft-kliïnten en -tsjinners.",
+  "modmenu.nameTranslation.raknetify_runtime": "Utfieromjouwing foar Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Netwurkferbiningen mei RakNet foar Minecraft-kliïnten en -tsjinners.",
+  "fml.menu.mods.info.description.raknetify": "Netwurkferbiningen mei RakNet foar Minecraft-kliïnten en -tsjinners."
+}

@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Óvirkin",
+  "raknetify.hud.active": "Virkin · MTU %1$s",
+  "raknetify.hud.latency": "Virkin · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Í bíðirøð · Viðskiftari %1$s MiB",
+  "raknetify.hud.queues": "Í bíðirøð · Viðskiftari %1$s MiB · Ambætari %2$s MiB",
+  "raknetify.hud.traffic": "Dátuferðsla hjá viðskiftaranum · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Viðskiftari",
+  "raknetify.hud.server": "Ambætari",
+  "raknetify.hud.packets": "%1$s · Sent umaftur %2$s · ↑ %3$s/s · ↓ %4$s/s · Pakkar í senn %5$s",
+  "raknetify.hud.compression": "Dátutrýsting · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Netsamband við RakNet til viðskiftarar og ambætarar í Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Netsamband við RakNet til viðskiftarar og ambætarar í Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Koyriumhvørvi hjá Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Netsamband við RakNet til viðskiftarar og ambætarar í Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Netsamband við RakNet til viðskiftarar og ambætarar í Minecraft."
+}

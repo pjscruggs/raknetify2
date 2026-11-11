@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Pouint actif",
+  "raknetify.hud.active": "Actif · MTU %1$s",
+  "raknetify.hud.latency": "Actif · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "A esperer · Client %1$s MiB",
+  "raknetify.hud.queues": "A esperer · Client %1$s MiB · Servouer %2$s MiB",
+  "raknetify.hud.traffic": "Paqhets du client · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Client",
+  "raknetify.hud.server": "Servouer",
+  "raknetify.hud.packets": "%1$s · Envayés de rengracie %2$s · ↑ %3$s/s · ↓ %4$s/s · Paqhets d'un coup %5$s",
+  "raknetify.hud.compression": "Serraj · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Le client e le servouer de Minecraft se joignent par la rezille o RakNet.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Le client e le servouer de Minecraft se joignent par la rezille o RakNet.",
+  "modmenu.nameTranslation.raknetify_runtime": "De cai fére aler Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Le client e le servouer de Minecraft se joignent par la rezille o RakNet.",
+  "fml.menu.mods.info.description.raknetify": "Le client e le servouer de Minecraft se joignent par la rezille o RakNet."
+}

@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Neo-ghnìomhach",
+  "raknetify.hud.active": "Gnìomhach · MTU %1$s",
+  "raknetify.hud.latency": "Gnìomhach · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Sa chiudha · Cliant %1$s MiB",
+  "raknetify.hud.queues": "Sa chiudha · Cliant %1$s MiB · Frithealaiche %2$s MiB",
+  "raknetify.hud.traffic": "Trafaig a’ chliant · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Cliant",
+  "raknetify.hud.server": "Frithealaiche",
+  "raknetify.hud.packets": "%1$s · Air an cur a-rithist %2$s · ↑ %3$s/s · ↓ %4$s/s · Sreath phacaidean %5$s",
+  "raknetify.hud.compression": "Dùmhlachadh · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Ceanglaichean lìonraidh tro RakNet airson cliantan is frithealaichean Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Ceanglaichean lìonraidh tro RakNet airson cliantan is frithealaichean Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Àrainneachd ruith Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Ceanglaichean lìonraidh tro RakNet airson cliantan is frithealaichean Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Ceanglaichean lìonraidh tro RakNet airson cliantan is frithealaichean Minecraft."
+}

@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "غير نشط",
+  "raknetify.hud.active": "نشط · MTU %1$s",
+  "raknetify.hud.latency": "نشط · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "في قائمة الانتظار · العميل %1$s MiB",
+  "raknetify.hud.queues": "في قائمة الانتظار · العميل %1$s MiB · الخادم %2$s MiB",
+  "raknetify.hud.traffic": "حركة بيانات العميل · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "العميل",
+  "raknetify.hud.server": "الخادم",
+  "raknetify.hud.packets": "%1$s · أُعيد إرساله %2$s · ↑ %3$s/s · ↓ %4$s/s · دفعة %5$s",
+  "raknetify.hud.compression": "الضغط · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "اتصالات RakNet الشبكية لعملاء Minecraft وخوادمها.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "اتصالات RakNet الشبكية لعملاء Minecraft وخوادمها.",
+  "modmenu.nameTranslation.raknetify_runtime": "بيئة تشغيل Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "اتصالات RakNet الشبكية لعملاء Minecraft وخوادمها.",
+  "fml.menu.mods.info.description.raknetify": "اتصالات RakNet الشبكية لعملاء Minecraft وخوادمها."
+}

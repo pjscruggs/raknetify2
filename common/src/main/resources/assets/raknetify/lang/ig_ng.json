@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Anaghị arụ ọrụ",
+  "raknetify.hud.active": "Na-arụ ọrụ · MTU %1$s",
+  "raknetify.hud.latency": "Na-arụ ọrụ · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Na-eche n'ahịrị · Ngwa ahịa %1$s MiB",
+  "raknetify.hud.queues": "Na-eche n'ahịrị · Ngwa ahịa %1$s MiB · Njēozī %2$s MiB",
+  "raknetify.hud.traffic": "Nnyefe data nke ngwa ahịa · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Ngwa ahịa",
+  "raknetify.hud.server": "Njēozī",
+  "raknetify.hud.packets": "%1$s · Ezigara ọzọ %2$s · ↑ %3$s/s · ↓ %4$s/s · Ùkwù ngwugwu %5$s",
+  "raknetify.hud.compression": "Mbelata nha data · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "RakNet na-ejikọta ngwa ahịa na njēozī Minecraft na netwọk.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "RakNet na-ejikọta ngwa ahịa na njēozī Minecraft na netwọk.",
+  "modmenu.nameTranslation.raknetify_runtime": "Gburugburụ ebe Raknetify2 na-arụ ọrụ",
+  "neoforge.screen.mods.info.description.raknetify": "RakNet na-ejikọta ngwa ahịa na njēozī Minecraft na netwọk.",
+  "fml.menu.mods.info.description.raknetify": "RakNet na-ejikọta ngwa ahịa na njēozī Minecraft na netwọk."
+}

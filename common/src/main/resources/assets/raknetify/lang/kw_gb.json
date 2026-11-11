@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Anweythres",
+  "raknetify.hud.active": "Gweythres · MTU %1$s",
+  "raknetify.hud.latency": "Gweythres · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Ow kortos · Kliens %1$s MiB",
+  "raknetify.hud.queues": "Ow kortos · Kliens %1$s MiB · Servyer %2$s MiB",
+  "raknetify.hud.traffic": "Tremen an kliens · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Kliens",
+  "raknetify.hud.server": "Servyer",
+  "raknetify.hud.packets": "%1$s · Danvenys arta %2$s · ↑ %3$s/s · ↓ %4$s/s · Bagas a fardellow %5$s",
+  "raknetify.hud.compression": "Gwaskans · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Junyansow rosweyth dre RakNet rag kliensow ha servyoryon Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Junyansow rosweyth dre RakNet rag kliensow ha servyoryon Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Kylchynnans eksekutya Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Junyansow rosweyth dre RakNet rag kliensow ha servyoryon Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "Junyansow rosweyth dre RakNet rag kliensow ha servyoryon Minecraft."
+}

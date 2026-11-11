@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Ӗҫлемест",
+  "raknetify.hud.active": "Ӗҫре · MTU %1$s",
+  "raknetify.hud.latency": "Ӗҫре · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Черетре · Клиент %1$s MiB",
+  "raknetify.hud.queues": "Черетре · Клиент %1$s MiB · Сервер %2$s MiB",
+  "raknetify.hud.traffic": "Клиент трафикӗ · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Клиент",
+  "raknetify.hud.server": "Сервер",
+  "raknetify.hud.packets": "%1$s · Каллех янӑ %2$s · ↑ %3$s/s · ↓ %4$s/s · Пакетсен ушкӑнӗ %5$s",
+  "raknetify.hud.compression": "Хӗсни · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Minecraft клиентӗсемпе серверӗсем валли RakNet урлӑ тетел ҫыхӑнӑвӗ.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Minecraft клиентӗсемпе серверӗсем валли RakNet урлӑ тетел ҫыхӑнӑвӗ.",
+  "modmenu.nameTranslation.raknetify_runtime": "Raknetify2 ӗҫлемелли тӗл",
+  "neoforge.screen.mods.info.description.raknetify": "Minecraft клиентӗсемпе серверӗсем валли RakNet урлӑ тетел ҫыхӑнӑвӗ.",
+  "fml.menu.mods.info.description.raknetify": "Minecraft клиентӗсемпе серверӗсем валли RakNet урлӑ тетел ҫыхӑнӑвӗ."
+}

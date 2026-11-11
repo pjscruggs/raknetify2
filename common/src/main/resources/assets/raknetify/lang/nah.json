@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Axtekitikah",
+  "raknetify.hud.active": "Tekitikah · MTU %1$s",
+  "raknetify.hud.latency": "Tekitikah · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Kichīxtikah · Tlatekiwihkātl %1$s MiB",
+  "raknetify.hud.queues": "Kichīxtikah · Tlatekiwihkātl %1$s MiB · Mekatlapalēwīlli %2$s MiB",
+  "raknetify.hud.traffic": "Itlanahuatīl tlatekiwihkātl · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Tlatekiwihkātl",
+  "raknetify.hud.server": "Mekatlapalēwīlli",
+  "raknetify.hud.packets": "%1$s · Sanpa tlatītlanilli %2$s · ↑ %3$s/s · ↓ %4$s/s · Tlakimilli san sekan %5$s",
+  "raknetify.hud.compression": "Tlapātzoliztli · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "RakNet īka tepostokatsawalli kinsenilpia Minecraft tlatekiwihkameh īwan mekatlapalēwīlmeh.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "RakNet īka tepostokatsawalli kinsenilpia Minecraft tlatekiwihkameh īwan mekatlapalēwīlmeh.",
+  "modmenu.nameTranslation.raknetify_runtime": "Kan tekitih Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "RakNet īka tepostokatsawalli kinsenilpia Minecraft tlatekiwihkameh īwan mekatlapalēwīlmeh.",
+  "fml.menu.mods.info.description.raknetify": "RakNet īka tepostokatsawalli kinsenilpia Minecraft tlatekiwihkameh īwan mekatlapalēwīlmeh."
+}

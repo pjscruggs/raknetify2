@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Brukena nai",
+  "raknetify.hud.active": "Brukena · MTU %1$s",
+  "raknetify.hud.latency": "Brukena · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "Vent · Spelabma %1$s MiB",
+  "raknetify.hud.queues": "Vent · Spelabma %1$s MiB · Server %2$s MiB",
+  "raknetify.hud.traffic": "Impla fu spelabma · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Spelabma",
+  "raknetify.hud.server": "Server",
+  "raknetify.hud.packets": "%1$s · Gjenantaa %2$s · ↑ %3$s/s · ↓ %4$s/s · Mange kaban sama afti %5$s",
+  "raknetify.hud.compression": "Jacjmaha impla · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "RakNet tsunaga spelabma mit server fu Minecraft.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "RakNet tsunaga spelabma mit server fu Minecraft.",
+  "modmenu.nameTranslation.raknetify_runtime": "Dwaibmaplas fu Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "RakNet tsunaga spelabma mit server fu Minecraft.",
+  "fml.menu.mods.info.description.raknetify": "RakNet tsunaga spelabma mit server fu Minecraft."
+}

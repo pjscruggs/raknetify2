@@ -1,0 +1,17 @@
+{
+  "raknetify.hud.inactive": "Ned agdiv",
+  "raknetify.hud.active": "Agdiv · MTU %1$s",
+  "raknetify.hud.latency": "Agdiv · MTU %1$s · RTT %2$s ± %3$s ms",
+  "raknetify.hud.queue": "In da Waddschlang · Client %1$s MiB",
+  "raknetify.hud.queues": "In da Waddschlang · Client %1$s MiB · Seava %2$s MiB",
+  "raknetify.hud.traffic": "Dadnvergehr vom Client · ↓ %1$s · ↑ %2$s",
+  "raknetify.hud.client": "Client",
+  "raknetify.hud.server": "Seava",
+  "raknetify.hud.packets": "%1$s · Nummol gschiggd %2$s · ↑ %3$s/s · ↓ %4$s/s · Bageed auf amol %5$s",
+  "raknetify.hud.compression": "Kombrimierung · ↓ %1$s · ↑ %2$s",
+  "modmenu.descriptionTranslation.raknetify": "Nedzwerkverbindungen iber RakNet fer Minecraft-Clients un -Seava.",
+  "modmenu.descriptionTranslation.raknetify_runtime": "Nedzwerkverbindungen iber RakNet fer Minecraft-Clients un -Seava.",
+  "modmenu.nameTranslation.raknetify_runtime": "Laufzeidumgebung fer Raknetify2",
+  "neoforge.screen.mods.info.description.raknetify": "Nedzwerkverbindungen iber RakNet fer Minecraft-Clients un -Seava.",
+  "fml.menu.mods.info.description.raknetify": "Nedzwerkverbindungen iber RakNet fer Minecraft-Clients un -Seava."
+}
