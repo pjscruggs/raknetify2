@@ -25,8 +25,6 @@
 
 package com.ishland.raknetify.common.connection;
 
-import static com.ishland.raknetify.common.util.ReflectionUtil.accessible;
-
 import com.ishland.raknetify.api.PacketOrdering;
 import com.ishland.raknetify.common.Constants;
 
@@ -41,9 +39,7 @@ import network.ycc.raknet.pipeline.FrameJoiner;
 import network.ycc.raknet.pipeline.ReliabilityHandler;
 import network.ycc.raknet.server.channel.RakNetApplicationChannel;
 
-import java.lang.reflect.Field;
 import java.util.Comparator;
-import java.util.PriorityQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -211,36 +207,6 @@ public class RakNetConnectionUtil {
     //        }
     //    }
 
-    /**
-     * Replaces the transport send queue with the shared channel-priority comparator. Existing
-     * frames are retained. Reflection failures are logged without aborting channel initialization.
-     *
-     * @param channel transport channel containing the reliability handler
-     */
-    @SuppressWarnings("unchecked")
-    private static void reInitChannelForOrdering(final Channel channel) {
-        if (channel.config() instanceof RakNet.Config) {
-            try {
-                final ReliabilityHandler reliabilityHandler =
-                        channel.pipeline().get(ReliabilityHandler.class);
-                final Field frameQueueField =
-                        accessible(ReliabilityHandler.class.getDeclaredField("frameQueue"));
-                java.util.Queue<Frame> reliabilityHandlerFrameQueue =
-                        (PriorityQueue<Frame>) frameQueueField.get(reliabilityHandler);
-
-                final java.util.Queue<Frame> newSet = new PriorityQueue<>(cmp);
-                newSet.addAll(reliabilityHandlerFrameQueue);
-
-                frameQueueField.set(reliabilityHandler, newSet);
-
-            } catch (Throwable t) {
-                System.err.println(
-                        "Raknetify: Error occurred while reinitializing channel ordering");
-                t.printStackTrace();
-            }
-        }
-    }
-
     /** Installs transport stages after the underlying channel has finished registration. */
     private static final class TransportInitializer extends ChannelInitializer<Channel> {
         /** Optional bridge before which connection-local handlers must execute. */
@@ -273,7 +239,7 @@ public class RakNetConnectionUtil {
             simpleMetricsLogger.setMetricsSynchronizationHandler(metricsSynchronizationHandler);
             final SynchronizationLayer synchronizationLayer =
                     new SynchronizationLayer(Constants.synchronizationIgnoredChannels());
-            reInitChannelForOrdering(ch);
+            ch.pipeline().get(ReliabilityHandler.class).setFrameComparator(cmp);
             ch.pipeline()
                     .addBefore(
                             FrameJoiner.NAME,
