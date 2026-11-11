@@ -16,16 +16,15 @@ dependencies {
     api("com.github.RelativityMC.netty-raknet:netty-raknet-server")
     api("org.apache.commons:commons-math3:3.6.1")
 
-    //noinspection GradlePackageUpdate
-    compileOnly("io.netty:netty-all:4.1.25.Final")
+    compileOnly("io.netty:netty-all:${project.netty_version}")
 
     compileOnly("com.google.code.gson:gson:2.9.0")
-    compileOnly("com.google.guava:guava:31.1-jre")
+    compileOnly("com.google.guava:guava:${project.guava_version}")
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
     testImplementation 'com.tngtech.archunit:archunit:1.5.1'
-    testImplementation 'io.netty:netty-all:4.1.25.Final'
-    testImplementation 'com.google.guava:guava:31.1-jre'
+    testImplementation "io.netty:netty-all:${project.netty_version}"
+    testImplementation "com.google.guava:guava:${project.guava_version}"
     testRuntimeOnly 'com.google.code.gson:gson:2.9.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

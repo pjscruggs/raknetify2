@@ -88,6 +88,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - uses: ./.github/actions/setup-checks
+      - name: Compile against the minimum library APIs
+        run: >-
+          ./gradlew :common:compileJava :spigot:compileJava :transport-test-client:compileJava
+          -Pnetty_version=4.1.25.Final -Pguava_version=31.1-jre
+          --warning-mode fail --no-daemon --max-workers=2
       - name: Build and run unit tests
         run: ./gradlew build :common:transportProbe :common:benchmarkClasses :common:pitest --warning-mode fail --no-daemon --max-workers=2
       - name: Preserve unit and quality reports
