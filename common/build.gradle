@@ -1,11 +1,11 @@
 /** Builds platform-independent framing, compression, synchronization, and diagnostic code. */
-plugins {
-    id 'info.solidsoft.pitest' version '1.19.0'
-}
+configurations { pitestRuntime }
 
 repositories { maven { url = 'https://maven.fabricmc.net/' } }
 
 dependencies {
+    pitestRuntime 'org.pitest:pitest-command-line:1.30.2'
+    pitestRuntime 'org.pitest:pitest-junit5-plugin:1.2.3'
     testImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     compileOnlyApi 'de.maxhenkel.voicechat:voicechat-api:2.2.39'
     testImplementation 'de.maxhenkel.voicechat:voicechat-api:2.2.39'
@@ -37,18 +37,24 @@ processResources {
 test { useJUnitPlatform() }
 
 /** Mutates replay decisions and budget accounting to verify the security regressions detect faults. */
-pitest {
-    pitestVersion = '1.30.2'
-    junit5PluginVersion = '1.2.3'
-    targetClasses = ['com.ishland.raknetify.common.connection.FrameReplayWindow*']
-    targetTests = ['com.ishland.raknetify.common.connection.FrameReplayWindowTest',
-            'com.ishland.raknetify.common.connection.AuthenticatedFrameCipherTest']
-    threads = 2
-    outputFormats = ['XML', 'HTML']
-    timestampedReports = false
-    failWhenNoMutations = true
-    coverageThreshold = 100
-    mutationThreshold = 95
+tasks.register('pitest', JavaExec) {
+    // The released Gradle PIT plugin uses Configuration.setVisible, deprecated in Gradle 9.9.
+    // Invoke the same PIT engine directly so strict Gradle warning checks remain enabled.
+    group = 'verification'
+    description = 'Mutation-test replay protection with full line coverage and a 95 percent mutation threshold.'
+    dependsOn testClasses
+    classpath = configurations.pitestRuntime + sourceSets.test.runtimeClasspath
+    mainClass = 'org.pitest.mutationtest.commandline.MutationCoverageReport'
+    args '--targetClasses', 'com.ishland.raknetify.common.connection.FrameReplayWindow*',
+            '--targetTests', 'com.ishland.raknetify.common.connection.FrameReplayWindowTest,' +
+                    'com.ishland.raknetify.common.connection.AuthenticatedFrameCipherTest',
+            '--threads', '2', '--outputFormats', 'XML,HTML', '--timestampedReports', 'false',
+            '--failWhenNoMutations', 'true', '--coverageThreshold', '100', '--mutationThreshold', '95'
+    doFirst {
+        args '--reportDir', layout.buildDirectory.dir('reports/pitest').get().asFile.absolutePath,
+                '--sourceDirs', sourceSets.main.allSource.srcDirs.collect { it.absolutePath }.join(','),
+                '--mutableCodePaths', sourceSets.main.output.classesDirs.files.collect { it.absolutePath }.join(',')
+    }
 }
 
 /** Runs native login packet serialization before the client starts graphics or opens an account. */
