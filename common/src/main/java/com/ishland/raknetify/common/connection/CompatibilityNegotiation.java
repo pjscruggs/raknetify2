@@ -26,6 +26,7 @@
 package com.ishland.raknetify.common.connection;
 
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
@@ -163,7 +164,8 @@ public final class CompatibilityNegotiation extends ChannelDuplexHandler {
      */
     private void accept(final ChannelHandlerContext ctx, final FrameData frame) {
         if (received || gameReceived || !orderedFrame(frame) || frame.getDataSize() != 4) {
-            throw new IllegalArgumentException("Invalid Raknetify2 compatibility exchange");
+            throw new IllegalArgumentException(
+                    ConsoleMessages.transport(ctx.channel(), "incompatible"));
         }
         ByteBuf bytes = frame.createData();
         try {
@@ -171,15 +173,14 @@ public final class CompatibilityNegotiation extends ChannelDuplexHandler {
             int version = bytes.readUnsignedByte();
             int role = bytes.readUnsignedByte();
             int mode = bytes.readUnsignedByte();
-            validateDeclaration(version, role, mode);
+            validateDeclaration(ctx, version, role, mode);
             if (mode == 1) {
                 policy.requireOrdered();
             }
             received = true;
             if (CompatibilityPolicy.isOrdered(ctx.channel())) {
                 System.out.println(
-                        "Raknetify2: ordered compatibility negotiated with "
-                                + ctx.channel().remoteAddress());
+                        ConsoleMessages.text("ordered_peer", ctx.channel().remoteAddress()));
             }
         } finally {
             bytes.release();
@@ -189,14 +190,17 @@ public final class CompatibilityNegotiation extends ChannelDuplexHandler {
     /**
      * Validates the fixed wire fields without allowing clients to select server policy.
      *
+     * @param ctx channel that received the declaration
      * @param version wire protocol version
      * @param role zero for client, one for server
      * @param mode zero for ordinary capability, one for required ordering
      * @throws IllegalArgumentException if the version, role, or policy is invalid
      */
-    private void validateDeclaration(final int version, final int role, final int mode) {
+    private void validateDeclaration(
+            final ChannelHandlerContext ctx, final int version, final int role, final int mode) {
         if (version != 1 || role != (server ? 0 : 1) || mode > 1 || (server && mode != 0)) {
-            throw new IllegalArgumentException("Unsupported Raknetify2 compatibility declaration");
+            throw new IllegalArgumentException(
+                    ConsoleMessages.transport(ctx.channel(), "incompatible"));
         }
     }
 
@@ -216,8 +220,7 @@ public final class CompatibilityNegotiation extends ChannelDuplexHandler {
         gameReceived = true;
         if (CompatibilityPolicy.isOrdered(ctx.channel()) && (!received || !orderedFrame(frame))) {
             throw new IllegalArgumentException(
-                    "Server requires ordered Raknetify2 compatibility. Update Raknetify2 on the"
-                            + " client or connect using the normal TCP address without raknet;.");
+                    ConsoleMessages.transport(ctx.channel(), "ordered_required"));
         }
     }
 

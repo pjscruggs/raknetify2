@@ -28,6 +28,7 @@ import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.connection.multichannel.CustomPayloadChannel;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
 import com.ishland.raknetify.common.proxy.ProxyProtocol;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
@@ -164,12 +165,14 @@ public class RakNetVelocityConnectionUtil {
                                                     protocolVersion.getProtocol())));
                 } else {
                     RaknetifyVelocityPlugin.LOGGER.warn(
-                            "No multi-channel mappings for protocol version {} ({})",
-                            protocolVersion.getProtocol(),
-                            Arrays.toString(
-                                    protocolVersion
-                                            .getVersionsSupportedBy()
-                                            .toArray(String[]::new)));
+                            ConsoleMessages.text(
+                                    "mapping_missing",
+                                    protocolVersion.getProtocol()
+                                            + " "
+                                            + Arrays.toString(
+                                                    protocolVersion
+                                                            .getVersionsSupportedBy()
+                                                            .toArray(String[]::new))));
                 }
             }
 
@@ -180,9 +183,8 @@ public class RakNetVelocityConnectionUtil {
                             new RakNetVelocityPingUpdater(player));
 
             RaknetifyVelocityPlugin.LOGGER.info(
-                    String.format(
-                            "Raknetify: %s logged in via RakNet, mtu %d",
-                            evt.getPlayer().getGameProfile().getName(), config.getMTU()));
+                    ConsoleMessages.text(
+                            "login", evt.getPlayer().getGameProfile().getName(), config.getMTU()));
         }
     }
 
@@ -196,14 +198,13 @@ public class RakNetVelocityConnectionUtil {
         final ConnectedPlayer player = (ConnectedPlayer) evt.getPlayer();
         final VelocityServerConnection connectedServer = player.getConnectedServer();
         if (connectedServer == null) {
-            RaknetifyVelocityPlugin.LOGGER.warn(
-                    "No connected server for player ({}) after server switch?", player);
+            RaknetifyVelocityPlugin.LOGGER.warn(ConsoleMessages.text("missing_server", player));
             return;
         }
         final MinecraftConnection serverConnection = connectedServer.getConnection();
         if (serverConnection == null) {
             RaknetifyVelocityPlugin.LOGGER.warn(
-                    "Connected server ({}) have no underlying connection?", connectedServer);
+                    ConsoleMessages.text("missing_connection", connectedServer));
             return;
         }
         final Channel channel = player.getConnection().getChannel();

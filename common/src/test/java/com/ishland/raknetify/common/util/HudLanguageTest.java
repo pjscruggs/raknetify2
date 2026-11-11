@@ -94,6 +94,16 @@ class HudLanguageTest {
         assertEquals("12.50%", language.ratio(0.125, false));
         language.select("de_de");
         assertEquals("1,25", language.decimal(1.25));
+        assertEquals("1,50 KiB/s", language.byteRate(1536));
+        language.select("fr_fr");
+        assertEquals("1,50 Kio/s", language.byteRate(1536));
+        assertEquals("0 o/s", language.byteRate(0));
+        language.select("en_ud");
+        assertEquals("1.50 KiB/s", language.byteRate(1536));
+        language.select("ja_jp");
+        assertTrue(language.byteRate(1536).contains("秒"));
+        language.select("ar_sa");
+        assertEquals("١٥٣٦", language.integer(1536));
     }
 
     /** Both disconnected and vanilla TCP connections emit a single localized inactive line. */

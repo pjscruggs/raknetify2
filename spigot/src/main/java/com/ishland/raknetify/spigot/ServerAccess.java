@@ -25,6 +25,8 @@
 
 package com.ishland.raknetify.spigot;
 
+import com.ishland.raknetify.common.util.ConsoleMessages;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
@@ -60,8 +62,7 @@ final class ServerAccess {
     ServerAccess(final Object craftServer) throws ReflectiveOperationException {
         Object server = invoke(craftServer, "getServer");
         if (!"26.3".equals(invoke(server, "getServerVersion"))) {
-            throw new IllegalArgumentException(
-                    "This Raknetify2 Spigot build supports Minecraft 26.3");
+            throw new IllegalArgumentException(ConsoleMessages.text("spigot_version"));
         }
         privateKey = ((KeyPair) invoke(server, "getKeyPair")).getPrivate();
         Object connection = invoke(server, "getConnection");
@@ -106,7 +107,7 @@ final class ServerAccess {
                 return entry.getValue();
             }
         }
-        throw new IllegalStateException("Minecraft listener has no supported Netty acceptor");
+        throw new IllegalStateException(ConsoleMessages.text("acceptor_missing"));
     }
 
     /**

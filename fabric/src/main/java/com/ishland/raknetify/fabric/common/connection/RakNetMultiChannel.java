@@ -27,6 +27,7 @@ package com.ishland.raknetify.fabric.common.connection;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
@@ -100,8 +101,7 @@ public class RakNetMultiChannel {
                 } catch (ClassNotFoundException e) {
                     if (Boolean.getBoolean("raknetify.printNotFoundClasses")) {
                         System.out.println(
-                                "Raknetify: Warning: %s not found for raknet multi-channel"
-                                        .formatted(name));
+                                ConsoleMessages.text("packet_unknown", name, "multichannel"));
                     }
                 }
             }
@@ -513,8 +513,7 @@ public class RakNetMultiChannel {
     public static int getPacketChannelOverride(
             final @Nullable Class<?> clazz, final boolean suppressWarning) {
         if (clazz == null) {
-            System.err.println(
-                    "Raknetify: Warning: Tried to send packet without setting packet class");
+            System.err.println(ConsoleMessages.text("packet_missing"));
             return 0;
         }
         int channelOverride = classToChannelIdOverride.getInt(clazz);
@@ -526,8 +525,10 @@ public class RakNetMultiChannel {
                     final String intermediary =
                             mappingResolver.unmapClassName("intermediary", clazz.getName());
                     System.err.println(
-                            "Raknetify: Warning: unknown packet type %s (%s) for raknet multi-channel"
-                                    .formatted(intermediary.replace('.', '/'), clazz.getName()));
+                            ConsoleMessages.text(
+                                    "packet_unknown",
+                                    intermediary.replace('.', '/'),
+                                    clazz.getName()));
                 }
             }
             channelOverride = 7;

@@ -26,6 +26,7 @@
 package com.ishland.raknetify.fabric.mixin.compat.fabricapi;
 
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
 
 import io.netty.channel.Channel;
@@ -74,9 +75,7 @@ public class MixinServerLoginNetworkAddon {
         final MultiChannelingStreamingCompression compression =
                 channel.pipeline().get(MultiChannelingStreamingCompression.class);
         if (compression != null && compression.isActive()) {
-            System.out.println(
-                    "Raknetify: Preventing vanilla compression as streaming compression is"
-                            + " enabled");
+            System.out.println(ConsoleMessages.text("streaming_compression"));
             return -1;
         }
         return server.getNetworkCompressionThreshold();

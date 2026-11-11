@@ -27,6 +27,7 @@ package com.ishland.raknetify.fabric.common.compat.viafabric;
 
 import com.google.common.base.Preconditions;
 import com.ishland.raknetify.common.compat.CurrentViaFabric;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.minecraft.ModPlatform;
 
 import io.netty.buffer.ByteBuf;
@@ -132,12 +133,7 @@ public class ViaFabricCompatInjector {
                                 handlerDecoderName,
                                 fabricDecodeHandler);
             } catch (Throwable t) {
-                //noinspection RedundantStringFormatCall
-                System.err.println(
-                        String.format(
-                                "Raknetify: Could not inject ViaVersion compatibility into RakNet"
-                                        + " channel %s: %s",
-                                channel, t));
+                System.err.println(ConsoleMessages.text("via_channel", channel, t));
                 t.printStackTrace();
             }
         }

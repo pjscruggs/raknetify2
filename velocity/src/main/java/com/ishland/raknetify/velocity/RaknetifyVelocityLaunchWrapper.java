@@ -24,6 +24,7 @@ package com.ishland.raknetify.velocity;
 import static com.ishland.raknetify.velocity.RaknetifyVelocityPlugin.LOGGER;
 
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.velocity.connection.RakNetVelocityConnectionUtil;
 import com.ishland.raknetify.velocity.init.VelocityPacketRegistryInjector;
 import com.ishland.raknetify.velocity.init.VelocityRaknetifyServer;
@@ -50,12 +51,11 @@ public class RaknetifyVelocityLaunchWrapper {
         if (!isCompatible()) {
             Runnable runnable =
                     () -> {
+                        LOGGER.error(ConsoleMessages.text("velocity_version"));
                         LOGGER.error(
-                                "This version of Raknetify is NOT compatible with your version of"
-                                        + " Velocity");
-                        LOGGER.error(
-                                "Please update your Velocity at"
-                                        + " https://papermc.io/downloads#Velocity");
+                                ConsoleMessages.text(
+                                        "velocity_update",
+                                        "https://papermc.io/downloads/velocity"));
                     };
             runnable.run();
             RaknetifyVelocityPlugin.proxy()

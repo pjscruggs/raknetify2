@@ -128,7 +128,7 @@ public class NetworkInterfaceListener {
         } catch (java.net.SocketException | RuntimeException exception) {
             LOGGER.log(
                     System.Logger.Level.WARNING,
-                    "Cannot update local interface addresses",
+                    ConsoleMessages.text("interface_update"),
                     exception);
         }
     }

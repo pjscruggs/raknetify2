@@ -88,6 +88,9 @@ public class RakNetFabricConnectionUtil {
      */
     public static void postInitChannel(final Channel channel, final boolean isClientSide) {
         if (channel.config() instanceof RakNet.Config) {
+            if (isClientSide) {
+                com.ishland.raknetify.fabric.common.client.DebugHudUtil.bindPlayerLanguage(channel);
+            }
             RakNetConnectionUtil.removeTcpOnlyHandlers(channel);
             ViaFabricCompatInjector.inject(channel, isClientSide);
             channel.pipeline().replace("timeout", "timeout", new ChannelDuplexHandler()); // no-op

@@ -25,6 +25,7 @@
 
 package com.ishland.raknetify.fabric.common.client;
 
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.common.util.DebugHudFormatter;
 import com.ishland.raknetify.common.util.HudLanguage;
 import com.ishland.raknetify.fabric.common.util.MultiVersionUtil;
@@ -44,6 +45,16 @@ public class DebugHudUtil {
 
     /** Render-thread formatter that honors the active game resource packs. */
     private static final HudLanguage LANGUAGE = new HudLanguage(I18n::translate);
+
+    /**
+     * Uses the player's resource packs for failures that Minecraft can display while connecting.
+     *
+     * @param channel RakNet application channel on the client
+     */
+    public static void bindPlayerLanguage(final Channel channel) {
+        ConsoleMessages.bindPlayer(
+                channel, () -> MinecraftClient.getInstance().options.language, I18n::translate);
+    }
 
     /**
      * Emits transport diagnostics for the active connection or an inactive marker when no RakNet

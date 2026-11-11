@@ -26,6 +26,7 @@
 package com.ishland.raknetify.fabric.mixin.server;
 
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
 
 import io.netty.channel.Channel;
@@ -73,9 +74,7 @@ public class MixinPlayerManager1_20_1 {
         final Channel channel = ((IClientConnection) connection).getChannel();
         if (channel != null && channel.config() instanceof RakNet.Config config) {
             System.out.println(
-                    String.format(
-                            "Raknetify: %s logged in via RakNet, mtu %d",
-                            player.getName().getString(), config.getMTU()));
+                    ConsoleMessages.text("login", player.getName().getString(), config.getMTU()));
         }
     }
 
@@ -95,9 +94,7 @@ public class MixinPlayerManager1_20_1 {
         final Channel channel = ((IClientConnection) connection).getChannel();
         if (channel != null && channel.config() instanceof RakNet.Config config) {
             System.out.println(
-                    String.format(
-                            "Raknetify: %s logged in via RakNet, mtu %d",
-                            player.getName().getString(), config.getMTU()));
+                    ConsoleMessages.text("login", player.getName().getString(), config.getMTU()));
         }
     }
 
@@ -124,8 +121,7 @@ public class MixinPlayerManager1_20_1 {
             final CallbackInfo ci) {
         final Channel channel = ((IClientConnection) connection).getChannel();
         if (channel == null) {
-            System.err.println(
-                    "Raknetify: Cannot negotiate ordered transport without a login channel");
+            System.err.println(ConsoleMessages.text("no_login_channel"));
             return;
         }
         RakNetConnectionUtil.requestMultichannel(channel);
@@ -146,8 +142,7 @@ public class MixinPlayerManager1_20_1 {
             final CallbackInfo ci) {
         final Channel channel = ((IClientConnection) connection).getChannel();
         if (channel == null) {
-            System.err.println(
-                    "Raknetify: Cannot negotiate ordered transport without a login channel");
+            System.err.println(ConsoleMessages.text("no_login_channel"));
             return;
         }
         RakNetConnectionUtil.requestMultichannel(channel);

@@ -26,6 +26,7 @@
 package com.ishland.raknetify.common.connection;
 
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
@@ -252,7 +253,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
         if (msg instanceof FrameData compressedFrameData) {
             compressedFrameData.touch();
-            final int channel = checkedOrderChannel(compressedFrameData);
+            final int channel = checkedOrderChannel(ctx.channel(), compressedFrameData);
             if (compressedFrameData.getPacketId()
                     == Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID) {
                 handleHandshake(ctx, compressedFrameData);
@@ -288,7 +289,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
             return;
         } else if (msg instanceof FrameData rawFrameData) {
             rawFrameData.touch();
-            final int channel = checkedOrderChannel(rawFrameData);
+            final int channel = checkedOrderChannel(ctx.channel(), rawFrameData);
             if (rawFrameData.getPacketId() == rawPacketId
                     && rawFrameData.getReliability().isReliable
                     && rawFrameData.getReliability().isOrdered
@@ -336,16 +337,19 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     /**
      * Rejects unsupported channels before transferring or consuming a frame's ownership.
      *
+     * @param channel application channel supplying the error language
      * @param frame owned frame whose channel will select a compression dictionary
      * @return validated ordering-channel index
      * @throws CorruptedFrameException after releasing a frame with an invalid channel
      */
-    private static int checkedOrderChannel(final FrameData frame) {
+    private static int checkedOrderChannel(
+            final io.netty.channel.Channel channel, final FrameData frame) {
         try {
             return Objects.checkIndex(frame.getOrderChannel(), Constants.ORDER_CHANNEL_COUNT);
         } catch (IndexOutOfBoundsException invalid) {
             frame.release();
-            throw new CorruptedFrameException("Invalid compression ordering channel", invalid);
+            throw new CorruptedFrameException(
+                    ConsoleMessages.transport(channel, "invalid_channel"), invalid);
         }
     }
 
@@ -403,7 +407,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
             inBytesCompressed.addAndGet(data.readableBytes());
 
             out = ctx.alloc().buffer(256, Constants.MAX_QUEUED_SIZE - 1);
-            inflateInto(inflater, scratch(), out);
+            inflateInto(ctx.channel(), inflater, scratch(), out);
 
             inBytesRaw.addAndGet(out.writerIndex());
 
@@ -431,19 +435,24 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     /**
      * Drains one compressed packet within the destination's configured payload ceiling.
      *
+     * @param channel application channel supplying the error language
      * @param inflater channel dictionary positioned at this packet's compressed input
      * @param scratch reusable transient output from zlib
      * @param out bounded destination excluding the frame identifier
      * @throws DataFormatException if the stream is malformed
      * @throws CorruptedFrameException if decompression exceeds the frame budget
      */
-    static void inflateInto(final Inflater inflater, final byte[] scratch, final ByteBuf out)
+    static void inflateInto(
+            final io.netty.channel.Channel channel,
+            final Inflater inflater,
+            final byte[] scratch,
+            final ByteBuf out)
             throws DataFormatException {
         int count;
         while ((count = inflater.inflate(scratch)) != 0) {
             if (count > out.maxWritableBytes()) {
                 throw new CorruptedFrameException(
-                        "Decompressed RakNet frame exceeds the transport limit");
+                        ConsoleMessages.transport(channel, "inflated_limit", out.maxCapacity()));
             }
             out.writeBytes(scratch, 0, count);
         }
@@ -472,7 +481,9 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
         FrameData compressedFrameData = null;
         try {
             if (data.readableBytes() >= Constants.MAX_QUEUED_SIZE) {
-                throw new IllegalArgumentException("Minecraft frame exceeds the transport limit");
+                throw new IllegalArgumentException(
+                        ConsoleMessages.transport(
+                                ctx.channel(), "frame_limit", Constants.MAX_QUEUED_SIZE - 1));
             }
             byte[] deflateBuffer = scratch();
             deflater.setInput(data.nioBuffer());

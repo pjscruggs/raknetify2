@@ -241,15 +241,12 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
     /** Published outgoing byte rate for the latest sampling interval, in bytes per second. */
     private volatile long measureBytesOutRate;
 
-    /** Incoming byte rate formatted with binary units and a per-second suffix. */
-    private volatile String measureTrafficInFormatted = "...";
-
-    /** Outgoing byte rate formatted with binary units and a per-second suffix. */
-    private volatile String measureTrafficOutFormatted = "...";
+    /** True once both byte rates have been sampled for the first time. */
+    private volatile boolean trafficSample;
 
     /**
      * Converts counter deltas into packet and byte rates using the actual elapsed interval. Packet
-     * rates use rolling means. Byte rates and their display strings describe the latest interval.
+     * rates use rolling means. Byte rates describe the latest interval.
      *
      * @param deltaTime elapsed sampling time in milliseconds
      */
@@ -271,10 +268,7 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
         this.measureBytesInRate = (long) ((bytesIn - this.lastBytesIn) / timeDeltaS);
         this.measureBytesOutRate = (long) ((bytesOut - this.lastBytesOut) / timeDeltaS);
 
-        this.measureTrafficInFormatted =
-                MathUtil.humanReadableByteCountBin(this.measureBytesInRate) + "/s";
-        this.measureTrafficOutFormatted =
-                MathUtil.humanReadableByteCountBin(this.measureBytesOutRate) + "/s";
+        trafficSample = true;
 
         this.lastPacketsIn = packetsIn;
         this.lastPacketsOut = packetsOut;
@@ -366,12 +360,23 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
     }
 
     /**
+     * Indicates whether both traffic rates are available for display.
+     *
+     * @return whether at least one sampling interval has elapsed
+     */
+    public boolean hasTrafficSample() {
+        return trafficSample;
+    }
+
+    /**
      * Reports the incoming transfer rate for display.
      *
      * @return binary-unit rate with a per-second suffix, or an ellipsis before sampling
      */
     public String getMeasureTrafficInFormatted() {
-        return measureTrafficInFormatted;
+        return trafficSample
+                ? MathUtil.humanReadableByteCountBin(measureBytesInRate) + "/s"
+                : "...";
     }
 
     /**
@@ -380,7 +385,9 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
      * @return binary-unit rate with a per-second suffix, or an ellipsis before sampling
      */
     public String getMeasureTrafficOutFormatted() {
-        return measureTrafficOutFormatted;
+        return trafficSample
+                ? MathUtil.humanReadableByteCountBin(measureBytesOutRate) + "/s"
+                : "...";
     }
 
     /**

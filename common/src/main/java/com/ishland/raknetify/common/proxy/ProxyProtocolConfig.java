@@ -26,6 +26,7 @@
 package com.ishland.raknetify.common.proxy;
 
 import com.google.gson.JsonParser;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import io.netty.util.NetUtil;
 
@@ -67,7 +68,7 @@ public final class ProxyProtocolConfig {
         try (var input = Files.newInputStream(path)) {
             byte[] bytes = input.readNBytes(65537);
             if (bytes.length > 65536) {
-                throw new IOException("PROXY configuration exceeds 64 KiB");
+                throw new IOException(ConsoleMessages.text("maximum", path, "64 KiB"));
             }
             return parse(new String(bytes, StandardCharsets.UTF_8));
         } catch (NoSuchFileException absent) {
@@ -86,23 +87,28 @@ public final class ProxyProtocolConfig {
         try {
             var root = JsonParser.parseString(json).getAsJsonObject();
             if (!root.keySet().equals(Set.of("trustedProxies"))) {
-                throw new IllegalArgumentException("Expected only trustedProxies");
+                throw new IllegalArgumentException(
+                        ConsoleMessages.text("fields", "trustedProxies"));
             }
             var entries = root.getAsJsonArray("trustedProxies");
             if (entries.isEmpty() || entries.size() > 128) {
-                throw new IllegalArgumentException("Expected 1 to 128 trusted proxy addresses");
+                throw new IllegalArgumentException(
+                        ConsoleMessages.text("expected", "trustedProxies", "1–128"));
             }
             List<Subnet> subnets = new ArrayList<>();
             for (var entry : entries) {
                 if (!entry.getAsJsonPrimitive().isString()) {
-                    throw new IllegalArgumentException("Expected an IP or CIDR string");
+                    throw new IllegalArgumentException(
+                            ConsoleMessages.text(
+                                    "expected", "trustedProxies", "IPv4 / IPv6 / CIDR"));
                 }
                 subnets.add(Subnet.parse(entry.getAsString()));
             }
             return new ProxyProtocolConfig(subnets);
         } catch (RuntimeException invalid) {
             throw new IllegalArgumentException(
-                    "Invalid Raknetify2 PROXY protocol configuration", invalid);
+                    ConsoleMessages.text("invalid", "config/raknetify2-proxy-protocol.json"),
+                    invalid);
         }
     }
 
@@ -155,11 +161,13 @@ public final class ProxyProtocolConfig {
             String[] pieces = value.split("/", -1);
             byte[] address = NetUtil.createByteArrayFromIpAddressString(pieces[0]);
             if (pieces.length > 2 || address == null || value.contains("%")) {
-                throw new IllegalArgumentException("Expected a literal IP address or CIDR");
+                throw new IllegalArgumentException(
+                        ConsoleMessages.text("expected", "trustedProxies", "IPv4 / IPv6 / CIDR"));
             }
             int bits = pieces.length == 2 ? Integer.parseInt(pieces[1]) : address.length * 8;
             if (bits < 0 || bits > address.length * 8) {
-                throw new IllegalArgumentException("Invalid CIDR width");
+                throw new IllegalArgumentException(
+                        ConsoleMessages.text("expected", "CIDR", "0–" + (address.length * 8)));
             }
             return new Subnet(address, bits);
         }

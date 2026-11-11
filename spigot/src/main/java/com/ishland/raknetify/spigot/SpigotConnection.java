@@ -31,6 +31,7 @@ import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
 import com.ishland.raknetify.common.proxy.ProxyProtocol;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -75,7 +76,7 @@ final class SpigotConnection {
         }
         var mapping = ProtocolMultiChannelMappings.INSTANCE.mappings.get(777);
         if (mapping == null) {
-            throw new IllegalStateException("Missing Minecraft 26.3 packet routing table");
+            throw new IllegalStateException(ConsoleMessages.text("spigot_mappings"));
         }
         for (String name : new String[] {"timeout", "splitter", "prepender"}) {
             pipeline.replace(name, name, new ChannelDuplexHandler());

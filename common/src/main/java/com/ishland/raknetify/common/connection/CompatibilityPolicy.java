@@ -26,6 +26,7 @@
 package com.ishland.raknetify.common.connection;
 
 import com.google.gson.JsonParser;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
@@ -102,7 +103,7 @@ public final class CompatibilityPolicy {
         try (var input = Files.newInputStream(path)) {
             byte[] bytes = input.readNBytes(4097);
             if (bytes.length > 4096) {
-                throw new IOException("Compatibility configuration exceeds 4 KiB");
+                throw new IOException(ConsoleMessages.text("maximum", path, "4 KiB"));
             }
             return parse(new String(bytes, StandardCharsets.UTF_8));
         } catch (NoSuchFileException absent) {
@@ -122,12 +123,14 @@ public final class CompatibilityPolicy {
         if (!root.keySet().equals(Set.of("mode"))
                 || !root.get("mode").getAsJsonPrimitive().isString()) {
             throw new IllegalArgumentException(
-                    "Expected compatibility mode: ordered or multichannel");
+                    ConsoleMessages.text("expected", "mode", "ordered | multichannel"));
         }
         return switch (root.get("mode").getAsString()) {
             case "ordered" -> true;
             case "multichannel" -> false;
-            default -> throw new IllegalArgumentException("Unknown Raknetify2 compatibility mode");
+            default ->
+                    throw new IllegalArgumentException(
+                            ConsoleMessages.text("expected", "mode", "ordered | multichannel"));
         };
     }
 
@@ -149,15 +152,14 @@ public final class CompatibilityPolicy {
             try {
                 boolean ordered = load(Path.of("config", "raknetify2-compatibility.json"));
                 System.out.println(
-                        "Raknetify2 compatibility: "
-                                + (ordered
-                                        ? "ordered (updated clients required, genuine"
-                                                + " acknowledgements)"
-                                        : "multichannel"));
+                        ordered
+                                ? ConsoleMessages.text("ordered_mode")
+                                : ConsoleMessages.text("multichannel_mode"));
                 return ordered;
             } catch (IOException failure) {
                 throw new IllegalStateException(
-                        "Cannot read Raknetify2 compatibility configuration", failure);
+                        ConsoleMessages.text("read", "config/raknetify2-compatibility.json"),
+                        failure);
             }
         }
     }

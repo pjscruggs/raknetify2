@@ -25,7 +25,6 @@
 
 package com.ishland.raknetify.common.util;
 
-import com.ishland.raknetify.common.connection.MetricsSynchronizationHandler;
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetify.common.connection.SimpleMetricsLogger;
 
@@ -74,85 +73,89 @@ public class DebugUtil {
      */
     public static String printChannelDetails(final Channel channel) {
         final StringBuilder b = new StringBuilder();
-        b.append("Channel details for ")
+        final var local = String.valueOf(channel.localAddress());
+        final var peer = String.valueOf(channel.remoteAddress());
+        b.append("Channel: ")
                 .append(channel)
                 .append(" (")
                 .append(channel.getClass().getName())
-                .append(")\nConnection: ")
-                .append(channel.localAddress())
-                .append(" <--> ")
-                .append(channel.remoteAddress())
-                .append("\nOpen: ")
+                .append(")\n")
+                .append(local)
+                .append(" ↔ ")
+                .append(peer)
+                .append("\nisOpen: ")
                 .append(channel.isOpen())
-                .append("\nActive: ")
+                .append("\nisActive: ")
                 .append(channel.isActive())
-                .append("\nAuto Read: ")
+                .append("\nAUTO_READ: ")
                 .append(channel.config().isAutoRead())
                 .append('\n');
         if (channel.config() instanceof RakNet.Config config) {
-            b.append("MTU: ").append(config.getMTU()).append('\n');
-            b.append(
-                            "RTT: %.2f/%.2fms"
-                                    .formatted(
-                                            config.getRTTNanos() / 1_000_000.0,
-                                            config.getRTTStdDevNanos() / 1_000_000.0))
-                    .append('\n');
+            var language = ConsoleMessages.measurements();
+            b.append("MTU: ")
+                    .append(language.integer(config.getMTU()))
+                    .append("\nRTT: ")
+                    .append(language.decimal(config.getRTTNanos() / 1_000_000.0))
+                    .append(" ± ")
+                    .append(language.decimal(config.getRTTStdDevNanos() / 1_000_000.0))
+                    .append(" ms\n");
             if (config.getMetrics() instanceof SimpleMetricsLogger logger) {
-                final MetricsSynchronizationHandler sync =
-                        logger.getMetricsSynchronizationHandler();
-                if (sync != null && sync.isRemoteSupported()) {
-                    b.append(
-                                    "Local Buffer: %.2fMB; Remote buffer: %.2fMB"
-                                            .formatted(
-                                                    logger.getCurrentQueuedBytes()
-                                                            / 1024.0
-                                                            / 1024.0,
-                                                    sync.getQueuedBytes() / 1024.0 / 1024.0))
-                            .append('\n');
-                } else {
-                    b.append(
-                                    "Local buffer: %.2fMB"
-                                            .formatted(
-                                                    logger.getCurrentQueuedBytes()
-                                                            / 1024.0
-                                                            / 1024.0))
-                            .append('\n');
-                }
-
+                var sync = logger.getMetricsSynchronizationHandler();
                 b.append(
-                                "Local traffic: I: %s, O: %s"
-                                        .formatted(
-                                                logger.getMeasureTrafficInFormatted(),
-                                                logger.getMeasureTrafficOutFormatted()))
-                        .append(
-                                "\nLocal Statistics: ERR: %.4f%%, %d tx, %d rx, Burst: %d"
-                                        .formatted(
-                                                logger.getMeasureErrorRate() * 100.0,
-                                                logger.getMeasureTX(),
-                                                logger.getMeasureRX(),
-                                                logger.getMeasureBurstTokens()
-                                                        + config.getDefaultPendingFrameSets()))
+                                ConsoleMessages.text(
+                                        "queue_sample",
+                                        local,
+                                        language.decimal(
+                                                logger.getCurrentQueuedBytes() / 1048576.0)))
                         .append('\n');
-
+                b.append(
+                                ConsoleMessages.text(
+                                        "traffic_sample",
+                                        local,
+                                        logger.hasTrafficSample()
+                                                ? language.byteRate(logger.getMeasureBytesInRate())
+                                                : "...",
+                                        logger.hasTrafficSample()
+                                                ? language.byteRate(logger.getMeasureBytesOutRate())
+                                                : "..."))
+                        .append('\n');
+                b.append(
+                                language.translate(
+                                        "packets",
+                                        local,
+                                        language.ratio(logger.getMeasureErrorRate(), true),
+                                        language.integer(logger.getMeasureTX()),
+                                        language.integer(logger.getMeasureRX()),
+                                        language.integer(
+                                                logger.getMeasureBurstTokens()
+                                                        + config.getDefaultPendingFrameSets())))
+                        .append('\n');
                 if (sync != null && sync.isRemoteSupported()) {
                     b.append(
-                                    "Remote Statistics: ERR: %.4f%%, %d tx, %d rx, Burst: %d"
-                                            .formatted(
-                                                    sync.getErrorRate() * 100.0,
-                                                    sync.getTX(),
-                                                    sync.getRX(),
-                                                    sync.getBurst()))
+                                    ConsoleMessages.text(
+                                            "queue_sample",
+                                            peer,
+                                            language.decimal(sync.getQueuedBytes() / 1048576.0)))
+                            .append('\n');
+                    b.append(
+                                    language.translate(
+                                            "packets",
+                                            peer,
+                                            language.ratio(sync.getErrorRate(), true),
+                                            language.integer(sync.getTX()),
+                                            language.integer(sync.getRX()),
+                                            language.integer(sync.getBurst())))
                             .append('\n');
                 }
-
-                final MultiChannelingStreamingCompression compression =
-                        channel.pipeline().get(MultiChannelingStreamingCompression.class);
+                var compression = channel.pipeline().get(MultiChannelingStreamingCompression.class);
                 if (compression != null && compression.isActive()) {
                     b.append(
-                                    "Local Streaming Compression Ratio: I: %.2f%%, O: %.2f%%"
-                                            .formatted(
-                                                    compression.getInCompressionRatio() * 100,
-                                                    compression.getOutCompressionRatio() * 100))
+                                    language.translate(
+                                            "compression",
+                                            language.ratio(
+                                                    compression.getInCompressionRatio(), false),
+                                            language.ratio(
+                                                    compression.getOutCompressionRatio(), false)))
                             .append('\n');
                 }
             }
@@ -162,7 +165,7 @@ public class DebugUtil {
         appendPipeline(b, channel);
 
         if (channel.parent() != null) {
-            b.append("\nParent: \n")
+            b.append("\nChannel.parent(): \n")
                     .append(printChannelDetails(channel.parent()).replace("\n", "\n\t"));
         }
 
@@ -176,7 +179,7 @@ public class DebugUtil {
      * @param channel channel whose handlers may be removed concurrently while the report is built
      */
     private static void appendPipeline(final StringBuilder b, final Channel channel) {
-        b.append("Pipeline: \n");
+        b.append("ChannelPipeline: \n");
         for (String name : channel.pipeline().names()) {
             final ChannelHandler channelHandler = channel.pipeline().get(name);
             if (channelHandler == null) {

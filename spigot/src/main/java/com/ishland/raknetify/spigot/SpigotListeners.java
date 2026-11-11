@@ -28,6 +28,7 @@ package com.ishland.raknetify.spigot;
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.proxy.ProxyProtocol;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -102,7 +103,7 @@ final class SpigotListeners implements AutoCloseable {
             final @Nullable SpigotPacketEvents packetEvents) {
         if (portOverride < 0 || portOverride > 65535) {
             throw new IllegalArgumentException(
-                    "UDP port override is outside the usable port range");
+                    ConsoleMessages.text("port_range", "raknetify.spigot.portOverride"));
         }
         this.access = access;
         this.packetEvents = packetEvents;
@@ -128,12 +129,11 @@ final class SpigotListeners implements AutoCloseable {
             port = Integer.parseInt(value);
         } catch (NumberFormatException invalid) {
             throw new IllegalArgumentException(
-                    "raknetify.spigot.portOverride must be an integer from 1 through 65535",
-                    invalid);
+                    ConsoleMessages.text("port_range", "raknetify.spigot.portOverride"), invalid);
         }
         if (port < 1 || port > 65535) {
             throw new IllegalArgumentException(
-                    "raknetify.spigot.portOverride must be an integer from 1 through 65535");
+                    ConsoleMessages.text("port_range", "raknetify.spigot.portOverride"));
         }
         return port;
     }
@@ -150,7 +150,7 @@ final class SpigotListeners implements AutoCloseable {
             }
         }
         if (channels.isEmpty()) {
-            throw new IllegalStateException("No Minecraft TCP listener found");
+            throw new IllegalStateException(ConsoleMessages.text("no_tcp"));
         }
     }
 

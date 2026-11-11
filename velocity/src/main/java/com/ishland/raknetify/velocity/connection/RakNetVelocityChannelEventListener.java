@@ -26,6 +26,7 @@ import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompressi
 import com.ishland.raknetify.common.connection.MultiChannellingEncryption;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.connection.SynchronizationLayer;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.common.util.MathUtil;
 import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;
 import com.velocitypowered.proxy.VelocityServer;
@@ -88,8 +89,7 @@ public class RakNetVelocityChannelEventListener extends ChannelDuplexHandler {
             final MultiChannelingStreamingCompression compression =
                     ctx.channel().pipeline().get(MultiChannelingStreamingCompression.class);
             if (compression != null && compression.isActive()) {
-                RaknetifyVelocityPlugin.LOGGER.info(
-                        "Preventing vanilla compression as streaming compression is enabled");
+                RaknetifyVelocityPlugin.LOGGER.info(ConsoleMessages.text("streaming_compression"));
                 promise.setSuccess(); // swallow SetCompression packet
                 return;
             }
@@ -133,10 +133,7 @@ public class RakNetVelocityChannelEventListener extends ChannelDuplexHandler {
                                 packet.getSharedSecret());
                 this.encryptionKey = new SecretKeySpec(secret, "AES");
             } catch (Throwable t) {
-                RaknetifyVelocityPlugin.LOGGER.warn(
-                        "Failed to decrypt captured encryption secret, the raknetify connection is"
-                                + " broken",
-                        t);
+                RaknetifyVelocityPlugin.LOGGER.warn(ConsoleMessages.text("decrypt"), t);
             }
         }
         super.channelRead(ctx, msg);
@@ -237,8 +234,7 @@ public class RakNetVelocityChannelEventListener extends ChannelDuplexHandler {
             final MultiChannelingStreamingCompression compression =
                     ctx.channel().pipeline().get(MultiChannelingStreamingCompression.class);
             if (compression != null && compression.isActive()) {
-                RaknetifyVelocityPlugin.LOGGER.info(
-                        "Preventing vanilla compression as streaming compression is enabled");
+                RaknetifyVelocityPlugin.LOGGER.info(ConsoleMessages.text("streaming_compression"));
                 ctx.channel()
                         .pipeline()
                         .replace(
@@ -258,8 +254,7 @@ public class RakNetVelocityChannelEventListener extends ChannelDuplexHandler {
                 if (minecraftConnection != null) {
                     minecraftConnection.setCompressionThreshold(-1);
                 } else {
-                    RaknetifyVelocityPlugin.LOGGER.warn(
-                            "Unable to sync compression state with velocity");
+                    RaknetifyVelocityPlugin.LOGGER.warn(ConsoleMessages.text("compression_sync"));
                 }
             }
         } else if (evt == VelocityConnectionEvent.COMPRESSION_DISABLED) {

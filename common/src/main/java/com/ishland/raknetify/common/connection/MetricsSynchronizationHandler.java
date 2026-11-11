@@ -26,6 +26,7 @@
 package com.ishland.raknetify.common.connection;
 
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
@@ -392,9 +393,8 @@ public class MetricsSynchronizationHandler extends ChannelDuplexHandler {
                 nextStrikeAt = now + INTERVAL;
                 if (++strikes == 3) {
                     System.out.println(
-                            "Raknetify2: closing connection "
-                                    + ctx.channel().remoteAddress()
-                                    + " after repeated requests for disabled server diagnostics");
+                            ConsoleMessages.text(
+                                    "diagnostics_denied", ctx.channel().remoteAddress()));
                     ctx.close().addListener(RakNet.INTERNAL_WRITE_LISTENER);
                 }
             }

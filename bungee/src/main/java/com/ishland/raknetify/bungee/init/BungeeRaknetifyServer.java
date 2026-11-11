@@ -32,6 +32,7 @@ import com.ishland.raknetify.bungee.connection.RakNetBungeeConnectionUtil;
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.proxy.ProxyProtocol;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.common.util.NetworkInterfaceListener;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -181,12 +182,12 @@ public class BungeeRaknetifyServer {
 
             if (!errors.isEmpty()) {
                 final RuntimeException exception =
-                        new RuntimeException("Failed to start Raknetify server");
+                        new RuntimeException(ConsoleMessages.text("start_error"));
                 errors.forEach(exception::addSuppressed);
                 throw exception;
             }
         } catch (Throwable t) {
-            throw new RuntimeException("Failed to start Raknetify server", t);
+            throw new RuntimeException(ConsoleMessages.text("start_error"), t);
         }
     }
 
@@ -249,13 +250,13 @@ public class BungeeRaknetifyServer {
 
             if (initializer == null) {
                 RaknetifyBungeePlugin.LOGGER.severe(
-                        "Unable to find channel initializer for listener %s".formatted(listener));
+                        ConsoleMessages.text("listener_missing", "ChannelInitializer", listener));
                 return;
             }
 
             if (info == null) {
                 RaknetifyBungeePlugin.LOGGER.severe(
-                        "Unable to find listener info for listener %s".formatted(listener));
+                        ConsoleMessages.text("listener_missing", "ListenerInfo", listener));
                 return;
             }
 
@@ -269,10 +270,10 @@ public class BungeeRaknetifyServer {
 
         } catch (Throwable t) {
             if (throwErrors) {
-                throw new RuntimeException("Failed to start Raknetify server", t);
+                throw new RuntimeException(ConsoleMessages.text("start_error"), t);
             } else {
                 RaknetifyBungeePlugin.LOGGER.log(
-                        Level.SEVERE, "Failed to start Raknetify server", t);
+                        Level.SEVERE, ConsoleMessages.text("start_error"), t);
             }
         }
     }
@@ -306,8 +307,7 @@ public class BungeeRaknetifyServer {
                             .getAddress()
                             .equals(event.address())) {
                         RaknetifyBungeePlugin.LOGGER.info(
-                                "Closing Raknetify server %s"
-                                        .formatted(future.channel().localAddress()));
+                                ConsoleMessages.text("stopping", future.channel().localAddress()));
                         future.channel()
                                 .close()
                                 .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
@@ -419,7 +419,7 @@ public class BungeeRaknetifyServer {
                         startServer(instance, listener, initializer, info, address);
                     } catch (Throwable t) {
                         RaknetifyBungeePlugin.LOGGER.log(
-                                Level.SEVERE, "Failed to start Raknetify server", t);
+                                Level.SEVERE, ConsoleMessages.text("start_error"), t);
                     }
                 }
             }
@@ -503,7 +503,7 @@ public class BungeeRaknetifyServer {
         }
 
         RaknetifyBungeePlugin.LOGGER.info(
-                "Raknetify server started on %s".formatted(future.channel().localAddress()));
+                ConsoleMessages.text("started", future.channel().localAddress()));
     }
 
     /**
@@ -517,7 +517,7 @@ public class BungeeRaknetifyServer {
                                 nonWildcardChannels.stream())
                         .toList()) {
             RaknetifyBungeePlugin.LOGGER.info(
-                    "Closing Raknetify server %s".formatted(future.channel().localAddress()));
+                    ConsoleMessages.text("stopping", future.channel().localAddress()));
             future.channel().close().syncUninterruptibly();
         }
 

@@ -25,6 +25,7 @@
 
 package com.ishland.raknetify.common.proxy;
 
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.common.voice.VoiceTransport;
 
 import io.netty.channel.Channel;
@@ -66,7 +67,8 @@ public final class ProxyProtocol {
                     sockets,
                     ProxyProtocolConfig.load(Path.of("config", "raknetify2-proxy-protocol.json")));
         } catch (IOException invalid) {
-            throw new UncheckedIOException("Cannot load Raknetify2 PROXY protocol policy", invalid);
+            throw new UncheckedIOException(
+                    ConsoleMessages.text("read", "config/raknetify2-proxy-protocol.json"), invalid);
         }
     }
 
@@ -97,8 +99,10 @@ public final class ProxyProtocol {
     public static void requireForwarded(final Channel channel) {
         if (!Boolean.TRUE.equals(channel.attr(FORWARDED).get())) {
             throw new IllegalStateException(
-                    "Configure trustedProxies in config/raknetify2-proxy-protocol.json before using"
-                            + " required PROXY headers with RakNet");
+                    ConsoleMessages.text(
+                            "proxy_required",
+                            "trustedProxies",
+                            "config/raknetify2-proxy-protocol.json"));
         }
     }
 

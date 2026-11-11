@@ -25,6 +25,8 @@
 
 package com.ishland.raknetify.common.voice;
 
+import com.ishland.raknetify.common.util.ConsoleMessages;
+
 import de.maxhenkel.voicechat.api.RawUdpPacket;
 import de.maxhenkel.voicechat.api.VoicechatSocket;
 
@@ -67,7 +69,7 @@ final class SharedVoiceSocket implements VoicechatSocket {
         VoiceHub selected = VoiceTransport.await(port, address, () -> closed);
         synchronized (this) {
             if (closed) {
-                throw new SocketException("Voice socket closed during startup");
+                throw new SocketException(ConsoleMessages.text("voice_closed"));
             }
             attachment = new Attachment(selected, selected.attach());
         }
@@ -86,7 +88,7 @@ final class SharedVoiceSocket implements VoicechatSocket {
             throw new SocketException("Voice socket already opened or closed");
         }
         if (port < 1 || port > 65535) {
-            throw new SocketException("Shared voice port must match an explicit RakNet port");
+            throw new SocketException(ConsoleMessages.text("voice_port"));
         }
         opened = true;
     }
@@ -118,7 +120,7 @@ final class SharedVoiceSocket implements VoicechatSocket {
             throws InterruptedException, SocketException {
         Attachment current = requireAttachment();
         if (!(address instanceof InetSocketAddress inet) || inet.isUnresolved()) {
-            throw new SocketException("Voice destination must be a resolved UDP address");
+            throw new SocketException(ConsoleMessages.text("voice_dest"));
         }
         current.hub().send(current.inbox(), data, inet);
     }
@@ -133,7 +135,7 @@ final class SharedVoiceSocket implements VoicechatSocket {
     private Attachment requireAttachment() throws SocketException {
         Attachment current = attachment;
         if (current == null || current.inbox().closed()) {
-            throw new SocketException("Voice socket is not open");
+            throw new SocketException(ConsoleMessages.text("voice_closed"));
         }
         return current;
     }

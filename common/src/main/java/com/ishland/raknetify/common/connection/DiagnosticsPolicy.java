@@ -27,6 +27,7 @@ package com.ishland.raknetify.common.connection;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -68,14 +69,15 @@ record DiagnosticsPolicy(boolean share, boolean disconnect) {
         try (var file = Files.newInputStream(path)) {
             byte[] bytes = file.readNBytes(4097);
             if (bytes.length > 4096) {
-                throw new IllegalArgumentException("Diagnostics configuration exceeds 4 KiB");
+                throw new IllegalArgumentException(ConsoleMessages.text("maximum", path, "4 KiB"));
             }
             var root =
                     JsonParser.parseString(new String(bytes, StandardCharsets.UTF_8))
                             .getAsJsonObject();
-            if (!Set.of("shareServerMetrics", "disconnectOnRejectedRequests")
-                    .containsAll(root.keySet())) {
-                throw new IllegalArgumentException("Unknown Raknetify2 diagnostics setting");
+            for (String key : root.keySet()) {
+                if (!Set.of("shareServerMetrics", "disconnectOnRejectedRequests").contains(key)) {
+                    throw new IllegalArgumentException(ConsoleMessages.text("unknown_option", key));
+                }
             }
             return new DiagnosticsPolicy(
                     setting(root, "shareServerMetrics", DEFAULT_SERVER.share()),
@@ -83,8 +85,7 @@ record DiagnosticsPolicy(boolean share, boolean disconnect) {
         } catch (NoSuchFileException absent) {
             return DEFAULT_SERVER;
         } catch (IOException failure) {
-            throw new UncheckedIOException(
-                    "Cannot read Raknetify2 diagnostics configuration", failure);
+            throw new UncheckedIOException(ConsoleMessages.text("read", path), failure);
         }
     }
 
@@ -103,7 +104,8 @@ record DiagnosticsPolicy(boolean share, boolean disconnect) {
             return fallback;
         }
         if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isBoolean()) {
-            throw new IllegalArgumentException("Expected a boolean for " + key);
+            throw new IllegalArgumentException(
+                    ConsoleMessages.text("expected", key, "true | false"));
         }
         return value.getAsBoolean();
     }

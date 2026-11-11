@@ -25,25 +25,15 @@
 
 package com.ishland.raknetify.common.util;
 
-import com.google.gson.JsonParser;
-
 import org.jspecify.annotations.Nullable;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.regex.Pattern;
 
 /** Resolves HUD messages and numeric conventions in the language selected by the client. */
 public final class HudLanguage {
-
-    /** Limits packaged catalog lookups to Minecraft language codes. */
-    private static final Pattern CODE = Pattern.compile("[a-z0-9_]+");
 
     /** Minecraft's translator includes any resource packs enabled by the player. */
     private final BiFunction<String, Object[], String> game;
@@ -53,6 +43,9 @@ public final class HudLanguage {
 
     /** Java locale used for formatting the current language's numeric values. */
     private Locale locale = Locale.ROOT;
+
+    /** Formatter for whole packet counts, byte rates and MTU values. */
+    private NumberFormat integers = numberFormat(Locale.ROOT, false, 0);
 
     /** Formatter for queued bytes in MiB and latency in milliseconds. */
     private NumberFormat decimals = numberFormat(Locale.ROOT, false, 2);
@@ -76,6 +69,20 @@ public final class HudLanguage {
     }
 
     /**
+     * Constructs a thread-confined formatter for one report from an already-loaded catalog.
+     *
+     * @param language Minecraft locale of the operator
+     * @param messages immutable catalog shared by console reporters
+     * @return formatter with per-report numeric state
+     */
+    static HudLanguage packaged(final String language, final Map<String, String> messages) {
+        var formatter = new HudLanguage((key, arguments) -> key);
+        formatter.select(language);
+        formatter.catalog = messages;
+        return formatter;
+    }
+
+    /**
      * Refreshes cached formats when the player switches language.
      *
      * @param selected exact locale identifier from the game options
@@ -84,6 +91,7 @@ public final class HudLanguage {
         if (!selected.equals(code)) {
             code = selected;
             locale = Locale.forLanguageTag(code.replace('_', '-'));
+            integers = numberFormat(locale, false, 0);
             decimals = numberFormat(locale, false, 2);
             percent = numberFormat(locale, true, 2);
             precisePercent = numberFormat(locale, true, 4);
@@ -99,48 +107,25 @@ public final class HudLanguage {
      * @return formatted text in the selected language
      */
     String translate(final String suffix, final Object... arguments) {
-        final String key = "raknetify.hud." + suffix;
+        return message("raknetify.hud." + suffix, arguments);
+    }
+
+    /**
+     * Looks up a complete resource key in the game or the matching packaged language.
+     *
+     * @param key resource-pack translation key
+     * @param arguments values the translator may reorder
+     * @return localized text
+     */
+    String message(final String key, final Object... arguments) {
         final String translated = game.apply(key, arguments);
         if (!key.equals(translated)) {
             return translated;
         }
         if (catalog == null) {
-            final Map<String, String> messages = new HashMap<>();
-            readCatalog("en_us", messages);
-            if (!"en_us".equals(code) && CODE.matcher(code).matches()) {
-                readCatalog(code, messages);
-            }
-            catalog = messages;
+            catalog = LanguageCatalog.load(code);
         }
         return String.format(locale, catalog.getOrDefault(key, key), arguments);
-    }
-
-    /**
-     * Loads packaged text for clients that do not mount mod assets as game resource packs.
-     *
-     * @param language exact Minecraft locale identifier
-     * @param messages destination for overriding existing English defaults
-     */
-    private static void readCatalog(final String language, final Map<String, String> messages) {
-        try (var stream =
-                HudLanguage.class.getResourceAsStream(
-                        "/assets/raknetify/lang/" + language + ".json")) {
-            if (stream != null) {
-                try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
-                    JsonParser.parseReader(reader)
-                            .getAsJsonObject()
-                            .entrySet()
-                            .forEach(entry ->
-                                    messages.put(entry.getKey(), entry.getValue().getAsString()));
-                }
-            }
-        } catch (final IOException exception) {
-            System.getLogger(HudLanguage.class.getName())
-                    .log(
-                            System.Logger.Level.WARNING,
-                            "Unable to read HUD language " + language,
-                            exception);
-        }
     }
 
     /**
@@ -171,6 +156,31 @@ public final class HudLanguage {
      */
     String decimal(final double value) {
         return decimals.format(value);
+    }
+
+    /**
+     * Formats an ungrouped whole measurement in the selected numbering system.
+     *
+     * @param value packet count, byte count or MTU
+     * @return localized digits
+     */
+    String integer(final long value) {
+        return integers.format(value);
+    }
+
+    /**
+     * Formats a sampled transfer rate with binary units and the player's per-second notation.
+     *
+     * @param bytes nonnegative bytes per second
+     * @return localized rate including the unit
+     */
+    String byteRate(final long bytes) {
+        final int scale = Math.max(0, (63 - Long.numberOfLeadingZeros(bytes)) / 10);
+        if (scale == 0) {
+            return translate("byte_rate", integer(bytes), "");
+        }
+        final String prefix = "KMGTPE".substring(scale - 1, scale) + "i";
+        return translate("byte_rate", decimal(Math.scalb((double) bytes, -10 * scale)), prefix);
     }
 
     /**

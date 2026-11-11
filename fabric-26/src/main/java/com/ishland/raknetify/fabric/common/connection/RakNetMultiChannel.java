@@ -26,6 +26,7 @@
 package com.ishland.raknetify.fabric.common.connection;
 
 import com.google.common.collect.Sets;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.fabric.common.util.MinecraftVersions;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -619,8 +620,7 @@ public class RakNetMultiChannel {
     public static int getPacketChannelOverride(
             final @Nullable Class<?> clazz, final boolean suppressWarning) {
         if (clazz == null) {
-            System.err.println(
-                    "Raknetify: Warning: Tried to send packet without setting packet class");
+            System.err.println(ConsoleMessages.text("packet_missing"));
             return 0;
         }
         int channelOverride = classToChannelIdOverride.getInt(clazz);
@@ -628,8 +628,8 @@ public class RakNetMultiChannel {
             if (!suppressWarning) {
                 if (foundUnknownClasses.add(clazz)) {
                     System.err.println(
-                            "Raknetify: Warning: unknown packet type %s for raknet multi-channel"
-                                    .formatted(clazz.getName()));
+                            ConsoleMessages.text(
+                                    "packet_unknown", clazz.getName(), "multichannel"));
                 }
             }
             channelOverride = 7;

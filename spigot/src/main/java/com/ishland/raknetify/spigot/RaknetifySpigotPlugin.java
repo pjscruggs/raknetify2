@@ -26,6 +26,7 @@
 package com.ishland.raknetify.spigot;
 
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -69,13 +70,13 @@ public final class RaknetifySpigotPlugin extends JavaPlugin {
             for (var address : listeners.localAddresses()) {
                 getLogger()
                         .info(
-                                "RakNet is listening on UDP port "
-                                        + address.getPort()
-                                        + " at "
-                                        + address.getAddress().getHostAddress());
+                                ConsoleMessages.text(
+                                        "spigot_listening",
+                                        address.getPort(),
+                                        address.getAddress().getHostAddress()));
             }
         } catch (Exception exception) {
-            getLogger().log(Level.SEVERE, "Could not start RakNet transport", exception);
+            getLogger().log(Level.SEVERE, ConsoleMessages.text("start_error"), exception);
             getServer().getPluginManager().disablePlugin(this);
         }
     }

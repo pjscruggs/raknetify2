@@ -25,6 +25,8 @@
 
 package com.ishland.raknetify.common.voice;
 
+import com.ishland.raknetify.common.util.ConsoleMessages;
+
 import io.netty.buffer.Unpooled;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.DatagramPacket;
@@ -87,7 +89,7 @@ final class VoiceHub {
             throw new SocketException("RakNet listener closed");
         }
         if (subscriber != null && !subscriber.closed()) {
-            throw new SocketException("RakNet listener already has a voice socket");
+            throw new SocketException(ConsoleMessages.text("voice_conflict"));
         }
         subscriber = new Inbox();
         return subscriber;
@@ -129,7 +131,7 @@ final class VoiceHub {
         DatagramChannel socket;
         synchronized (this) {
             if (subscriber != inbox || inbox.closed()) {
-                throw new SocketException("Voice socket closed");
+                throw new SocketException(ConsoleMessages.text("voice_closed"));
             }
             socket = channel();
         }
@@ -143,10 +145,10 @@ final class VoiceHub {
                 socket.writeAndFlush(
                         new DatagramPacket(Unpooled.wrappedBuffer(data.clone()), address));
         if (!write.await(5000)) {
-            throw new SocketException("Voice datagram write timed out");
+            throw new SocketException(ConsoleMessages.text("voice_timeout"));
         }
         if (!write.isSuccess()) {
-            throw new SocketException("Voice datagram write failed: " + write.cause());
+            throw new SocketException(ConsoleMessages.text("voice_write", write.cause()));
         }
     }
 
@@ -239,7 +241,7 @@ final class VoiceHub {
                 wait();
             }
             if (closed) {
-                throw new SocketException("Voice socket closed");
+                throw new SocketException(ConsoleMessages.text("voice_closed"));
             }
             return packets.remove();
         }

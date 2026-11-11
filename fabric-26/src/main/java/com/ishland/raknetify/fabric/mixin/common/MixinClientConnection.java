@@ -26,6 +26,7 @@
 package com.ishland.raknetify.fabric.mixin.common;
 
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.common.util.DebugUtil;
 import com.ishland.raknetify.fabric.common.util.NetworkStates;
 
@@ -161,7 +162,7 @@ public abstract class MixinClientConnection {
             return;
         }
         if (Constants.DEBUG) {
-            System.err.println("Exception caught for connection %s".formatted(this.channel));
+            System.err.println(ConsoleMessages.text("connection_error", this.channel));
             DebugUtil.printChannelDetails(this.channel)
                     .lines()
                     .forEach(line -> System.err.println("  " + line));
@@ -174,7 +175,8 @@ public abstract class MixinClientConnection {
                 if (handler instanceof ConnectionProtocol state1) {
                     state = state1;
                 } else {
-                    System.err.println("Unknown handler type: " + handler.getClass().getName());
+                    System.err.println(
+                            ConsoleMessages.text("handler_unknown", handler.getClass().getName()));
                     state = null;
                 }
             } else {

@@ -62,7 +62,7 @@ public final class DebugHudFormatter {
         if (config.getMetrics() instanceof SimpleMetricsLogger logger) {
             appendConnectionMetrics(line, language, config, logger);
         } else {
-            line.accept(language.translate("active", config.getMTU()));
+            line.accept(language.translate("active", language.integer(config.getMTU())));
         }
         final MultiChannelingStreamingCompression compression =
                 channel.pipeline().get(MultiChannelingStreamingCompression.class);
@@ -91,7 +91,7 @@ public final class DebugHudFormatter {
         line.accept(
                 language.translate(
                         "latency",
-                        config.getMTU(),
+                        language.integer(config.getMTU()),
                         language.decimal(logger.getMeasureRTTns() / 1_000_000.0),
                         language.decimal(logger.getMeasureRTTnsStdDev() / 1_000_000.0)));
         final MetricsSynchronizationHandler serverSync = logger.getMetricsSynchronizationHandler();
@@ -112,25 +112,31 @@ public final class DebugHudFormatter {
         line.accept(
                 language.translate(
                         "traffic",
-                        logger.getMeasureTrafficInFormatted(),
-                        logger.getMeasureTrafficOutFormatted()));
+                        logger.hasTrafficSample()
+                                ? language.byteRate(logger.getMeasureBytesInRate())
+                                : "...",
+                        logger.hasTrafficSample()
+                                ? language.byteRate(logger.getMeasureBytesOutRate())
+                                : "..."));
         line.accept(
                 language.translate(
                         "packets",
                         language.translate("client"),
                         language.ratio(logger.getMeasureErrorRate(), true),
-                        logger.getMeasureTX(),
-                        logger.getMeasureRX(),
-                        logger.getMeasureBurstTokens() + config.getDefaultPendingFrameSets()));
+                        language.integer(logger.getMeasureTX()),
+                        language.integer(logger.getMeasureRX()),
+                        language.integer(
+                                logger.getMeasureBurstTokens()
+                                        + config.getDefaultPendingFrameSets())));
         if (serverSync != null && serverSync.isRemoteSupported()) {
             line.accept(
                     language.translate(
                             "packets",
                             language.translate("server"),
                             language.ratio(serverSync.getErrorRate(), true),
-                            serverSync.getTX(),
-                            serverSync.getRX(),
-                            serverSync.getBurst()));
+                            language.integer(serverSync.getTX()),
+                            language.integer(serverSync.getRX()),
+                            language.integer(serverSync.getBurst())));
         }
     }
 }

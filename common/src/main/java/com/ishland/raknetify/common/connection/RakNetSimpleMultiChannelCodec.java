@@ -26,6 +26,7 @@
 package com.ishland.raknetify.common.connection;
 
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.common.util.MathUtil;
 
 import io.netty.buffer.ByteBuf;
@@ -257,9 +258,7 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
             return;
         }
         if (!this.isMultichannelAvailable()) {
-            System.out.println(
-                    "Raknetify: [MultiChannellingDataCodec] Failed to start multichannel: not"
-                            + " available");
+            System.out.println(ConsoleMessages.text("multichannel_unavailable"));
             return;
         }
         final ByteBuf buf = ctx.alloc().buffer(1).writeByte(0);
@@ -558,8 +557,8 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
                 if (!suppressWarning) {
                     if (this.unknownPacketIds.add(packetId)) {
                         System.err.println(
-                                "Raknetify: Unknown packet id %d for %s"
-                                        .formatted(packetId, descriptiveProtocolStatus));
+                                ConsoleMessages.text(
+                                        "packet_unknown", packetId, descriptiveProtocolStatus));
                     }
                 }
                 return 7;

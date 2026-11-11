@@ -25,6 +25,7 @@
 
 package com.ishland.raknetify.spigot;
 
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.common.voice.VoicePlugin;
 
 import de.maxhenkel.voicechat.api.BukkitVoicechatService;
@@ -48,7 +49,8 @@ final class SpigotVoice {
                 plugin.getServer().getServicesManager().load(BukkitVoicechatService.class);
         if (service == null) {
             throw new IllegalStateException(
-                    "Simple Voice Chat did not register its Bukkit API service");
+                    ConsoleMessages.text(
+                            "voice_service", BukkitVoicechatService.class.getSimpleName()));
         }
         service.registerPlugin(new VoicePlugin());
     }

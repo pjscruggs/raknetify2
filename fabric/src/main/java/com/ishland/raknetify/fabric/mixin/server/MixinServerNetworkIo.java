@@ -29,6 +29,7 @@ import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RaknetifyEventLoops;
 import com.ishland.raknetify.common.proxy.ProxyProtocol;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.common.util.NetworkInterfaceListener;
 import com.ishland.raknetify.common.util.ThreadLocalUtil;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -141,14 +142,11 @@ public abstract class MixinServerNetworkIo {
                                 networkInterface.getInetAddresses().asIterator();
                         while (iterator.hasNext()) {
                             final InetAddress inetAddress = iterator.next();
-                            System.out.println(
-                                    "Starting raknetify server on %s".formatted(inetAddress));
+                            System.out.println(ConsoleMessages.text("starting", inetAddress));
                             try {
                                 bind(inetAddress, udpPort);
                             } catch (IOException t) {
-                                System.out.println(
-                                        "**** FAILED TO BIND TO PORT! %s"
-                                                .formatted(t.getMessage()));
+                                System.out.println(ConsoleMessages.text("bind_error", t));
                             }
                         }
                     }
@@ -161,7 +159,7 @@ public abstract class MixinServerNetworkIo {
                         NetworkInterfaceListener.addListener(this.raknetify$eventListener);
                     }
                 } else {
-                    System.out.println("Starting raknetify server on %s".formatted(address));
+                    System.out.println(ConsoleMessages.text("starting", address));
                     bind(address, udpPort);
                 }
             } finally {
@@ -206,15 +204,15 @@ public abstract class MixinServerNetworkIo {
             ThreadLocalUtil.setInitializingRaknet(true);
             final InetAddress inetAddress = event.address();
             if (event.added()) {
-                System.out.println("Starting raknetify server on %s".formatted(inetAddress));
+                System.out.println(ConsoleMessages.text("starting", inetAddress));
                 try {
                     bind(inetAddress, port);
                 } catch (IOException t) {
-                    System.out.println("**** FAILED TO BIND TO PORT! %s".formatted(t.getMessage()));
+                    System.out.println(ConsoleMessages.text("bind_error", t));
                 } catch (RuntimeException t) {
                     raknetify$logger.log(
                             System.Logger.Level.WARNING,
-                            "Failed to bind RakNet address " + inetAddress,
+                            ConsoleMessages.text("bind_error", inetAddress),
                             t);
                 }
             } else {
@@ -226,8 +224,7 @@ public abstract class MixinServerNetworkIo {
                         final SocketAddress socketAddress = channel.channel().localAddress();
                         if (socketAddress instanceof InetSocketAddress channelAddress) {
                             if (inetAddress.equals(channelAddress.getAddress())) {
-                                System.out.println(
-                                        "Stopping raknetify server on %s".formatted(inetAddress));
+                                System.out.println(ConsoleMessages.text("stopping", inetAddress));
                                 channel.channel()
                                         .close()
                                         .addListener(
@@ -240,7 +237,7 @@ public abstract class MixinServerNetworkIo {
             }
         } catch (RuntimeException e) {
             raknetify$logger.log(
-                    System.Logger.Level.WARNING, "Failed to update RakNet interface listeners", e);
+                    System.Logger.Level.WARNING, ConsoleMessages.text("listener_update"), e);
         } finally {
             ThreadLocalUtil.setInitializingRaknet(false);
         }

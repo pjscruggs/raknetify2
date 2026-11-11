@@ -25,6 +25,8 @@
 
 package com.ishland.raknetify.common.voice;
 
+import com.ishland.raknetify.common.util.ConsoleMessages;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramChannel;
@@ -87,7 +89,7 @@ public final class VoiceTransport {
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
         while (true) {
             if (cancelled.getAsBoolean()) {
-                throw new SocketException("Voice socket closed during startup");
+                throw new SocketException(ConsoleMessages.text("voice_closed"));
             }
             VoiceHub match = find(port, address);
             if (match != null) {
@@ -95,8 +97,7 @@ public final class VoiceTransport {
             }
             long remaining = deadline - System.nanoTime();
             if (remaining <= 0) {
-                throw new SocketException(
-                        "No RakNet listener matches the voice bind address and port " + port);
+                throw new SocketException(ConsoleMessages.text("voice_missing", port, address));
             }
             TimeUnit.NANOSECONDS.timedWait(VoiceTransport.class, remaining);
         }
@@ -124,7 +125,7 @@ public final class VoiceTransport {
                 continue;
             }
             if (result != null) {
-                throw new SocketException("Multiple RakNet listeners match the voice bind address");
+                throw new SocketException(ConsoleMessages.text("voice_multiple", port, address));
             }
             result = hub;
         }

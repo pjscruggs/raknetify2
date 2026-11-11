@@ -61,6 +61,8 @@ Older clients can use the ordinary TCP address without `raknet;`. An absent file
 
 ## Connection diagnostics
 
+The HUD follows the language selected in Minecraft. Raknetify2 uses the JVM’s display language for its operator messages. To select a specific Minecraft locale on a server or proxy, add a JVM option such as `-Draknetify.language=fr_ca` before `-jar`.
+
 The client debug HUD shows RakNet latency, traffic and queue statistics. On Minecraft versions with configurable debug entries, enable `raknetify:raknetify_debug_info` in the debug screen options. The client requests peer statistics while that entry is displayed, including when set to Always On. Earlier versions show the lines in the F3 overlay.
 
 Servers and proxies keep their measurements private by default. The client asks once when diagnostics are needed. If the server declines or the peer does not answer, the HUD continues showing local measurements. An accepting server can share its measurements by creating `config/raknetify2-diagnostics.json` in its working directory and restarting:

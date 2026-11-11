@@ -31,6 +31,7 @@ import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompressi
 import com.ishland.raknetify.common.connection.MultiChannellingEncryption;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.connection.SynchronizationLayer;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -96,8 +97,7 @@ public class RakNetBungeeClientChannelEventListener extends ChannelDuplexHandler
             final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise)
             throws Exception {
         if (this.needResetCompression) {
-            RaknetifyBungeePlugin.LOGGER.info(
-                    "Preventing vanilla compression as streaming compression is enabled");
+            RaknetifyBungeePlugin.LOGGER.info(ConsoleMessages.text("streaming_compression"));
 
             final HandlerBoss handlerBoss = ctx.channel().pipeline().get(HandlerBoss.class);
 
@@ -134,8 +134,7 @@ public class RakNetBungeeClientChannelEventListener extends ChannelDuplexHandler
             final MultiChannelingStreamingCompression compression =
                     ctx.channel().pipeline().get(MultiChannelingStreamingCompression.class);
             if (compression != null && compression.isActive()) {
-                RaknetifyBungeePlugin.LOGGER.info(
-                        "Preventing vanilla compression as streaming compression is enabled");
+                RaknetifyBungeePlugin.LOGGER.info(ConsoleMessages.text("streaming_compression"));
                 promise.setSuccess(); // swallow SetCompression packet
                 needResetCompression = true;
                 return;
@@ -185,10 +184,7 @@ public class RakNetBungeeClientChannelEventListener extends ChannelDuplexHandler
                     this.encryptionKey = getSecretUnchecked(packet);
                 } catch (Throwable t) {
                     RaknetifyBungeePlugin.LOGGER.log(
-                            Level.WARNING,
-                            "Failed to decrypt captured encryption secret, the raknetify connection"
-                                    + " is broken",
-                            t);
+                            Level.WARNING, ConsoleMessages.text("decrypt"), t);
                 }
             }
         }

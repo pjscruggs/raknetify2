@@ -25,6 +25,8 @@
 
 package com.ishland.raknetify.common.connection;
 
+import com.ishland.raknetify.common.util.ConsoleMessages;
+
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 
@@ -69,7 +71,7 @@ public final class TransferSupport {
                     TransferDestinations.load(configDirectory.resolve("raknetify2-transfers.json"));
         } catch (IOException | IllegalArgumentException invalid) {
             throw new IllegalStateException(
-                    "Cannot load Raknetify2 transfer destinations", invalid);
+                    ConsoleMessages.text("read", "config/raknetify2-transfers.json"), invalid);
         }
     }
 

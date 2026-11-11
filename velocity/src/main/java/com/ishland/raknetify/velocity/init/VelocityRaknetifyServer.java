@@ -27,6 +27,7 @@ import com.google.common.base.Preconditions;
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.proxy.ProxyProtocol;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.common.util.NetworkInterfaceListener;
 import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;
 import com.ishland.raknetify.velocity.connection.RakNetVelocityConnectionUtil;
@@ -157,12 +158,12 @@ public class VelocityRaknetifyServer {
                             startServer(new InetSocketAddress(inetAddress, address.getPort()));
                         } catch (Throwable t) {
                             RaknetifyVelocityPlugin.LOGGER.error(
-                                    "Failed to start raknetify server", t);
+                                    ConsoleMessages.text("start_error"), t);
                         }
                     }
                 }
             } catch (Throwable t) {
-                throw new RuntimeException("Failed to start raknetify server", t);
+                throw new RuntimeException(ConsoleMessages.text("start_error"), t);
             }
         } else {
             startServer(address);
@@ -240,17 +241,17 @@ public class VelocityRaknetifyServer {
                                 .syncUninterruptibly();
 
                 RaknetifyVelocityPlugin.LOGGER.info(
-                        "Raknetify server started on {}", future.channel().localAddress());
+                        ConsoleMessages.text("started", future.channel().localAddress()));
                 channels.add(future);
             }
 
         } catch (Throwable t) {
             if (t instanceof IOException) {
                 RaknetifyVelocityPlugin.LOGGER.error(
-                        "Raknetify server failed to start on {}: {}", address, t.getMessage());
+                        ConsoleMessages.text("start_address_error", address, t));
                 return;
             }
-            throw new RuntimeException("Failed to start Raknetify server", t);
+            throw new RuntimeException(ConsoleMessages.text("start_error"), t);
         }
     }
 
@@ -282,11 +283,11 @@ public class VelocityRaknetifyServer {
      */
     private static void closeServer(final ChannelFuture channel) {
         RaknetifyVelocityPlugin.LOGGER.info(
-                "Closing Raknetify server {}", channel.channel().localAddress());
+                ConsoleMessages.text("stopping", channel.channel().localAddress()));
         try {
             channel.channel().close().sync();
         } catch (InterruptedException e) {
-            RaknetifyVelocityPlugin.LOGGER.error("Interrupted whilst closing raknetify server");
+            RaknetifyVelocityPlugin.LOGGER.error(ConsoleMessages.text("stop_interrupted"));
         }
     }
 

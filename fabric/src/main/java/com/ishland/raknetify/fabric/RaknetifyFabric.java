@@ -28,6 +28,7 @@ package com.ishland.raknetify.fabric;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.common.util.NetworkInterfaceListener;
 import com.ishland.raknetify.fabric.common.client.DebugHudUtil1_21_9;
 import com.ishland.raknetify.fabric.common.connection.RakNetMultiChannel;
@@ -141,12 +142,9 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
         try {
             level = ResourceLeakDetector.Level.valueOf(levelStr.trim().toUpperCase(Locale.ENGLISH));
         } catch (IllegalArgumentException invalidLevel) {
-            System.err.println(
-                    "Raknetify2: Invalid io.netty.leakDetection.level value: "
-                            + levelStr
-                            + ". Using SIMPLE.");
+            System.err.println(ConsoleMessages.text("leak_invalid", levelStr));
         }
-        System.out.println("Raknetify: Using leak detector level %s".formatted(level));
+        System.out.println(ConsoleMessages.text("leak_level", level));
         ResourceLeakDetector.setLevel(level);
     }
 
@@ -322,7 +320,7 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
         try {
             mappings = gson.fromJson(Files.readString(path), ProtocolMultiChannelMappings.class);
         } catch (IOException e) {
-            System.out.println("Error reading previously generated mappings: " + e.toString());
+            System.out.println(ConsoleMessages.text("map_read", e));
         }
         final ProtocolMultiChannelMappings.VersionMapping versionMapping =
                 new ProtocolMultiChannelMappings.VersionMapping();
@@ -383,7 +381,7 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            System.out.println("Error writing generated mappings: " + e.toString());
+            System.out.println(ConsoleMessages.text("map_write", e));
         }
         if (EXIT_AFTER_SAVE_CHANNEL_MAPPINGS) {
             System.exit(0);

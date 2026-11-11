@@ -25,6 +25,7 @@
 
 package com.ishland.raknetify.fabric.mixin.compat.krypton;
 
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.fabric.common.util.MultiVersionUtil;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
 
@@ -97,7 +98,7 @@ public class MixinServerLoginNetworkHandler {
                     && encrypt != null
                     && "me.steinborn.krypton.mod.shared.network.pipeline.MinecraftCipherEncoder"
                             .equals(encrypt.getClass().getName())) {
-                System.out.println("Raknetify: Krypton detected, applying compatibility");
+                System.out.println(ConsoleMessages.text("krypton"));
 
                 pipeline.remove("decrypt");
                 pipeline.remove("encrypt");

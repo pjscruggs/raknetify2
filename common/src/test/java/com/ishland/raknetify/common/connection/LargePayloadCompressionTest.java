@@ -62,21 +62,24 @@ class LargePayloadCompressionTest {
             stream.write(new byte[17]);
         }
         for (int capacity : new int[] {16, 17}) {
+            var endpoint = new io.netty.channel.embedded.EmbeddedChannel();
             var out = io.netty.buffer.Unpooled.buffer(0, capacity);
             var inflater = new java.util.zip.Inflater();
             try {
                 inflater.setInput(encoded.toByteArray());
                 if (capacity == 17) {
-                    MultiChannelingStreamingCompression.inflateInto(inflater, new byte[8], out);
+                    MultiChannelingStreamingCompression.inflateInto(
+                            endpoint, inflater, new byte[8], out);
                     org.junit.jupiter.api.Assertions.assertEquals(17, out.readableBytes());
                 } else {
                     org.junit.jupiter.api.Assertions.assertThrows(
                             io.netty.handler.codec.CorruptedFrameException.class,
                             () ->
                                     MultiChannelingStreamingCompression.inflateInto(
-                                            inflater, new byte[8], out));
+                                            endpoint, inflater, new byte[8], out));
                 }
             } finally {
+                endpoint.finishAndReleaseAll();
                 inflater.end();
                 out.release();
             }

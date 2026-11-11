@@ -24,6 +24,7 @@ package com.ishland.raknetify.velocity;
 import com.google.common.base.Equivalence;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
@@ -115,14 +116,11 @@ public class RaknetifyVelocityPlugin {
                 RaknetifyVelocityPlugin.class.getProtectionDomain().getCodeSource();
         if (codeSource != null && !isDevLaunch()) {
             try {
-                LOGGER.info("Bootstrapping raknetify in wrapped environment");
+                LOGGER.info(ConsoleMessages.text("wrapper"));
                 launchIsolated(codeSource.getLocation());
                 return;
             } catch (ReflectiveOperationException | RuntimeException | LinkageError t) {
-                LOGGER.error(
-                        "Error bootstrapping raknetify inside wrapped environment, running in"
-                                + " normal environment instead",
-                        t);
+                LOGGER.error(ConsoleMessages.text("wrapper_failed"), t);
             }
         }
 

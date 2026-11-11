@@ -30,6 +30,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.common.util.PrefixUtil;
 
 import org.jspecify.annotations.Nullable;
@@ -86,7 +87,7 @@ public final class TransferDestinations {
         try (var stream = Files.newInputStream(path)) {
             byte[] bytes = stream.readNBytes(MAX_BYTES + 1);
             if (bytes.length > MAX_BYTES) {
-                throw new IOException("Transfer configuration exceeds 64 KiB: " + path);
+                throw new IOException(ConsoleMessages.text("maximum", path, "64 KiB"));
             }
             return parse(new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
         }
@@ -106,7 +107,8 @@ public final class TransferDestinations {
             requireKeys(root, Set.of("destinations"));
             var entries = root.getAsJsonArray("destinations");
             if (entries.size() > MAX_DESTINATIONS) {
-                throw new IllegalArgumentException("Too many transfer destinations");
+                throw new IllegalArgumentException(
+                        ConsoleMessages.text("maximum", "destinations", MAX_DESTINATIONS));
             }
             Map<Endpoint, Integer> rules = new LinkedHashMap<>();
             for (JsonElement entry : entries) {
@@ -115,7 +117,7 @@ public final class TransferDestinations {
             return new TransferDestinations(rules);
         } catch (RuntimeException invalid) {
             throw new IllegalArgumentException(
-                    "Invalid Raknetify2 transfer configuration", invalid);
+                    ConsoleMessages.text("invalid", "config/raknetify2-transfers.json"), invalid);
         }
     }
 
@@ -129,7 +131,7 @@ public final class TransferDestinations {
      */
     private static void requireKeys(final JsonObject object, final Set<String> expected) {
         if (!object.keySet().equals(expected)) {
-            throw new IllegalArgumentException("Expected fields " + expected);
+            throw new IllegalArgumentException(ConsoleMessages.text("fields", expected));
         }
     }
 
@@ -143,13 +145,13 @@ public final class TransferDestinations {
     private static void add(final Map<Endpoint, Integer> rules, final JsonObject entry) {
         requireKeys(entry, Set.of("host", "tcpPort", "udpPort"));
         if (!entry.get("host").getAsJsonPrimitive().isString()) {
-            throw new IllegalArgumentException("Host must be a string");
+            throw new IllegalArgumentException(ConsoleMessages.text("host_string"));
         }
         Endpoint key =
                 new Endpoint(
                         canonicalHost(entry.get("host").getAsString()), port(entry.get("tcpPort")));
         if (rules.putIfAbsent(key, port(entry.get("udpPort"))) != null) {
-            throw new IllegalArgumentException("Duplicate transfer destination " + key);
+            throw new IllegalArgumentException(ConsoleMessages.text("duplicate_destination", key));
         }
     }
 
@@ -162,11 +164,13 @@ public final class TransferDestinations {
      */
     private static int port(final JsonElement value) {
         if (!value.getAsJsonPrimitive().isNumber()) {
-            throw new IllegalArgumentException("Port must be a number");
+            throw new IllegalArgumentException(
+                    ConsoleMessages.text("port_range", "tcpPort / udpPort"));
         }
         int result = value.getAsBigDecimal().intValueExact();
         if (result < 1 || result > 65535) {
-            throw new IllegalArgumentException("Port must be between 1 and 65535");
+            throw new IllegalArgumentException(
+                    ConsoleMessages.text("port_range", "tcpPort / udpPort"));
         }
         return result;
     }
@@ -181,7 +185,7 @@ public final class TransferDestinations {
      */
     private static String canonicalHost(final String host) {
         if (host.contains("%")) {
-            throw new IllegalArgumentException("Scoped IP addresses are not transfer destinations");
+            throw new IllegalArgumentException(ConsoleMessages.text("scoped_ip", host));
         }
         String unbracketed =
                 host.startsWith("[") && host.endsWith("]")
@@ -195,7 +199,7 @@ public final class TransferDestinations {
             ascii = ascii.substring(0, ascii.length() - 1);
         }
         if (ascii.isEmpty() || ascii.length() > 253) {
-            throw new IllegalArgumentException("Invalid transfer hostname");
+            throw new IllegalArgumentException(ConsoleMessages.text("invalid_host", host));
         }
         return ascii;
     }

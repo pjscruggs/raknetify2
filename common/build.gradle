@@ -30,6 +30,11 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// Standalone servers use the same locale inventory validated by CI.
+processResources {
+    from(rootProject.file('.github/scripts/minecraft-locales.json')) { into 'assets/raknetify' }
+}
+
 test { useJUnitPlatform() }
 
 /** Mutates replay decisions and budget accounting to verify the security regressions detect faults. */

@@ -35,6 +35,7 @@ import com.ishland.raknetify.common.connection.SynchronizationLayer;
 import com.ishland.raknetify.common.connection.multichannel.CustomPayloadChannel;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
 import com.ishland.raknetify.common.proxy.ProxyProtocol;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -203,8 +204,7 @@ public class RakNetBungeeConnectionUtil {
                                         "protocol version %d".formatted(protocolVersion)));
                     } else {
                         RaknetifyBungeePlugin.LOGGER.warning(
-                                "No multi-channel mapping found for protocol version %d, reduced responsiveness is expected"
-                                        .formatted(protocolVersion));
+                                ConsoleMessages.text("mapping_missing", protocolVersion));
                     }
                 }
 
@@ -216,9 +216,7 @@ public class RakNetBungeeConnectionUtil {
                                 new RakNetBungeePingUpdater(player));
 
                 RaknetifyBungeePlugin.LOGGER.info(
-                        String.format(
-                                "Raknetify: %s logged in via RakNet, mtu %d",
-                                player.getName(), config.getMTU()));
+                        ConsoleMessages.text("login", player.getName(), config.getMTU()));
             }
         } catch (Throwable t) {
             throw new RuntimeException(t);

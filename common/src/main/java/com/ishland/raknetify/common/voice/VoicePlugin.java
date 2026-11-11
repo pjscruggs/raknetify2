@@ -26,6 +26,7 @@
 package com.ishland.raknetify.common.voice;
 
 import com.google.gson.JsonParser;
+import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import de.maxhenkel.voicechat.api.ForgeVoicechatPlugin;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
@@ -70,7 +71,7 @@ public final class VoicePlugin implements VoicechatPlugin {
             }
         } catch (IOException failure) {
             throw new UncheckedIOException(
-                    "Cannot read Raknetify2 voice sharing configuration", failure);
+                    ConsoleMessages.text("read", "config/raknetify2-voicechat.json"), failure);
         }
         registration.registerEvent(VoicechatServerStartingEvent.class, VoicePlugin::starting);
     }
@@ -84,7 +85,7 @@ public final class VoicePlugin implements VoicechatPlugin {
      */
     private static void starting(final VoicechatServerStartingEvent event) {
         if (event.getSocketImplementation() != null) {
-            throw new IllegalStateException("Another voice plugin already supplies a UDP socket");
+            throw new IllegalStateException(ConsoleMessages.text("voice_conflict"));
         }
         event.setSocketImplementation(new SharedVoiceSocket());
     }
@@ -101,7 +102,7 @@ public final class VoicePlugin implements VoicechatPlugin {
         try (var input = Files.newInputStream(path)) {
             byte[] bytes = input.readNBytes(1025);
             if (bytes.length > 1024) {
-                throw new IOException("Voice sharing configuration exceeds one KiB");
+                throw new IOException(ConsoleMessages.text("maximum", path, "1 KiB"));
             }
             var root =
                     JsonParser.parseString(new String(bytes, StandardCharsets.UTF_8))
@@ -109,7 +110,7 @@ public final class VoicePlugin implements VoicechatPlugin {
             if (!root.keySet().equals(Set.of("enabled"))
                     || !root.get("enabled").isJsonPrimitive()
                     || !root.getAsJsonPrimitive("enabled").isBoolean()) {
-                throw new IllegalArgumentException("Expected only a boolean enabled field");
+                throw new IllegalArgumentException(ConsoleMessages.text("voice_enabled"));
             }
             return root.get("enabled").getAsBoolean();
         } catch (NoSuchFileException absent) {
