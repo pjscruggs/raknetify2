@@ -26,14 +26,10 @@ plugins {
 	id 'net.minecraftforge.gradle' version '7.0.17' apply false
 	id 'dev.yumi.gradle.licenser' version '4.0.0' apply false
 	id 'com.modrinth.minotaur' version '2.10.0' apply false
-	id 'io.github.themrmilchmann.curseforge-publish' version '0.8.0' apply false
 }
 
 ext.remapJarTaskType = net.fabricmc.loom.task.RemapJarTask
-ext.curseforgeBeta = io.github.themrmilchmann.gradle.publish.curseforge.ReleaseType.BETA
-ext.curseforgeMarkdown = io.github.themrmilchmann.gradle.publish.curseforge.ChangelogFormat.MARKDOWN
 ext.modrinthProjectId = providers.gradleProperty('modrinth_project_id')
-ext.curseforgeProjectId = providers.gradleProperty('curseforge_project_id')
 ext.supportedVersions = new groovy.json.JsonSlurper().parse(file('supported-versions.json'))
 ext.nativeLoaders = new groovy.json.JsonSlurper().parse(file('native-loaders.json'))
 

@@ -6,13 +6,6 @@ import java.util.zip.ZipFile
 evaluationDependsOn(':fabric')
 evaluationDependsOn(':fabric-26')
 
-if (rootProject.modrinthProjectId.isPresent()) {
-    apply plugin: 'com.modrinth.minotaur'
-}
-if (rootProject.curseforgeProjectId.isPresent()) {
-    apply plugin: 'io.github.themrmilchmann.curseforge-publish'
-}
-
 base {
     archivesName = project.archives_base_name + '-fabric'
 }
@@ -78,45 +71,6 @@ jar {
         from(task.flatMap { it.archiveFile }) {
             into 'META-INF/jars'
             rename { name + '.jar' }
-        }
-    }
-}
-
-plugins.withId('com.modrinth.minotaur') {
-    modrinth {
-        versionNumber = project.version
-        versionName = 'Raknetify2 ' + project.version
-        uploadFile = jar
-        loaders = ['fabric']
-    }
-}
-
-plugins.withId('io.github.themrmilchmann.curseforge-publish') {
-    curseforge {
-        apiToken = System.getenv('CURSEFORGE_TOKEN')
-        publications {
-            register('main') {
-                projectId = rootProject.curseforgeProjectId.get()
-                rootProject.supportedVersions.values().collectMany { it.gameVersions }.unique()
-                        .findAll { !it.contains('-') }.each { version ->
-                    gameVersion('minecraft-' + version.split('\\.').take(2).join('-'), version.replace('.', '-'))
-                }
-                gameVersion('java', 'java-17')
-                gameVersion('java', 'java-21')
-                gameVersion('java', 'java-25')
-                gameVersion('modloader', 'fabric')
-                gameVersion('environment', 'server')
-                gameVersion('environment', 'client')
-                artifacts.register('main') {
-                    from(jar)
-                    displayName = 'Raknetify2 ' + project.version
-                    releaseType = rootProject.curseforgeBeta
-                    changelog {
-                        format = rootProject.curseforgeMarkdown
-                        from(com.ishland.buildscript.ParseGItHubActionChangelog.getChangelog())
-                    }
-                }
-            }
         }
     }
 }
