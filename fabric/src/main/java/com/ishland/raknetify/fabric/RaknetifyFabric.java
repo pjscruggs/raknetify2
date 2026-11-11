@@ -161,6 +161,9 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
         RakNetMultiChannel.init();
         //        RakNetMultiChannel.iterateKnownPackets();
         NetworkInterfaceListener.init();
+        if (!SAVE_CHANNEL_MAPPINGS) {
+            return;
+        }
 
         Int2IntArrayMap s2c = new Int2IntArrayMap();
         Int2IntArrayMap c2s = new Int2IntArrayMap();
@@ -177,11 +180,11 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
                     if (entry.getKey() == NetworkSide.CLIENTBOUND) {
                         s2c.put(
                                 type.getIntValue(),
-                                RakNetMultiChannel.getPacketChannelOverride(type.getKey(), false));
+                                RakNetMultiChannel.requirePacketChannel(type.getKey()));
                     } else if (entry.getKey() == NetworkSide.SERVERBOUND) {
                         c2s.put(
                                 type.getIntValue(),
-                                RakNetMultiChannel.getPacketChannelOverride(type.getKey(), false));
+                                RakNetMultiChannel.requirePacketChannel(type.getKey()));
                     }
                 }
             }
@@ -272,9 +275,7 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
             recordPacketChannels(c2sPacketTypes, vanillaPacketTypes, c2s);
         }
 
-        if (SAVE_CHANNEL_MAPPINGS) {
-            saveMappings(c2s, s2c);
-        }
+        saveMappings(c2s, s2c);
     }
 
     /**
@@ -452,7 +453,8 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
      *
      * @param packetTypes packet types in registration order for one traffic direction
      * @param packetClasses implementation classes recovered from the protocol registries
-     * @param channels destination map updated only for packet types with a known implementation
+     * @param channels destination map for the complete play packet registry
+     * @throws IllegalStateException if a registered type has no known implementation or route
      */
     private static void recordPacketChannels(
             final List<? extends PacketType<?>> packetTypes,
@@ -462,10 +464,9 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
             PacketType<?> packetType = packetTypes.get(i);
             final Class<?> clazz = packetClasses.get(packetType);
             if (clazz == null) {
-                System.out.println("Skipping unmapped packet type: " + packetType);
-                continue;
+                throw new IllegalStateException("Missing vanilla packet class for " + packetType);
             }
-            channels.put(i, RakNetMultiChannel.getPacketChannelOverride(clazz, false));
+            channels.put(i, RakNetMultiChannel.requirePacketChannel(clazz));
         }
     }
 

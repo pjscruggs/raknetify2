@@ -587,6 +587,22 @@ public class RakNetMultiChannel {
         }
     }
 
+    /**
+     * Requires an explicit policy for every play packet enumerated by the mapping generator.
+     *
+     * @param clazz vanilla packet class from the running protocol registry
+     * @return declared delivery policy, including an explicit world-channel assignment
+     * @throws IllegalStateException if a supported vanilla packet has no reviewed policy
+     */
+    public static int requirePacketChannel(final Class<?> clazz) {
+        final int channel = classToChannelIdOverride.getInt(clazz);
+        if (channel == Integer.MAX_VALUE) {
+            throw new IllegalStateException(
+                    "Missing vanilla packet routing policy: " + clazz.getName());
+        }
+        return channel;
+    }
+
     /** Unknown packet classes already reported, shared safely across connection threads. */
     private static final Set<Class<?>> foundUnknownClasses = Sets.newConcurrentHashSet();
 

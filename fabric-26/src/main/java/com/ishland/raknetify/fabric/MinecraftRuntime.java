@@ -136,6 +136,9 @@ public final class MinecraftRuntime {
     private static void handleMappings() {
         RakNetMultiChannel.init();
         NetworkInterfaceListener.init();
+        if (!SAVE_CHANNEL_MAPPINGS) {
+            return;
+        }
 
         Int2IntArrayMap s2c = new Int2IntArrayMap();
         Int2IntArrayMap c2s = new Int2IntArrayMap();
@@ -143,9 +146,7 @@ public final class MinecraftRuntime {
         recordPacketChannels(GameProtocols.CLIENTBOUND_TEMPLATE.details(), vanillaPacketTypes, s2c);
         recordPacketChannels(GameProtocols.SERVERBOUND_TEMPLATE.details(), vanillaPacketTypes, c2s);
 
-        if (SAVE_CHANNEL_MAPPINGS) {
-            saveMappings(c2s, s2c);
-        }
+        saveMappings(c2s, s2c);
     }
 
     /**
@@ -311,7 +312,8 @@ public final class MinecraftRuntime {
      *
      * @param details complete protocol metadata for one traffic direction
      * @param packetClasses implementation classes recovered from the protocol registries
-     * @param channels destination map updated only for packet types with a known implementation
+     * @param channels destination map for the complete play packet registry
+     * @throws IllegalStateException if a registered type has no known implementation or route
      */
     private static void recordPacketChannels(
             final ProtocolInfo.Details details,
@@ -320,10 +322,9 @@ public final class MinecraftRuntime {
         details.listPackets((packetType, packetId) -> {
             final Class<?> clazz = packetClasses.get(packetType);
             if (clazz == null) {
-                System.out.println("Skipping unmapped packet type: " + packetType);
-                return;
+                throw new IllegalStateException("Missing vanilla packet class for " + packetType);
             }
-            channels.put(packetId, RakNetMultiChannel.getPacketChannelOverride(clazz, false));
+            channels.put(packetId, RakNetMultiChannel.requirePacketChannel(clazz));
         });
     }
 

@@ -83,8 +83,34 @@ final class GameplayOrderingTest {
      *     packet class
      */
     static void verify() throws ReflectiveOperationException {
+        verifyUnknownPolicy();
         verifyGroup(GAMEPLAY_PACKETS, "gameplay");
         verifyGroup(ENTITY_PACKETS, "entity lifecycle");
+    }
+
+    /**
+     * Verifies that an unfamiliar runtime class retains its fallback while generated routes require
+     * an explicit decision.
+     *
+     * @throws ReflectiveOperationException if the installed routing contract is unavailable
+     */
+    private static void verifyUnknownPolicy() throws ReflectiveOperationException {
+        Class<?> table =
+                Class.forName("com.ishland.raknetify.fabric.common.connection.RakNetMultiChannel");
+        Method runtime = table.getMethod("getPacketChannelOverride", Class.class, boolean.class);
+        require(
+                (int) runtime.invoke(null, GameplayOrderingTest.class, true) == 7,
+                "Unknown runtime route");
+        Method generator = table.getMethod("requirePacketChannel", Class.class);
+        try {
+            generator.invoke(null, GameplayOrderingTest.class);
+        } catch (java.lang.reflect.InvocationTargetException failure) {
+            require(
+                    failure.getCause() instanceof IllegalStateException,
+                    "Unexpected mapping failure");
+            return;
+        }
+        require(false, "Unknown vanilla packet accepted for publication");
     }
 
     /**
