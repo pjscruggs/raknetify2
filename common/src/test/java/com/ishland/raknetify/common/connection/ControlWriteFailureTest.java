@@ -114,7 +114,7 @@ class ControlWriteFailureTest {
         try {
             var viewer = new MetricsSynchronizationHandler();
             left.pipeline().addLast(viewer);
-            right.pipeline().addLast(new MetricsSynchronizationHandler());
+            right.pipeline().addLast(new MetricsSynchronizationHandler(DiagnosticsPolicy.CLIENT));
             viewer.requestSnapshot();
             left.runPendingTasks();
             left.flushOutbound();

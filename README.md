@@ -63,7 +63,18 @@ Older clients can use the ordinary TCP address without `raknet;`. An absent file
 
 The client debug HUD shows RakNet latency, traffic and queue statistics. On Minecraft versions with configurable debug entries, enable `raknetify:raknetify_debug_info` in the debug screen options. The client requests peer statistics while that entry is displayed, including when set to Always On. Earlier versions show the lines in the F3 overlay.
 
-Starting a Fabric, Forge or NeoForge endpoint with `-Draknetify.debug=true` also samples peer statistics for connection exception logs. Updated peers exchange these reports on demand, at most once a second per direction. Older peers can still send unsolicited reports.
+Servers and proxies keep their measurements private by default. The client asks once when diagnostics are needed. If the server declines or the peer does not answer, the HUD continues showing local measurements. An accepting server can share its measurements by creating `config/raknetify2-diagnostics.json` in its working directory and restarting:
+
+```json
+{
+  "shareServerMetrics": true,
+  "disconnectOnRejectedRequests": true
+}
+```
+
+`shareServerMetrics` defaults to `false`. `disconnectOnRejectedRequests` defaults to `true`. After the transport acknowledges a refusal, the server allows three seconds for requests already in flight and closes the connection after three further requests counted at least one second apart. Set `disconnectOnRejectedRequests` to `false` to ignore continued requests. Unsolicited reports from older clients do not count as requests.
+
+Starting a Fabric, Forge or NeoForge endpoint with `-Draknetify.debug=true` also requests peer statistics for its own connection exception logs. Each endpoint can send at most one solicited sample per second.
 
 ## UDP proxies and PROXY protocol v2
 

@@ -27,7 +27,7 @@ package com.ishland.raknetify.common.connection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ishland.raknetify.common.Constants;
@@ -86,14 +86,13 @@ class MetricsSnapshotTest {
         var channel = new EmbeddedChannel(handler);
         try {
             assertFalse(handler.isRemoteSupported());
+            handler.requestSnapshot();
             channel.writeInbound(snapshot(1, 11));
             assertTrue(handler.isRemoteSupported());
             FrameData truncated = frame(Unpooled.buffer().writeByte(0).writeLong(100).writeInt(99));
-            assertThrows(IndexOutOfBoundsException.class, () -> channel.writeInbound(truncated));
+            assertFalse(channel.writeInbound(truncated));
             assertEquals(0, truncated.refCnt());
             assertEquals(11, handler.getQueuedBytes());
-            channel.writeInbound(snapshot(2, 22));
-            assertEquals(22, handler.getQueuedBytes());
             assertEquals(4, handler.getBurst());
             assertEquals(0.125, handler.getErrorRate());
             assertEquals(6, handler.getTX());
@@ -101,6 +100,86 @@ class MetricsSnapshotTest {
         } finally {
             channel.finishAndReleaseAll();
         }
+    }
+
+    /**
+     * A reliable refusal stops polling, tolerates in-flight requests and enforces the server
+     * setting.
+     *
+     * @throws InterruptedException if the acknowledgement grace period is interrupted
+     */
+    @Test
+    void refusalControlsBothEndpoints() throws InterruptedException {
+        var viewer = new MetricsSynchronizationHandler(DiagnosticsPolicy.CLIENT);
+        var client = new EmbeddedChannel(viewer);
+        var strict = new EmbeddedChannel(new MetricsSynchronizationHandler());
+        var lenient =
+                new EmbeddedChannel(
+                        new MetricsSynchronizationHandler(new DiagnosticsPolicy(false, false)));
+        try {
+            viewer.requestSnapshot();
+            client.runPendingTasks();
+            client.flushOutbound();
+            FrameData query = client.readOutbound();
+            assertTrue(query.getReliability().isReliable);
+            lenient.writeInbound(query.retain());
+            strict.writeInbound(query);
+            strict.flushOutbound();
+            FrameData refusal = strict.readOutbound();
+            assertTrue(refusal.getReliability().isReliable);
+            client.writeInbound(refusal);
+            strict.writeInbound(frame(Unpooled.buffer().writeByte(1)));
+            assertTrue(strict.isOpen());
+            lenient.flushOutbound();
+            ((FrameData) lenient.readOutbound()).release();
+            Thread.sleep(3100);
+            viewer.requestSnapshot();
+            client.runPendingTasks();
+            client.flushOutbound();
+            assertNull(client.readOutbound());
+            for (int strike = 1; strike <= 3; strike++) {
+                for (var server : new EmbeddedChannel[] {strict, lenient}) {
+                    server.writeInbound(snapshot(2, 22));
+                    server.writeInbound(frame(Unpooled.buffer().writeByte(1)));
+                    if (strike < 3) {
+                        server.writeInbound(frame(Unpooled.buffer().writeByte(1)));
+                        assertTrue(server.isOpen());
+                    }
+                    server.flush();
+                    assertNull(server.readOutbound());
+                }
+                if (strike < 3) {
+                    Thread.sleep(1050);
+                }
+            }
+            assertFalse(strict.isOpen());
+            assertTrue(lenient.isOpen());
+        } finally {
+            client.finishAndReleaseAll();
+            strict.finishAndReleaseAll();
+            lenient.finishAndReleaseAll();
+        }
+    }
+
+    /**
+     * Only explicitly enabled disclosure can expose server measurements.
+     *
+     * @param dir temporary server configuration directory
+     * @throws java.io.IOException if the fixture cannot write its test configuration
+     */
+    @Test
+    void serverPolicyDefaultsAndOverrides(
+            @org.junit.jupiter.api.io.TempDir final java.nio.file.Path dir)
+            throws java.io.IOException {
+        var file = dir.resolve("settings.json");
+        assertEquals(DiagnosticsPolicy.DEFAULT_SERVER, DiagnosticsPolicy.load(file));
+        java.nio.file.Files.writeString(file, "{\"disconnectOnRejectedRequests\":false}");
+        assertEquals(new DiagnosticsPolicy(false, false), DiagnosticsPolicy.load(file));
+        java.nio.file.Files.writeString(file, "{\"shareServerMetrics\":true}");
+        assertEquals(new DiagnosticsPolicy(true, true), DiagnosticsPolicy.load(file));
+        java.nio.file.Files.writeString(file, "{\"shareServerMetrics\":\"true\"}");
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalArgumentException.class, () -> DiagnosticsPolicy.load(file));
     }
 
     /**

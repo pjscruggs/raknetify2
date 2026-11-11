@@ -235,7 +235,10 @@ public class RakNetConnectionUtil {
             final SimpleMetricsLogger simpleMetricsLogger = new SimpleMetricsLogger();
             config.setMetrics(simpleMetricsLogger);
             final MetricsSynchronizationHandler metricsSynchronizationHandler =
-                    new MetricsSynchronizationHandler();
+                    new MetricsSynchronizationHandler(
+                            ch instanceof network.ycc.raknet.client.channel.RakNetClientChannel
+                                    ? DiagnosticsPolicy.CLIENT
+                                    : DiagnosticsPolicy.server());
             simpleMetricsLogger.setMetricsSynchronizationHandler(metricsSynchronizationHandler);
             final SynchronizationLayer synchronizationLayer =
                     new SynchronizationLayer(Constants.synchronizationIgnoredChannels());

@@ -67,6 +67,7 @@ class EncryptionPipelineTest {
                         KeyGenerator.getInstance("AES").generateKey(), false);
         var channel = new EmbeddedChannel(metrics, encryption);
         try {
+            metrics.requestSnapshot();
             FrameData control = zeroFrame(Constants.RAKNET_METRICS_SYNC_PACKET_ID);
             assertFalse(channel.writeInbound(control));
             assertEquals(0, control.refCnt());
