@@ -111,6 +111,9 @@ public final class CompatibilityNegotiation extends ChannelDuplexHandler {
         try {
             ctx.writeAndFlush(FrameData.create(ctx.alloc(), PACKET_ID, data))
                     .addListener(RakNet.INTERNAL_WRITE_LISTENER);
+            if (!server) {
+                BundleWire.advertise(ctx);
+            }
         } finally {
             data.release();
         }
@@ -134,6 +137,11 @@ public final class CompatibilityNegotiation extends ChannelDuplexHandler {
         try {
             if (frame.getPacketId() == PACKET_ID) {
                 accept(ctx, frame);
+                frame.release();
+                return;
+            }
+            if (frame.getPacketId() == BundleWire.CAPABILITY) {
+                BundleWire.accept(ctx, frame, server && !gameReceived);
                 frame.release();
                 return;
             }

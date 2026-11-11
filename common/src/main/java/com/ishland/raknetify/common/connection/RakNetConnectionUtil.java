@@ -128,6 +128,9 @@ public class RakNetConnectionUtil {
             // FlushEnforcer());
             //            channel.pipeline().addLast("raknetify-flush-consolidation", new
             // FlushConsolidationHandler(Integer.MAX_VALUE, true));
+            if (server) {
+                channel.pipeline().addLast("raknetify-bundle-delivery", new BundleDelivery());
+            }
             channel.pipeline().addLast("raknetify-graceful-close", new GracefulCloseHandler());
             channel.pipeline().addLast("raknetify-no-flush", new NoFlush());
             channel.pipeline()

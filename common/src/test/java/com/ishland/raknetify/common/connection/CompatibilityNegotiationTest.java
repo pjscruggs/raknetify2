@@ -70,12 +70,13 @@ class CompatibilityNegotiationTest {
     }
 
     /**
-     * Exchanges the one initial declaration in each direction.
+     * Exchanges both policy declarations and the client bundle capability before gameplay.
      *
      * @param client connecting endpoint
      * @param server accepting endpoint
      */
     private static void negotiate(final EmbeddedChannel client, final EmbeddedChannel server) {
+        server.writeInbound((Object) client.readOutbound());
         server.writeInbound((Object) client.readOutbound());
         client.writeInbound((Object) server.readOutbound());
     }

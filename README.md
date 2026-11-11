@@ -45,7 +45,7 @@ Install the matching plugin on Velocity or BungeeCord and the matching client mo
 
 Normally, Raknetify2 lets independent packet channels continue while one channel waits for missing data. Ordered mode puts all Minecraft packets on one channel, so a missing packet holds up every later packet in that direction until it is retransmitted. This preserves the order expected by some anti-cheat software, but gives up Raknetify2’s ability to keep unrelated game traffic moving during that wait.
 
-Minecraft uses clientbound packet bundles to apply a group of updates in the same client tick. Multichannel mode routes the members individually and drops the bundle delimiters. Choose ordered mode when a mod or plugin relies on the bundle arriving together.
+Minecraft uses clientbound packet bundles to apply a group of updates in the same client tick. With updated endpoints, multichannel mode delivers each bundle together. A bundle containing packets from multiple ordering channels waits for earlier writes, and later writes wait for that bundle. Bundles confined to one channel use that channel normally. Older peers retain per-packet multichannel delivery. Ordered mode preserves vanilla bundles on its single channel.
 
 Create `config/raknetify2-compatibility.json` in the working directory of the server or Minecraft proxy accepting RakNet connections:
 

@@ -6,6 +6,7 @@
   "client": [
     "NativeClientTickMixin",
     "IntegrationClientMixin",
+    "BundlePacketWitness",
     "IncomingPayloadMixin", "IntegrationPayloadMixin"
   ],
   "injectors": {

@@ -59,6 +59,9 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     /** Local outbound marker requesting multichannel negotiation rather than a wire payload. */
     public static final Object SIGNAL_START_MULTICHANNEL = new Object();
 
+    /** Clientbound group under construction from consecutive vanilla writes. */
+    private final OutboundBundle bundle = new OutboundBundle();
+
     /** Frame identifier used to wrap and recognize Minecraft payloads. */
     private final int packetId;
 
@@ -150,7 +153,9 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     @Override
     public void handlerRemoved(final ChannelHandlerContext ctx) throws Exception {
         super.handlerRemoved(ctx);
-        failPendingWrites(new IllegalStateException("Channel closed"));
+        final var failure = new IllegalStateException("Channel closed");
+        bundle.fail(failure);
+        failPendingWrites(failure);
     }
 
     /**
@@ -169,9 +174,6 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
             throws Exception {
         if (ignoreControl(ctx, msg)) {
             promise.trySuccess();
-            return;
-        }
-        if (queueIfPending(ctx, msg, promise)) {
             return;
         }
         if (msg == SIGNAL_START_MULTICHANNEL) {
@@ -194,12 +196,11 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
 
         if (msg instanceof ByteBuf buf && buf.isReadable()) {
             try {
-                final FrameData frameData = encode0(ctx, buf);
-                if (frameData != null) {
-                    writeFrame(ctx, frameData, promise);
-                } else {
-                    promise.setSuccess();
-                }
+                writePayload(ctx, buf, promise);
+            } catch (RuntimeException failure) {
+                bundle.fail(failure);
+                ctx.close().addListener(network.ycc.raknet.RakNet.INTERNAL_WRITE_LISTENER);
+                throw failure;
             } finally {
                 buf.release();
             }
@@ -207,23 +208,6 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
         }
 
         super.write(ctx, msg, promise);
-    }
-
-    /**
-     * Retains game writes while the multichannel marker is awaiting delivery.
-     *
-     * @param ctx owning outbound context
-     * @param message pending payload or unrelated control
-     * @param promise original write completion
-     * @return whether the write was retained
-     */
-    private boolean queueIfPending(
-            final ChannelHandlerContext ctx, final Object message, final ChannelPromise promise) {
-        if (queuePendingWrites && message instanceof ByteBuf buffer) {
-            queueWrite(ctx, buffer, promise);
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -327,28 +311,6 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     }
 
     /**
-     * Holds an encoded packet until multichannel negotiation finishes, completing discarded packets
-     * immediately.
-     *
-     * @param ctx allocation context for the encoded frame
-     * @param buf Minecraft packet payload released after encoding
-     * @param promise completion notification retained with an accepted frame
-     */
-    private void queueWrite(
-            final ChannelHandlerContext ctx, final ByteBuf buf, final ChannelPromise promise) {
-        try {
-            final FrameData data = encode0(ctx, buf);
-            if (data != null) {
-                pendingWrites.add(new PendingWrite(data, promise));
-            } else {
-                promise.setSuccess();
-            }
-        } finally {
-            buf.release();
-        }
-    }
-
-    /**
      * Removes and releases each held frame before notifying its caller, including already cancelled
      * writes. Emptying the queue also prevents a late marker acknowledgement from forwarding
      * released frames.
@@ -364,36 +326,83 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     }
 
     /**
-     * Creates a frame using the first applicable channel rule without releasing the input buffer.
-     * Packets sent before negotiation begins stay ordered on channel zero. Writes held behind the
-     * negotiation marker already need their final routes so later writes cannot overtake them.
+     * Classifies each encoded write while its native packet capture is still active. An updated
+     * client receives a complete vanilla bundle in a single reliable envelope.
      *
-     * @param ctx allocator for the new frame
-     * @param buf readable Minecraft payload with its packet ID at the reader index
-     * @return an owned frame, or null for empty payloads or an explicit discard rule
+     * @param ctx outbound application connection
+     * @param buf encoded Minecraft packet owned by the caller
+     * @param promise original packet completion
+     * @throws Exception if transport forwarding fails
      */
-    private @Nullable FrameData encode0(final ChannelHandlerContext ctx, final ByteBuf buf) {
+    private void writePayload(
+            final ChannelHandlerContext ctx, final ByteBuf buf, final ChannelPromise promise)
+            throws Exception {
         if (CompatibilityPolicy.isOrdered(ctx.channel())) {
-            return FrameData.create(ctx.alloc(), packetId, buf);
+            writeFrame(ctx, FrameData.create(ctx.alloc(), packetId, buf), promise);
+            return;
         }
-        if (buf.isReadable()) {
-            final int packetChannelOverride = getChannelOverride(buf, !isMultichannelEnabled);
-            if (packetChannelOverride == Integer.MIN_VALUE) {
-                return null; // the void
-            }
-            final FrameData frameData = FrameData.create(ctx.alloc(), packetId, buf);
-            if (isMultichannelEnabled || queuePendingWrites) {
-                if (packetChannelOverride >= 0) {
-                    frameData.setOrderChannel(packetChannelOverride);
-                } else if (packetChannelOverride == -1) {
-                    frameData.setReliability(FramedPacket.Reliability.RELIABLE);
-                } else if (packetChannelOverride == -2) {
-                    frameData.setReliability(FramedPacket.Reliability.UNRELIABLE);
-                }
-            }
-            return frameData;
+        final int route = getChannelOverride(buf, !isMultichannelEnabled);
+        if (route == Integer.MIN_VALUE) {
+            delimiter(ctx, buf, promise);
+            return;
         }
-        return null;
+        final int lane = isMultichannelEnabled || queuePendingWrites ? route : 0;
+        if (bundle.active()) {
+            bundle.append(buf, lane, promise);
+            return;
+        }
+        final FrameData frame = FrameData.create(ctx.alloc(), packetId, buf);
+        if (lane >= 0) {
+            frame.setOrderChannel(lane);
+        } else {
+            frame.setReliability(
+                    lane == -1
+                            ? FramedPacket.Reliability.RELIABLE
+                            : FramedPacket.Reliability.UNRELIABLE);
+        }
+        emit(ctx, frame, promise);
+    }
+
+    /**
+     * Opens or closes an advertised clientbound bundle. Older peers retain their historical
+     * per-member delivery. The vanilla play delimiter has no fields and uses packet ID zero.
+     *
+     * @param ctx outbound game context
+     * @param buf classified delimiter bytes
+     * @param promise delimiter's original completion
+     * @throws Exception if the completed envelope cannot be delivered
+     */
+    private void delimiter(
+            final ChannelHandlerContext ctx, final ByteBuf buf, final ChannelPromise promise)
+            throws Exception {
+        if (!Boolean.TRUE.equals(ctx.channel().attr(BundleWire.PEER).get())
+                || buf.readableBytes() != 1
+                || buf.getByte(buf.readerIndex()) != 0) {
+            promise.trySuccess();
+        } else if (bundle.active()) {
+            final var delivery = ctx.newPromise();
+            emit(ctx, bundle.finish(ctx, promise, delivery), delivery);
+        } else {
+            bundle.open(ctx, buf, promise);
+        }
+    }
+
+    /**
+     * Preserves the negotiation barrier for ordinary packets and completed bundles alike.
+     *
+     * @param ctx outbound application context
+     * @param frame completed frame whose ownership transfers to the queue or transport
+     * @param promise transport delivery completion
+     * @throws Exception if the outbound pipeline rejects the write
+     */
+    private void emit(
+            final ChannelHandlerContext ctx, final FrameData frame, final ChannelPromise promise)
+            throws Exception {
+        if (queuePendingWrites) {
+            pendingWrites.add(new PendingWrite(frame, promise));
+        } else {
+            writeFrame(ctx, frame, promise);
+        }
     }
 
     /**
@@ -455,6 +464,9 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
             try {
                 if (packetId == packet.getPacketId()) {
                     ctx.fireChannelRead(packet.createData().skipBytes(1));
+                } else if (packet.getPacketId() == BundleWire.SINGLE
+                        || packet.getPacketId() == BundleWire.MIXED) {
+                    BundleWire.unpack(ctx, packet);
                 } else if (packet.getPacketId() == Constants.RAKNET_PING_PACKET_ID) {
                     return;
                 } else {

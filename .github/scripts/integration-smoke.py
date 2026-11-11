@@ -71,6 +71,10 @@ def transitions(server, args, common, cancelled):
         server.stdin.flush()
     wait(log, 'PASS native final chat sent', cancelled)
     wait(args.work_dir / 'server.log', 'Raknetify transport fixture joined', cancelled)
+    if args.scenario in {'mod-payloads', 'paper-plugins', 'proxy-native', 'via-client'}:
+        server.stdin.write('execute at TransportProbe run summon armor_stand ~ ~ ~ {UUID:[I;0,0,0,8137]}\n')
+        server.stdin.flush()
+        wait(log, 'PASS native bundled entity spawn', cancelled)
     server.stdin.write('datapack list enabled\n')
     if args.scenario == 'paper-plugins':
         server.stdin.write('viaversion list\n')
