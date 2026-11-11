@@ -134,6 +134,37 @@ class CustomPayloadRoutingTest {
         }
     }
 
+    /** A configuration cookie keeps its bytes after login and again after leaving play. */
+    @Test
+    void proxyOnlyInterpretsPlayIdsWhileEncodingPlay() {
+        var playing = new java.util.concurrent.atomic.AtomicBoolean();
+        var codec = new RakNetSimpleMultiChannelCodec(0xFD);
+        codec.addPlayHandlers(playing::get, (buf, quiet) -> 0, (buf, quiet) -> Integer.MIN_VALUE);
+        var channel = new EmbeddedChannel(codec);
+        try {
+            for (boolean play : new boolean[] {false, true, false}) {
+                playing.set(play);
+                var bytes = payload(0, "example:cookie");
+                assertEquals(play ? Integer.MIN_VALUE : 0, codec.getChannelOverride(bytes, false));
+                assertEquals(!play, channel.writeOutbound(bytes));
+                if (!play) {
+                    FrameData frame = channel.readOutbound();
+                    var data = frame.createData();
+                    try {
+                        assertEquals(0xFD, data.readUnsignedByte());
+                        assertEquals(0, data.readUnsignedByte());
+                        assertEquals("example:cookie".length(), data.readUnsignedByte());
+                    } finally {
+                        data.release();
+                        frame.release();
+                    }
+                }
+            }
+        } finally {
+            channel.finishAndReleaseAll();
+        }
+    }
+
     /**
      * Recreates the custom-payload-first classifier order used by Velocity and BungeeCord.
      *

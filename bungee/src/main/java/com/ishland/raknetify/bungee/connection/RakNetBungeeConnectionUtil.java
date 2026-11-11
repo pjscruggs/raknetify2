@@ -194,12 +194,10 @@ public class RakNetBungeeConnectionUtil {
                                     "PluginMessage packetId=%d at version=%d"
                                             .formatted(pluginMessageId, protocolVersion));
                         }
-                        multiChannelCodec.addHandler(
+                        multiChannelCodec.addPlayHandlers(
+                                () -> channelWrapper.getEncodeProtocol() == Protocol.GAME,
                                 new CustomPayloadChannel.PayloadClassifier(
-                                        value -> value == pluginMessageId, channel));
-
-                        // packet id -> channel id
-                        multiChannelCodec.addHandler(
+                                        value -> value == pluginMessageId, channel),
                                 new RakNetSimpleMultiChannelCodec.PacketIdBasedOverrideHandler(
                                         versionMapping.s2c,
                                         "protocol version %d".formatted(protocolVersion)));

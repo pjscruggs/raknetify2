@@ -96,6 +96,27 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     }
 
     /**
+     * Installs both play classifiers behind the proxy's current outbound protocol state. The state
+     * is read on every write because an established connection can return to configuration.
+     *
+     * @param playing whether the proxy is currently encoding clientbound play packets
+     * @param payload identifier-aware custom payload classifier
+     * @param packets version-specific vanilla packet classifier
+     */
+    public void addPlayHandlers(
+            final java.util.function.BooleanSupplier playing,
+            final OverrideHandler payload,
+            final OverrideHandler packets) {
+        addHandler((bytes, quiet) -> {
+            if (!playing.getAsBoolean()) {
+                return 0;
+            }
+            int custom = payload.getChannelOverride(bytes, quiet);
+            return custom != 0 ? custom : packets.getChannelOverride(bytes, quiet);
+        });
+    }
+
+    /**
      * Removes a classifier when its protocol phase or integration is no longer active.
      *
      * @param handler previously registered classifier to remove

@@ -152,12 +152,10 @@ public class RakNetVelocityConnectionUtil {
                                 "PluginMessage packetId=%d at version=%d"
                                         .formatted(pluginMessageId, protocolVersion.getProtocol()));
                     }
-                    multiChannelCodec.addHandler(
+                    multiChannelCodec.addPlayHandlers(
+                            () -> player.getConnection().getState() == StateRegistry.PLAY,
                             new CustomPayloadChannel.PayloadClassifier(
-                                    value -> value == pluginMessageId, channel));
-
-                    // packet id -> channel id
-                    multiChannelCodec.addHandler(
+                                    value -> value == pluginMessageId, channel),
                             new RakNetSimpleMultiChannelCodec.PacketIdBasedOverrideHandler(
                                     versionMapping.s2c,
                                     "%s (%d)"
