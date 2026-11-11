@@ -370,7 +370,7 @@ jobs:
           java-version: 25
       - name: Install Linux client display dependencies
         if: runner.os == 'Linux'
-        run: bash .github/scripts/install-client-libraries.sh
+        run: python .github/scripts/install-client-libraries.py
       - name: Test packaged native loaders
         env:
           LOADER: ${{ matrix.loader }}
@@ -444,7 +444,7 @@ jobs:
           java-version: 25
       - name: Install Linux client display dependencies
         if: runner.os == 'Linux'
-        run: bash .github/scripts/install-client-libraries.sh
+        run: python .github/scripts/install-client-libraries.py
       - name: Test native plugin authentication and gameplay
         env:
           PLATFORM: ${{ matrix.platform }}

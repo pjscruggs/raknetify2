@@ -16,4 +16,4 @@ runs:
         distribution: zulu
         java-version: 25
     - shell: bash
-      run: bash .github/scripts/install-client-libraries.sh
+      run: python .github/scripts/install-client-libraries.py
