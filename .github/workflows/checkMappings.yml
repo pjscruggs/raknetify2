@@ -18,26 +18,19 @@ jobs:
     steps:
       - name: checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          fetch-depth: 0
-          submodules: true
-      - name: validate gradle wrapper
-        uses: gradle/actions/wrapper-validation@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+          name: Test-inputs
+          path: ci-input
+      - name: Verify staged test inputs
+        working-directory: ci-input
+        run: sha256sum --check --quiet test-inputs.sha256
       - name: setup jdk ${{ matrix.java }}
         uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
           java-package: jdk
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ./.gradle/loom-cache
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
       - name: "cache mappingsGen"
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -46,11 +39,12 @@ jobs:
           key: ${{ runner.os }}-mappingsGen-${{ hashFiles('./genMappings.sh', './.github/scripts/generate-mappings.py', './supported-versions.json') }}
           restore-keys: |
             ${{ runner.os }}-mappingsGen-
-      - uses: ./.github/actions/setup-checks
       - name: generate mappings
         env:
           MAPPINGS_GEN_FRESH: true
-        run: ./genMappings.sh
+        run: |
+          version=$(jq -er .version ci-input/fabric-universal/build/generated/metadata/compatibility.json)
+          ./genMappings.sh --jar "ci-input/fabric-universal/build/libs/raknetify2-fabric-${version}.jar"
       - name: fail if mappings changed
         run: |
           if ! git diff --exit-code --; then

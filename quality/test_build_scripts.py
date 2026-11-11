@@ -5,6 +5,7 @@ import io
 import json
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
@@ -69,7 +70,7 @@ class BuildScriptTest(unittest.TestCase):
             resource = root / 'common/src/main/resources/raknetify-channel-mappings.json'
             resource.parent.mkdir(parents=True)
             resource.write_bytes(b'original mappings')
-            jar = root / 'fabric-universal/build/libs/raknetify2-fabric-probe.jar'
+            jar = root / 'fabric-universal/build/mapping-input/universal.jar'
             jar.parent.mkdir(parents=True)
             jar.write_bytes(b'probe jar')
 
@@ -81,7 +82,7 @@ class BuildScriptTest(unittest.TestCase):
                     raise subprocess.CalledProcessError(1, ['java'])
 
             with patch.object(MAPPINGS, '__file__', str(root / '.github/scripts/generate-mappings.py')), \
-                    patch.object(MAPPINGS.sys, 'argv', ['generate-mappings.py', 'first', 'second']), \
+                    patch.object(sys, 'argv', ['generate-mappings.py', 'first', 'second']), \
                     patch.object(MAPPINGS.subprocess, 'run'), \
                     patch.object(MAPPINGS, 'generate_version', side_effect=generate), \
                     self.assertRaises(subprocess.CalledProcessError):

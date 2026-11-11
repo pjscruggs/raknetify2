@@ -6,12 +6,12 @@ Each server must exit successfully and write a fresh mapping before the result c
 replace the checked-in resource. Cached Fabric launchers stay in the isolated work folder.
 """
 
+import argparse
 import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 import time
 import urllib.request
 
@@ -80,18 +80,25 @@ def generate_version(work, version):
         raise RuntimeError(f'Mapping generation did not write output for {version}')
 
 
+def local_jar(root):
+    """Build only the universal archive and its dependencies at a deterministic staging path."""
+    wrapper = root / ('gradlew.bat' if os.name == 'nt' else 'gradlew')
+    subprocess.run([str(wrapper), ':fabric-universal:stageMappingJar'], cwd=root, check=True)
+    return root / 'fabric-universal/build/mapping-input/universal.jar'
+
+
 def main():
     """Build the universal mod, generate every selected version, and publish the complete local result."""
     root = Path(__file__).resolve().parents[2]
-    versions = sys.argv[1:] or supported_versions(root)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--jar', type=Path, help='Use an already built universal Fabric JAR.')
+    parser.add_argument('versions', nargs='*')
+    args = parser.parse_args()
+    versions = args.versions or supported_versions(root)
     print(' '.join(versions), flush=True)
-    wrapper = root / ('gradlew.bat' if os.name == 'nt' else 'gradlew')
-    subprocess.run([str(wrapper), 'clean', 'build'], cwd=root, check=True)
+    jar = args.jar or local_jar(root)
     work = prepare_work(root)
-    jars = list((root / 'fabric-universal/build/libs').glob('raknetify2-fabric-*.jar'))
-    if len(jars) != 1:
-        raise RuntimeError(f'Expected one universal Fabric JAR, found {len(jars)}')
-    shutil.copy2(jars[0], work / 'mods' / jars[0].name)
+    shutil.copy2(jar, work / 'mods' / 'universal.jar')
     for version in versions:
         generate_version(work, version)
     mapping = (work / 'channelMappings.json').read_text(encoding='utf-8')

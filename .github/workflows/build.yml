@@ -49,7 +49,7 @@ jobs:
 
   mappings:
     name: Regenerate packet mappings
-    needs: quality
+    needs: build
     uses: ./.github/workflows/checkMappings.yml
 
   security:

@@ -74,3 +74,10 @@ jar {
         }
     }
 }
+
+/** Supplies the generator with the current universal archive even when old releases remain in libs. */
+tasks.register('stageMappingJar', Sync) {
+    from(tasks.named('jar').flatMap { it.archiveFile })
+    into layout.buildDirectory.dir('mapping-input')
+    rename { 'universal.jar' }
+}
