@@ -45,6 +45,40 @@ import org.junit.jupiter.api.Test;
  * Verifies that an incomplete peer update cannot publish fields or poison the accepted timestamp.
  */
 class MetricsSnapshotTest {
+    /** Polling a visible HUD coalesces frames and removing the handler stops further requests. */
+    @Test
+    void requestsAreViewerDrivenAndCoalesced() {
+        var handler = new MetricsSynchronizationHandler();
+        var channel = new EmbeddedChannel(handler);
+        try {
+            channel.runPendingTasks();
+            channel.flushOutbound();
+            org.junit.jupiter.api.Assertions.assertNull(channel.readOutbound());
+            handler.requestSnapshot();
+            handler.requestSnapshot();
+            channel.runPendingTasks();
+            channel.flushOutbound();
+            FrameData request = channel.readOutbound();
+            var data = request.createData();
+            try {
+                assertEquals(Constants.RAKNET_METRICS_SYNC_PACKET_ID, data.readUnsignedByte());
+                assertEquals(1, data.readUnsignedByte());
+                assertFalse(data.isReadable());
+            } finally {
+                data.release();
+                request.release();
+            }
+            org.junit.jupiter.api.Assertions.assertNull(channel.readOutbound());
+            channel.pipeline().remove(handler);
+            handler.requestSnapshot();
+            channel.runPendingTasks();
+            channel.flushOutbound();
+            org.junit.jupiter.api.Assertions.assertNull(channel.readOutbound());
+        } finally {
+            channel.finishAndReleaseAll();
+        }
+    }
+
     /** Parsing must finish before either peer support or its most recent measurements change. */
     @Test
     void truncatedSnapshotCannotReplaceAcceptedMeasurements() {

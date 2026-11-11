@@ -50,13 +50,11 @@ class ControlWriteFailureTest {
     /**
      * Closed transports fail queued controls without reporting another pipeline error.
      *
-     * @param metrics whether to exercise periodic metrics instead of ordering declarations
-     * @throws InterruptedException if the metric publication wait is interrupted
+     * @param metrics whether to exercise requested metrics instead of ordering declarations
      */
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
-    void closedTransportDoesNotReportControlFailure(final boolean metrics)
-            throws InterruptedException {
+    void closedTransportDoesNotReportControlFailure(final boolean metrics) {
         HeldWrite held = new HeldWrite();
         EmbeddedChannel channel = channel(metrics, held);
         try {
@@ -70,12 +68,11 @@ class ControlWriteFailureTest {
     /**
      * Unexpected control failures remain observable and terminate the affected connection.
      *
-     * @param metrics whether to exercise periodic metrics instead of ordering declarations
-     * @throws InterruptedException if the metric publication wait is interrupted
+     * @param metrics whether to exercise requested metrics instead of ordering declarations
      */
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
-    void unexpectedControlFailureIsNotHidden(final boolean metrics) throws InterruptedException {
+    void unexpectedControlFailureIsNotHidden(final boolean metrics) {
         HeldWrite held = new HeldWrite();
         EmbeddedChannel channel = channel(metrics, held);
         try {
@@ -91,23 +88,46 @@ class ControlWriteFailureTest {
     /**
      * Creates one real control write whose transport completion the test can delay.
      *
-     * @param metrics selects the scheduled metrics control instead of the activation declaration
+     * @param metrics selects the requested metrics control instead of the activation declaration
      * @param held captures and releases the generated frame while retaining its completion
      * @return channel owning the selected production handler
-     * @throws InterruptedException if the scheduled metric wait is interrupted
      */
-    private static EmbeddedChannel channel(final boolean metrics, final HeldWrite held)
-            throws InterruptedException {
+    private static EmbeddedChannel channel(final boolean metrics, final HeldWrite held) {
         EmbeddedChannel channel = new MetricsChannel();
         channel.pipeline().addLast(held);
         if (metrics) {
-            channel.pipeline().addLast(new MetricsSynchronizationHandler());
-            Thread.sleep(250);
-            channel.runScheduledPendingTasks();
+            var handler = new MetricsSynchronizationHandler();
+            channel.pipeline().addLast(handler);
+            handler.requestSnapshot();
+            channel.runPendingTasks();
         } else {
             channel.pipeline().addLast(new PayloadOrderingNegotiation(Map.of()));
         }
         return channel;
+    }
+
+    /** Updated peers answer only a viewer request and stop after the report reaches the viewer. */
+    @org.junit.jupiter.api.Test
+    void requestedSnapshotMakesOneRoundTrip() {
+        var left = new MetricsChannel();
+        var right = new MetricsChannel();
+        try {
+            var viewer = new MetricsSynchronizationHandler();
+            left.pipeline().addLast(viewer);
+            right.pipeline().addLast(new MetricsSynchronizationHandler());
+            viewer.requestSnapshot();
+            left.runPendingTasks();
+            left.flushOutbound();
+            right.writeInbound((Object) left.readOutbound());
+            right.flushOutbound();
+            left.writeInbound((Object) right.readOutbound());
+            org.junit.jupiter.api.Assertions.assertTrue(viewer.isRemoteSupported());
+            left.flushOutbound();
+            org.junit.jupiter.api.Assertions.assertNull(left.readOutbound());
+        } finally {
+            left.finishAndReleaseAll();
+            right.finishAndReleaseAll();
+        }
     }
 
     /** Holds only write completion while releasing the fixture-owned frame immediately. */

@@ -95,6 +95,9 @@ public final class DebugHudFormatter {
                         language.decimal(logger.getMeasureRTTns() / 1_000_000.0),
                         language.decimal(logger.getMeasureRTTnsStdDev() / 1_000_000.0)));
         final MetricsSynchronizationHandler serverSync = logger.getMetricsSynchronizationHandler();
+        if (serverSync != null) {
+            serverSync.requestSnapshot();
+        }
         final String queued = language.decimal(logger.getCurrentQueuedBytes() / 1048576.0);
         if (serverSync != null && serverSync.isRemoteSupported()) {
             line.accept(

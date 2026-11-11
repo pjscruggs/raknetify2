@@ -30,7 +30,6 @@ import com.ishland.raknetify.common.Constants;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.concurrent.ScheduledFuture;
 
 import network.ycc.raknet.RakNet;
 import network.ycc.raknet.frame.FrameData;
@@ -59,48 +58,97 @@ public class MetricsSynchronizationHandler extends ChannelDuplexHandler {
     /** Wire-layout version accepted by this metrics exchange implementation. */
     private static final byte VERSION = 0x00;
 
-    /** Periodic event-loop task publishing a local snapshot every 200 milliseconds. */
-    private @Nullable ScheduledFuture<?> future;
+    /** A one-byte request ignored by older readers of the versioned envelope. */
+    private static final int REQUEST = 1;
+
+    /** Reply distinguished from a legacy unsolicited snapshot to prevent reply loops. */
+    private static final int RESPONSE = 2;
+
+    /** Minimum interval between requests, and independently between replies. */
+    private static final long INTERVAL = TimeUnit.SECONDS.toNanos(1);
+
+    /** Installed transport context, available to a HUD reader outside its event loop. */
+    private volatile @Nullable ChannelHandlerContext context;
+
+    /** Monotonic last request time, guarded by this handler's monitor. */
+    private long lastRequest = System.nanoTime() - INTERVAL;
+
+    /** Monotonic last reply time, owned by the transport event loop. */
+    private long lastReply = System.nanoTime() - INTERVAL;
 
     /**
-     * Captures the context and schedules peer-statistics updates on its event loop.
+     * Records the transport context without scheduling any background traffic.
      *
-     * @param ctx installed handler context for allocation, scheduling, and writes
+     * @param ctx installed transport handler context
      */
     @Override
     public void handlerAdded(final ChannelHandlerContext ctx) {
-        this.future =
-                ctx.channel()
-                        .eventLoop()
-                        .scheduleAtFixedRate(
-                                () -> sendSyncPacket(ctx), 200, 200, TimeUnit.MILLISECONDS);
+        context = ctx;
     }
 
     /**
-     * Stops periodic metric publication when the handler leaves the pipeline.
+     * Drops the transport context so later viewer reads cannot enqueue writes.
      *
-     * @param ctx removed context, unused because the scheduled task is already retained
+     * @param ctx removed transport context
      */
     @Override
     public void handlerRemoved(final ChannelHandlerContext ctx) {
-        if (future != null) {
-            future.cancel(false);
+        context = null;
+    }
+
+    /** Requests a current peer snapshot at most once per second while a diagnostic view is read. */
+    public synchronized void requestSnapshot() {
+        final ChannelHandlerContext ctx = context;
+        long now = System.nanoTime();
+        if (ctx == null || now - lastRequest < INTERVAL) {
+            return;
         }
+        lastRequest = now;
+        ctx.executor()
+                .execute(() -> {
+                    if (!ctx.isRemoved() && ctx.channel().isActive()) {
+                        ByteBuf payload = ctx.alloc().buffer(1).writeByte(REQUEST);
+                        try {
+                            send(ctx, payload);
+                        } finally {
+                            payload.release();
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Emits a best-effort control frame using the transport's usual flush batching.
+     *
+     * @param ctx owning transport context
+     * @param payload borrowed envelope bytes
+     */
+    private static void send(final ChannelHandlerContext ctx, final ByteBuf payload) {
+        FrameData frame =
+                FrameData.create(ctx.alloc(), Constants.RAKNET_METRICS_SYNC_PACKET_ID, payload);
+        frame.setReliability(FramedPacket.Reliability.UNRELIABLE);
+        ctx.write(frame).addListener(RakNet.INTERNAL_WRITE_LISTENER);
     }
 
     /**
      * Sends the latest local queue, burst, retransmission, and packet-rate measurements. The
      * temporary payload is released after an unreliable frame takes ownership of its data.
      *
-     * @param ctx installed context captured by this handler's event-loop task
+     * @param ctx installed transport context
+     * @param version snapshot layout marker understood by the requester
      */
-    private void sendSyncPacket(final ChannelHandlerContext ctx) {
+    private void sendSyncPacket(final ChannelHandlerContext ctx, final int version) {
+        long now = System.nanoTime();
+        if (now - lastReply < INTERVAL) {
+            return;
+        }
+        lastReply = now;
         if (ctx.channel().config() instanceof RakNet.Config config
                 && config.getMetrics() instanceof SimpleMetricsLogger logger) {
             ByteBuf buffer = null;
             try {
                 buffer = ctx.alloc().buffer(1 + 8 + 4 + 4 + 8 + 4 + 4);
-                buffer.writeByte(VERSION);
+                buffer.writeByte(version);
                 buffer.writeLong(System.currentTimeMillis());
                 buffer.writeInt(logger.getCurrentQueuedBytes());
                 buffer.writeInt(
@@ -110,11 +158,7 @@ public class MetricsSynchronizationHandler extends ChannelDuplexHandler {
                 buffer.writeDouble(logger.getMeasureErrorRate());
                 buffer.writeInt(logger.getMeasureTX());
                 buffer.writeInt(logger.getMeasureRX());
-                final FrameData frameData =
-                        FrameData.create(
-                                ctx.alloc(), Constants.RAKNET_METRICS_SYNC_PACKET_ID, buffer);
-                frameData.setReliability(FramedPacket.Reliability.UNRELIABLE);
-                ctx.write(frameData).addListener(RakNet.INTERNAL_WRITE_LISTENER);
+                send(ctx, buffer);
             } finally {
                 if (buffer != null) {
                     buffer.release();
@@ -160,23 +204,7 @@ public class MetricsSynchronizationHandler extends ChannelDuplexHandler {
             ByteBuf byteBuf = null;
             try {
                 byteBuf = frameData.createData().skipBytes(1);
-                final byte version = byteBuf.readByte();
-                if (version != VERSION) {
-                    return;
-                }
-
-                final long time = byteBuf.readLong();
-                if (time < snapshot().time()) {
-                    return;
-                }
-                remote =
-                        new RemoteMetrics(
-                                time,
-                                byteBuf.readInt(),
-                                byteBuf.readInt(),
-                                byteBuf.readDouble(),
-                                byteBuf.readInt(),
-                                byteBuf.readInt());
+                receive(ctx, byteBuf);
             } finally {
                 if (byteBuf != null) {
                     byteBuf.release();
@@ -187,6 +215,42 @@ public class MetricsSynchronizationHandler extends ChannelDuplexHandler {
         }
         super.channelRead(ctx, msg);
     }
+
+    /**
+     * Answers pull requests and continues to serve older viewers that only send push snapshots.
+     *
+     * @param ctx transport context for a rate-limited response
+     * @param bytes borrowed metrics envelope without its outer identifier
+     */
+    private void receive(final ChannelHandlerContext ctx, final ByteBuf bytes) {
+        int version = bytes.readUnsignedByte();
+        if (version == REQUEST && !bytes.isReadable()) {
+            sendSyncPacket(ctx, RESPONSE);
+            return;
+        }
+        if (version != VERSION && version != RESPONSE) {
+            return;
+        }
+        long time = bytes.readLong();
+        if (time < snapshot().time()) {
+            return;
+        }
+        remote =
+                new RemoteMetrics(
+                        time,
+                        bytes.readInt(),
+                        bytes.readInt(),
+                        bytes.readDouble(),
+                        bytes.readInt(),
+                        bytes.readInt());
+        receivedAt = System.nanoTime();
+        if (version == VERSION) {
+            sendSyncPacket(ctx, VERSION);
+        }
+    }
+
+    /** Monotonic receipt time for hiding old values after a viewer stops requesting reports. */
+    private volatile long receivedAt;
 
     /**
      * Reads a stable snapshot while preserving the distinction between no report and reported
@@ -205,7 +269,7 @@ public class MetricsSynchronizationHandler extends ChannelDuplexHandler {
      * @return true after at least one supported snapshot has been accepted
      */
     public boolean isRemoteSupported() {
-        return remote != null;
+        return remote != null && System.nanoTime() - receivedAt < 3 * INTERVAL;
     }
 
     /**
