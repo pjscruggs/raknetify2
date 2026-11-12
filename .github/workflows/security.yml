@@ -31,8 +31,8 @@ jobs:
         run: ./gradlew cyclonedxBom --no-daemon --max-workers=2 --warning-mode fail
       - name: Install verified OSV Scanner
         run: |
-          curl --fail --location --retry 3 -o "$RUNNER_TEMP/osv-scanner" https://github.com/google/osv-scanner/releases/download/v2.7.0/osv-scanner_linux_amd64
-          echo "160c6253e2922e9e0a6a9771c5c4c40a4b3c6090b34a3cdd5e80c96cc2e4218b  $RUNNER_TEMP/osv-scanner" | sha256sum --check --strict
+          curl --fail --location --retry 3 -o "$RUNNER_TEMP/osv-scanner" https://github.com/google/osv-scanner/releases/download/v2.7.1/osv-scanner_linux_amd64
+          echo "fb7dab19a8bd9bbe5c3189f09d4b7ee1820c9553a23bac202648a56efd2f6ee8  $RUNNER_TEMP/osv-scanner" | sha256sum --check --strict
           chmod +x "$RUNNER_TEMP/osv-scanner"
       - name: Reject known vulnerabilities in packaged dependencies
         run: >-
