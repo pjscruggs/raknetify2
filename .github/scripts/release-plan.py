@@ -32,9 +32,9 @@ def validate_run(run, repository):
 
 def publication_matrix(loader, destination):
     """Select independent upload jobs so a failed destination can be retried without replaying successful jobs."""
-    loaders = ['fabric', 'forge', 'neoforge'] if loader in ('all', 'all-mods') else [loader]
+    loaders = ['fabric', 'forge', 'neoforge', 'forge-mc1.20.1', 'neoforge-mc1.21.1'] if loader in ('all', 'all-mods') else [loader]
     if loader == 'all-platforms':
-        loaders = ['fabric', 'forge', 'neoforge', 'spigot']
+        loaders = ['fabric', 'forge', 'neoforge', 'forge-mc1.20.1', 'neoforge-mc1.21.1', 'spigot']
     destinations = ['modrinth', 'curseforge'] if destination == 'both' else [destination]
     validate_targets(loaders, destinations)
     return {'include': [{'loader': item, 'destination': target} for item in loaders for target in destinations]}
@@ -42,7 +42,7 @@ def publication_matrix(loader, destination):
 
 def validate_targets(loaders, destinations):
     """Reject unknown loaders and destinations before selecting an upload job or exposing credentials."""
-    if not all(item in ('fabric', 'forge', 'neoforge', 'spigot') for item in loaders):
+    if not all(item in ('fabric', 'forge', 'neoforge', 'forge-mc1.20.1', 'neoforge-mc1.21.1', 'spigot') for item in loaders):
         raise ValueError('Unknown loader')
     if not all(item in ('modrinth', 'curseforge') for item in destinations):
         raise ValueError('Unknown destination')
@@ -81,7 +81,7 @@ def verify_mod_version(path, loader, version):
         elif loader == 'spigot':
             metadata = spigot_metadata(archive)
         else:
-            filename = 'mods.toml' if loader == 'forge' else 'neoforge.mods.toml'
+            filename = 'mods.toml' if loader.split('-mc')[0] == 'forge' else 'neoforge.mods.toml'
             metadata = next(item for item in tomllib.loads(archive.read('META-INF/' + filename).decode())['mods']
                             if item['modId'] == 'raknetify')
         if metadata['version'] != version:
@@ -127,7 +127,7 @@ def verify_artifacts(folder):
     version = metadata['version']
     if not re.fullmatch(r'\d+\.\d+\.\d+-(?:alpha|beta)\.\d+\.\d+', version):
         raise ValueError('Not a clean release version')
-    for loader in ('fabric', 'forge', 'neoforge'):
+    for loader in ('fabric', 'forge', 'neoforge', 'forge-mc1.20.1', 'neoforge-mc1.21.1'):
         name = 'raknetify2-' + loader + '-' + version + '.jar'
         if name not in checked:
             raise ValueError('Missing release loader: ' + loader)

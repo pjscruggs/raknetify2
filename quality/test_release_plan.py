@@ -41,13 +41,13 @@ class ReleasePlanTests(unittest.TestCase):
     def make_bundle(self):
         """Create three small loader JARs with authentic metadata shapes and matching release checksums."""
         (self.folder / 'compatibility.json').write_text(json.dumps({'version': self.version}), encoding='utf-8')
-        for loader in ('fabric', 'forge', 'neoforge'):
+        for loader in ('fabric', 'forge', 'neoforge', 'forge-mc1.20.1', 'neoforge-mc1.21.1'):
             path = self.folder / ('raknetify2-' + loader + '-' + self.version + '.jar')
             with zipfile.ZipFile(path, 'w') as archive:
                 if loader == 'fabric':
                     archive.writestr('fabric.mod.json', json.dumps({'id': 'raknetify', 'version': self.version}))
                 else:
-                    filename = 'mods.toml' if loader == 'forge' else 'neoforge.mods.toml'
+                    filename = 'mods.toml' if loader.startswith('forge') else 'neoforge.mods.toml'
                     archive.writestr('META-INF/' + filename, '[[mods]]\nmodId="raknetify"\nversion="' + self.version + '"\n')
         self.checksums()
 
@@ -185,7 +185,7 @@ class ReleasePlanTests(unittest.TestCase):
         """Support replaying only an unsuccessful loader and destination without scheduling the other uploads."""
         self.assertEqual({'include': [{'loader': 'forge', 'destination': 'curseforge'}]},
                          self.guard.publication_matrix('forge', 'curseforge'))
-        self.assertEqual(6, len(self.guard.publication_matrix('all', 'both')['include']))
+        self.assertEqual(10, len(self.guard.publication_matrix('all', 'both')['include']))
 
     def test_checks_spigot_embedded_version_when_present(self):
         """Allow older mod-only releases but reject a mislabeled plugin added to a newer verified bundle."""
@@ -213,7 +213,7 @@ class ReleasePlanTests(unittest.TestCase):
         """Schedule each loader and destination pair once when publishing a release containing server plugins."""
         jobs = self.guard.publication_matrix('all-platforms', 'both')['include']
         pairs = {(job['loader'], job['destination']) for job in jobs}
-        expected = {(loader, host) for loader in ('fabric', 'forge', 'neoforge', 'spigot')
+        expected = {(loader, host) for loader in ('fabric', 'forge', 'neoforge', 'forge-mc1.20.1', 'neoforge-mc1.21.1', 'spigot')
                     for host in ('modrinth', 'curseforge')}
         self.assertEqual(expected, pairs)
         self.assertEqual(len(expected), len(jobs))

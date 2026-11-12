@@ -10,7 +10,7 @@ on:
         description: Mod loader or server plugin to publish
         type: choice
         default: all-mods
-        options: [all-mods, all-platforms, fabric, forge, neoforge, spigot]
+        options: [all-mods, all-platforms, fabric, forge, neoforge, forge-mc1.20.1, neoforge-mc1.21.1, spigot]
       destination:
         description: Publication destination
         type: choice

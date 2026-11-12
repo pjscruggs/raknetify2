@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.ishland.raknetify.legacy.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": ["ServerListenerMixin", "ConnectionMixin"],
+  "client": ["ServerAddressMixin", "ConnectScreenMixin"],
+  "injectors": {"defaultRequire": 1}
+}

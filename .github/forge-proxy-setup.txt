@@ -1,0 +1,23 @@
+Raknetify2 for Velocity and Forge 1.20.1
+
+Copy the two JARs in velocity/plugins to your Velocity plugins directory.
+Copy the two JARs in forge-server/mods to the Forge 1.20.1 backend mods directory.
+Replace older copies of the same components. Install the Raknetify2 Forge 1.20.1
+JAR in each player's Forge profile for UDP connections.
+
+Set announce-forge = true and player-info-forwarding-mode = "modern" in
+velocity.toml. Keep online-mode = true on an Internet-facing proxy. Configure
+the backend in Velocity's servers list. Set online-mode=false on the backend
+and restrict its listener to the proxy. Use loopback when they share a host.
+In the backend config/proxy-compatible-forge.toml set forwarding.enabled to
+true, forwarding.mode to "MODERN" and forwarding.secret to the value from the
+proxy's forwarding-secret-file. Each installation supplies its own secret.
+Enable crossStitch.enabled for modded command arguments.
+
+Start both services. Allow TCP and UDP on the public proxy port. Players enter
+raknet; followed by the proxy address. A successful UDP login appears in the
+Velocity log with the player's name and the negotiated RakNet MTU.
+
+Ambassador and Proxy Compatible Forge are distributed under LGPL-2.1-or-later.
+The sources directory contains the corresponding upstream release sources and
+license notices. The Raknetify2 distributions contain their MIT license notices.

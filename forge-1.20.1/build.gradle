@@ -1,0 +1,42 @@
+/** Builds the Java 17 endpoint against the Forge 47 game and loader APIs. */
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'com.gradleup.shadow'
+
+base { archivesName = project.archives_base_name + '-forge-mc1.20.1' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+tasks.withType(JavaCompile).configureEach { options.release = 17 }
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    runs {
+        register('server') { args '--nogui' }
+        register('client')
+    }
+}
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+}
+sourceSets.main.java.srcDir rootProject.file('native-legacy/src/main/java')
+configurations { shadowInclude }
+dependencies {
+    implementation minecraft.dependency('net.minecraftforge:forge:' + rootProject.nativeLoaders['forge-mc1.20.1'].version)
+    shadowInclude implementation(project(':common'))
+}
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('META-INF/mods.toml') { expand version: inputs.properties.version }
+    from rootProject.file('icon.png')
+}
+jar { archiveClassifier = 'dev' }
+shadowJar {
+    configurations = [project.configurations.shadowInclude]
+    archiveClassifier = ''
+    manifest { attributes 'MixinConfigs': 'raknetify-forge47.mixins.json' }
+    dependencies { exclude(dependency('it.unimi.dsi:fastutil')) }
+    from rootProject.file('LICENSE')
+    from(rootProject.file('netty-raknet/LICENSE')) { into 'META-INF/licenses/netty-raknet' }
+    mergeServiceFiles()
+}
+assemble.dependsOn shadowJar

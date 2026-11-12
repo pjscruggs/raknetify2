@@ -129,7 +129,8 @@ def expected_tags(loader, games):
         return set(games)
     if loader == 'fabric':
         return set(games) | {'fabric', 'Java 17', 'Java 21', 'Java 25', 'Client', 'Server'}
-    return set(games) | {loader, 'Java 25', 'Client', 'Server'}
+    java = {'forge-mc1.20.1': 'Java 17', 'neoforge-mc1.21.1': 'Java 21'}.get(loader, 'Java 25')
+    return set(games) | {loader.split('-mc')[0], java, 'Client', 'Server'}
 
 
 def check_upload(upload, artifacts, loader, fixture):
@@ -183,7 +184,7 @@ def main():
     """Run a bounded local contract check and always stop its listener before returning to the publication job."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--artifacts', required=True, type=Path)
-    parser.add_argument('--loader', required=True, choices=['fabric', 'forge', 'neoforge', 'spigot'])
+    parser.add_argument('--loader', required=True, choices=['fabric', 'forge', 'neoforge', 'forge-mc1.20.1', 'neoforge-mc1.21.1', 'spigot'])
     parser.add_argument('--source', type=Path, default=Path(__file__).resolve().parents[2])
     args = parser.parse_args()
     artifacts = args.artifacts.resolve()

@@ -19,11 +19,15 @@ Download from [GitHub Releases](https://github.com/pjscruggs/raknetify2/releases
 | Platform | File | Install location |
 | --- | --- | --- |
 | Fabric client or server | `raknetify2-fabric-*.jar` | `mods` |
-| Forge client or server | `raknetify2-forge-*.jar` | `mods` |
-| NeoForge client or server | `raknetify2-neoforge-*.jar` | `mods` |
+| Forge 1.20.1 client or server (Java 17) | `raknetify2-forge-mc1.20.1-*.jar` | `mods` |
+| Forge 26.3 client or server | `raknetify2-forge-*.jar` | `mods` |
+| NeoForge 1.21.1 client or server (Java 21) | `raknetify2-neoforge-mc1.21.1-*.jar` | `mods` |
+| NeoForge 26.3 client or server | `raknetify2-neoforge-*.jar` | `mods` |
 | Spigot or Paper server | `raknetify2-spigot-*.jar` | `plugins` |
 | Velocity proxy | `raknetify2-velocity-*.jar` | `plugins` |
 | BungeeCord proxy | `raknetify2-bungee-*.jar` | `plugins` |
+
+For a Forge 1.20.1 server behind Velocity, download `raknetify2-forge-proxy-mc1.20.1-*.zip`. It includes the proxy and backend plugins for FML login, modern player forwarding and modded commands. Follow `SETUP.txt` in the ZIP. Prism, CurseForge, Modrinth App and Minecraft Launcher profiles use the JAR matching the Minecraft version and mod loader selected for that instance.
 
 The included `compatibility.json` lists supported Minecraft versions and runtime requirements for Fabric. For Forge, NeoForge and Spigot/Paper, check the Minecraft version declared by that JAR.
 

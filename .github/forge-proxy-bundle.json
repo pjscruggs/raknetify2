@@ -1,0 +1,18 @@
+{
+  "velocity/plugins/Ambassador-Velocity-1.4.5-all.jar": {
+    "url": "https://cdn.modrinth.com/data/cOj6YqJM/versions/YeQbhgna/Ambassador-Velocity-1.4.5-all.jar",
+    "sha512": "214081b498644c5c640e1aea23deff0469d1c842e1142aae742143c8738a971a4898ead72da1605f1c2c202c4f1be8bcf28acc2787cbcede2a86d642ae48f81d"
+  },
+  "sources/Ambassador-349ce41f5fba50653d0aec8ebb7d77f68a5d00e1.zip": {
+    "url": "https://codeload.github.com/adde0109/Ambassador/zip/349ce41f5fba50653d0aec8ebb7d77f68a5d00e1",
+    "sha512": "ba6fff5e306459a9e4babb2b4e88cb3caf9d86d9940cce7a62fe07e186135ec24dffe197c70270fa8db2796e2e08130b3b360a1ce17cc75baa688a19e903a225"
+  },
+  "forge-server/mods/proxy-compatible-forge-1.3.1.jar": {
+    "url": "https://cdn.modrinth.com/data/vDyrHl8l/versions/qiZ49HIW/proxy-compatible-forge-1.3.1.jar",
+    "sha512": "dba5b70fedcb0f5fdc014801ab43e6d048f24b531de8aea5b70ea223760b66ae9fba3033c2ccd9d78793b9ea2f9d3b47ae1f4caa95aa129d989f97e63636b4ab"
+  },
+  "sources/Proxy-Compatible-Forge-4eb7b66dee0decdf0df8f3b9e1af9f42d617214f.zip": {
+    "url": "https://codeload.github.com/adde0109/Proxy-Compatible-Forge/zip/4eb7b66dee0decdf0df8f3b9e1af9f42d617214f",
+    "sha512": "11448d8be04f95d5762a80481bf8b4bc31716c272c3a82c9ae3bc510bfd5a15f96f5ccec02124e61bd097f16dfa669f975533d599f3b93c9be9f68f32618f4db"
+  }
+}
