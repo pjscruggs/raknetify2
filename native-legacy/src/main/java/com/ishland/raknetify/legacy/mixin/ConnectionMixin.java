@@ -60,7 +60,11 @@ abstract class ConnectionMixin {
      * @return the close future after waiting only when the caller can safely block
      */
     @Redirect(
-            method = {"m_129507_", "disconnect"},
+            method = {
+                "m_129507_(Lnet/minecraft/network/chat/Component;)V",
+                "disconnect(Lnet/minecraft/network/chat/Component;)V",
+                "disconnect(Lnet/minecraft/network/DisconnectionDetails;)V"
+            },
             at =
                     @At(
                             value = "INVOKE",
