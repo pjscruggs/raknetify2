@@ -367,6 +367,11 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.12'
+      - id: proxy-jdk
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: zulu
+          java-version: 25
       - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: zulu
@@ -375,12 +380,18 @@ jobs:
         run: python .github/scripts/install-client-libraries.py
       - name: Join the packaged FML server over TCP and RakNet
         env:
+          PROXY_JAVA: ${{ steps.proxy-jdk.outputs.path }}
           MOD_TARGET: ${{ matrix.target }}
           MOD_MODULE: ${{ matrix.module }}
           LIBGL_ALWAYS_SOFTWARE: 'true'
         run: |
-          jar=$(find "$MOD_MODULE/build/libs" -name '*.jar' ! -name '*-dev.jar')
-          xvfb-run -a python .github/scripts/legacy-loader-smoke.py --loader "$MOD_TARGET" --jar "$jar" --work-dir "$RUNNER_TEMP/legacy-$MOD_TARGET"
+          jar=$(find "$MOD_MODULE/build/libs" -name '*.jar' ! -name '*-dev.jar' ! -name '*-transport-test.jar')
+          fixture=$(find "$MOD_MODULE/build/libs" -name '*-transport-test.jar')
+          options=()
+          if [[ "$MOD_TARGET" == forge-mc1.20.1 ]]; then
+            options=(--proxy-bundle raknetify2-forge-proxy-*.zip --proxy-java "$PROXY_JAVA/bin/java")
+          fi
+          xvfb-run -a python .github/scripts/legacy-loader-smoke.py --loader "$MOD_TARGET" --jar "$jar" --fixture "$fixture" --work-dir "$RUNNER_TEMP/legacy-$MOD_TARGET" "${options[@]}"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:

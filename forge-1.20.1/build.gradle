@@ -40,3 +40,16 @@ shadowJar {
     mergeServiceFiles()
 }
 assemble.dependsOn shadowJar
+
+sourceSets {
+    transportTest {
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+}
+tasks.register('transportTestJar', Jar) {
+    archiveClassifier = 'transport-test'
+    from sourceSets.transportTest.output
+    from('src/main/resources/pack.mcmeta')
+}
+assemble.dependsOn transportTestJar
