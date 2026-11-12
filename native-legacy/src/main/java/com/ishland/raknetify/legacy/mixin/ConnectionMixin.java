@@ -54,6 +54,27 @@ import javax.crypto.Cipher;
 @Mixin(value = Connection.class, remap = false)
 abstract class ConnectionMixin {
     /**
+     * Lets a RakNet disconnect packet finish closing on its own event loop.
+     *
+     * @param close future returned by the game's channel close
+     * @return the close future after waiting only when the caller can safely block
+     */
+    @Redirect(
+            method = {"m_129507_", "disconnect"},
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target =
+                                    "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;"))
+    private ChannelFuture awaitClose(final ChannelFuture close) {
+        Channel channel = close.channel();
+        if (channel.config() instanceof RakNet.Config && channel.eventLoop().inEventLoop()) {
+            return close;
+        }
+        return close.awaitUninterruptibly();
+    }
+
+    /**
      * Keeps Forge's normal TCP bootstrap for unprefixed addresses.
      *
      * @param bootstrap configured native Minecraft bootstrap

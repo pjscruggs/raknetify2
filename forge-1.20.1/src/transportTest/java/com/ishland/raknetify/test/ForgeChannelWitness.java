@@ -89,7 +89,7 @@ public final class ForgeChannelWitness {
     private static void receive(final int value, final Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
         if (context.getDirection() == NetworkDirection.PLAY_TO_CLIENT && value == CHALLENGE) {
-            CHANNEL.sendToServer(~value);
+            CHANNEL.reply(~value, context);
         } else if (context.getDirection() == NetworkDirection.PLAY_TO_SERVER
                 && value == ~CHALLENGE) {
             System.out.println("PASS FML play channel round trip");

@@ -69,10 +69,10 @@ def client_args(args, native, folder, lock):
               'version_name': meta['id'], 'natives_directory': folder / 'natives', 'library_directory': folder / 'libraries',
               'launcher_name': 'TransportTests', 'launcher_version': '1'}
     jvm = native.launcher_arguments(meta['arguments']['jvm'] + profile['arguments']['jvm'], values)
-    return ['-Xmx1400m', *jvm, profile['mainClass'], *profile['arguments']['game'], '--gameDir', str(folder),
+    return ['-Xmx1400m', '-Djava.net.preferIPv4Stack=true', *jvm, profile['mainClass'], *profile['arguments']['game'], '--gameDir', str(folder),
             '--assetsDir', str(assets), '--assetIndex', meta['assetIndex']['id'], '--version', profile['id'],
             '--accessToken', '0', '--username', 'TransportProbe', '--uuid', '00000000000000000000000000000002',
-            '--width', '854', '--height', '480']
+            '--userType', 'legacy', '--width', '854', '--height', '480']
 
 
 def join(args, launch, server, address, name):
@@ -93,8 +93,10 @@ def join(args, launch, server, address, name):
         server.stdin.write(b'execute as TransportProbe in minecraft:the_nether run tp @s 0 100 0\n')
         server.stdin.write(b'execute as TransportProbe at @s if dimension minecraft:the_nether run say FML transport witness\n')
         server.stdin.flush()
-        await_line(player, log, 'FML transport witness')
-    await_line(server, server_log, 'TransportProbe left the game', offset=offset)
+        await_line(player, log, '[TransportProbe] FML transport witness')
+        server.stdin.write(b'kick TransportProbe Transport test complete\n')
+        server.stdin.flush()
+        await_line(server, server_log, 'TransportProbe left the game', offset=offset)
     return log
 
 
