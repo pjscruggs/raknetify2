@@ -14,7 +14,7 @@ dependencies {
     compileOnly 'org.spigotmc:spigot-api:26.3-R0.1-20261026.080323-10'
     compileOnly "io.netty:netty-all:${project.netty_version}"
     shadowInclude implementation(project(':common'))
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
     testImplementation "io.netty:netty-all:${project.netty_version}"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testRuntimeOnly 'com.google.code.gson:gson:2.9.0'

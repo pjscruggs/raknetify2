@@ -10,7 +10,7 @@ dependencies {
     compileOnly 'com.google.errorprone:error_prone_core:2.52.0'
     testImplementation 'com.google.errorprone:error_prone_core:2.52.0'
     testImplementation 'com.google.errorprone:error_prone_test_helpers:2.52.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

@@ -38,7 +38,7 @@ dependencies {
 //    compileOnly 'org.projectlombok:lombok:1.18.24' // for bungeecord sources
 
     shadowInclude implementation(project(":common"))
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
