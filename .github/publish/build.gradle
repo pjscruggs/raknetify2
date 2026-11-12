@@ -16,12 +16,10 @@ def supportedGames = supportedGames(loader, compatibility, nativeLoaders,
 def artifact = new File(releaseDirectory, "raknetify2-${loader}-${compatibility.version}.jar")
 def notes = providers.fileContents(layout.projectDirectory.file(providers.gradleProperty('changelogFile').get())).asText
 def preview = providers.gradleProperty('publishDryRun').map { it.toBoolean() }.getOrElse(true)
-def versionSuffix = destination == 'modrinth' ? loader.replace('neoforge-mc', 'nf-').replace('forge-mc', 'forge-') : loader
-def hostedVersion = compatibility.version + '+' + versionSuffix
+def hostedVersion = publicationVersion(compatibility.version, loader, destination)
 
 if (!artifact.isFile()) throw new GradleException('Missing verified release artifact: ' + artifact.name)
 if (!preview && compatibility.version.contains('dirty')) throw new GradleException('Refusing to publish an uncommitted build')
-if (destination == 'modrinth' && hostedVersion.length() > 32) throw new GradleException('Modrinth version number exceeds 32 characters: ' + hostedVersion)
 
 publishMods {
     file = artifact
@@ -52,6 +50,21 @@ publishMods {
             server = true
         }
     }
+}
+
+/**
+ * Builds a distinct public version number within the destination's metadata limit.
+ * @param release shared release version embedded in the verified JAR
+ * @param loader loader and optional Minecraft version identifying this distribution
+ * @param destination host receiving the upload
+ * @return release number with its platform suffix
+ * @throws GradleException if Modrinth would reject the version number
+ */
+static String publicationVersion(String release, String loader, String destination) {
+    if (destination != 'modrinth') return release + '+' + loader
+    String label = release + '+' + loader.replace('neoforge-mc', 'nf-').replace('forge-mc', 'forge-')
+    if (label.length() > 32) throw new GradleException('Modrinth version number exceeds 32 characters: ' + label)
+    return label
 }
 
 /**
