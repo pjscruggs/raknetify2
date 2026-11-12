@@ -16,13 +16,16 @@ def supportedGames = supportedGames(loader, compatibility, nativeLoaders,
 def artifact = new File(releaseDirectory, "raknetify2-${loader}-${compatibility.version}.jar")
 def notes = providers.fileContents(layout.projectDirectory.file(providers.gradleProperty('changelogFile').get())).asText
 def preview = providers.gradleProperty('publishDryRun').map { it.toBoolean() }.getOrElse(true)
+def versionSuffix = destination == 'modrinth' ? loader.replace('neoforge-mc', 'nf-').replace('forge-mc', 'forge-') : loader
+def hostedVersion = compatibility.version + '+' + versionSuffix
 
 if (!artifact.isFile()) throw new GradleException('Missing verified release artifact: ' + artifact.name)
 if (!preview && compatibility.version.contains('dirty')) throw new GradleException('Refusing to publish an uncommitted build')
+if (destination == 'modrinth' && hostedVersion.length() > 32) throw new GradleException('Modrinth version number exceeds 32 characters: ' + hostedVersion)
 
 publishMods {
     file = artifact
-    version = compatibility.version + '+' + loader
+    version = hostedVersion
     displayName = "Raknetify2 ${compatibility.version} (${loader})"
     changelog = notes
     type = compatibility.version.contains('-beta.') ? BETA : ALPHA
