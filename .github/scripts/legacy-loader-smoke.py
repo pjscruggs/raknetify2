@@ -71,7 +71,7 @@ def client_args(args, native, folder, lock):
     jvm = native.launcher_arguments(meta['arguments']['jvm'] + profile['arguments']['jvm'], values)
     return ['-Xmx1400m', '-Djava.net.preferIPv4Stack=true', *jvm, profile['mainClass'], *profile['arguments']['game'], '--gameDir', str(folder),
             '--assetsDir', str(assets), '--assetIndex', meta['assetIndex']['id'], '--version', profile['id'],
-            '--accessToken', '0', '--username', 'TransportProbe', '--uuid', '00000000000000000000000000000002',
+            '--accessToken', '0', '--username', 'TransportProbe', '--uuid', native.sibling('session-fixture').PLAYER_ID,
             '--userType', 'legacy', '--width', '854', '--height', '480']
 
 
@@ -149,12 +149,32 @@ def direct_joins(args, native, launch, server):
     """Require real FML play over TCP, an explicit UDP port and a DNS-only UDP hostname."""
     hosts = args.work_dir / 'client/fixture-hosts'
     hosts.write_text('127.0.0.1 localhost fixture.test target.fixture.test target.fixture.test.\n::1 localhost\n')
-    normal = [('127.0.0.1:28990', 'tcp'), ('raknet;127.0.0.1:28991', 'raknet')]
-    for address, name in normal:
-        native.check_failures(join(args, launch, server, address, name))
-    with native.sibling('service-dns').running(28991) as resolver:
-        dns = ['-Ddns.server=' + resolver, '-Djdk.net.hosts.file=' + str(hosts), *launch]
-        native.check_failures(join(args, dns, server, 'raknet;fixture.test', 'service'))
+    native.check_failures(join(args, launch, server, '127.0.0.1:28990', 'tcp'))
+    with native.sibling('login-ack-relay').running(28991) as (port, delayed):
+        for prefix, name in [('raknet;', 'raknet'), ('raknetl;', 'large')]:
+            address = prefix + '127.0.0.1:' + str(port)
+            native.check_failures(join(args, launch, server, address, name))
+        with native.sibling('service-dns').running(port) as resolver:
+            dns = ['-Ddns.server=' + resolver, '-Djdk.net.hosts.file=' + str(hosts), *launch]
+            native.check_failures(join(args, dns, server, 'raknet;fixture.test', 'service'))
+        assert delayed[0] > 0, 'No server acknowledgements were delayed'
+
+
+def encrypted_direct(args, native, launch, command, folder):
+    """Require real RSA/AES login and FML play while key-response ACKs arrive after server frames."""
+    properties = folder / 'server.properties'
+    offline = properties.read_text()
+    properties.write_text(offline.replace('online-mode=false', 'online-mode=true') + 'enforce-secure-profile=false\n')
+    try:
+        with native.sibling('session-fixture').SessionAuthority() as authority:
+            auth = ['-Dminecraft.api.' + service + '.host=' + authority.origin
+                    for service in ['auth', 'account', 'session', 'services']]
+            with running([command[0], *auth, *command[1:]], folder, args.work_dir / 'server.log', 'stop') as server:
+                await_line(server, args.work_dir / 'server.log', 'Done (')
+                direct_joins(args, native, [*auth, *launch], server)
+            assert len(authority.sessions) == 4 and len(authority.accepted) == 4, 'Missing native encrypted sessions'
+    finally:
+        properties.write_text(offline)
 
 
 def main():
@@ -185,9 +205,7 @@ def main():
     argfile = folder / 'libraries/net' / group / loader / lock['version'] / platform_args
     server_log = args.work_dir / 'server.log'
     command = [args.java, '-Xmx1200m', '-Draknetify.fabric.portOverride=28991', '@' + str(argfile), 'nogui']
-    with running(command, folder, server_log, 'stop') as server:
-        await_line(server, server_log, 'Done (')
-        direct_joins(args, native, launch, server)
+    encrypted_direct(args, native, launch, command, folder)
     native.check_failures(server_log)
     if args.proxy_bundle:
         server_log.replace(args.work_dir / 'direct-server.log')

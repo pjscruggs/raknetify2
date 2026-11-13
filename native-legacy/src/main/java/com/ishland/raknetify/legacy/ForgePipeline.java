@@ -27,6 +27,7 @@ package com.ishland.raknetify.legacy;
 
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.CompatibilityNegotiation;
+import com.ishland.raknetify.common.connection.LocalWriteCompletion;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.connection.SynchronizationLayer;
@@ -43,6 +44,7 @@ import io.netty.channel.ChannelPromise;
 
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
+import net.minecraft.network.protocol.login.ServerboundKeyPacket;
 
 import network.ycc.raknet.RakNet;
 
@@ -106,7 +108,8 @@ final class ForgePipeline extends ChannelInitializer<Channel> {
     /** Observes decoded packets before the vanilla encoder writes their bytes. */
     private static final class PacketTransitions extends ChannelDuplexHandler {
         /**
-         * Flushes a world transition and lets login compression change before the next write.
+         * Flushes world transitions and completes login transitions after local packet encoding.
+         * Encryption must be ready for the server response without waiting for a remote ACK.
          *
          * @param ctx outbound position in the Minecraft pipeline
          * @param msg outbound Minecraft packet or pipeline message
@@ -125,9 +128,9 @@ final class ForgePipeline extends ChannelInitializer<Channel> {
                 ctx.write(RakNetSimpleMultiChannelCodec.SIGNAL_START_MULTICHANNEL)
                         .addListener(RakNet.INTERNAL_WRITE_LISTENER);
             }
-            if (msg instanceof ClientboundLoginCompressionPacket) {
-                promise.trySuccess();
-                ctx.write(msg).addListener(RakNet.INTERNAL_WRITE_LISTENER);
+            if (msg instanceof ServerboundKeyPacket
+                    || msg instanceof ClientboundLoginCompressionPacket) {
+                LocalWriteCompletion.write(ctx, msg, promise);
                 return;
             }
             super.write(ctx, msg, promise);

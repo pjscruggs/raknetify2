@@ -116,7 +116,7 @@ class SessionHandler(BaseHTTPRequestHandler):
             self.reply(200, {'profilePropertyKeys': [], 'playerCertificateKeys': []})
         elif request.path in ('/verify', '/session/minecraft/hasJoined'):
             self.reply(*fixture.verify(parse_qs(request.query)))
-        elif request.path == '/profile/' + PLAYER_ID:
+        elif request.path in ('/profile/' + PLAYER_ID, '/session/minecraft/profile/' + PLAYER_ID):
             self.reply(200, {'id': PLAYER_ID, 'name': 'TransportProbe', 'properties': [], 'profileActions': []})
         else:
             self.reply(404)
