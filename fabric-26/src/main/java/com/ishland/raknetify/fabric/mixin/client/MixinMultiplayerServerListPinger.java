@@ -25,6 +25,7 @@
 
 package com.ishland.raknetify.fabric.mixin.client;
 
+import com.ishland.raknetify.common.connection.RakNetServiceAddress;
 import com.ishland.raknetify.common.util.PrefixUtil;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -58,6 +59,6 @@ public abstract class MixinMultiplayerServerListPinger {
     private ServerAddress modifyRaknetAddress(
             final String address, final Operation<ServerAddress> original) {
         final PrefixUtil.Info info = PrefixUtil.getInfo(address);
-        return original.call(info.stripped());
+        return RakNetServiceAddress.mark(original.call(info.stripped()), info);
     }
 }

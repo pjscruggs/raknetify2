@@ -28,7 +28,7 @@ def key(row):
 def network(tier):
     """Retain all release shards and use one representative shard per dependency sweep on pull requests."""
     linux = 'ubuntu-24.04'
-    suites = ['server', 'ordered', 'proxy', 'bungee', 'proxy-protocol', 'disconnect', 'polymer', 'polymer-krypton', 'packetfixer-krypton', 'packetfixer-polymer-krypton', 'ordering', 'transfers', 'transfer-clients', 'fastipping']
+    suites = ['server', 'ordered', 'proxy', 'bungee', 'proxy-protocol', 'disconnect', 'polymer', 'polymer-krypton', 'packetfixer-krypton', 'packetfixer-polymer-krypton', 'create', 'ordering', 'transfers', 'transfer-clients', 'fastipping']
     rows = [{'os': linux, 'suite': suite} for suite in suites]
     shards = [1] if tier == 'pull_request' else range(1, 5)
     rows.extend({'os': linux, 'suite': suite, 'shard': shard}

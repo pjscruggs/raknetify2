@@ -58,6 +58,14 @@ tasks.register('qualityChecks') {
 subprojects {
 	apply plugin: 'java'
 	apply plugin: 'java-library'
+    // DNS service discovery is per RakNet connection. Keep Java's system resolver in charge.
+    plugins.withId('com.gradleup.shadow') {
+        tasks.named('shadowJar') {
+            exclude 'META-INF/services/java.net.spi.InetAddressResolverProvider'
+            exclude 'META-INF/services/sun.net.spi.nameservice.NameServiceDescriptor'
+            relocate 'org.xbill.DNS', 'com.ishland.raknetify.internal.dns'
+        }
+    }
 	apply plugin: 'net.ltgt.errorprone'
 	dependencies {
 		errorprone 'com.google.errorprone:error_prone_core:2.52.0'

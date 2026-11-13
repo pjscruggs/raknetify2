@@ -39,6 +39,8 @@ Development builds are available from [GitHub Actions](https://github.com/pjscru
 2. Allow UDP traffic on the server's Minecraft port, using the same port number as TCP. Configure both the firewall and port forwarding when applicable.
 3. Connect using an address such as `raknet;example.com` or `raknet;example.com:25565`.
 
+To use one public hostname for separate TCP and RakNet listeners, publish an optional DNS SRV record such as `_raknetify._udp.play.example.com. 300 IN SRV 0 0 25570 udp.example.com.` A prefixed address uses this record. An explicit port takes precedence. Without the record, the client uses Minecraft's normal address lookup.
+
 Install Raknetify2 in place of Raknetify. Do not install both. Normal server addresses continue to use TCP.
 
 Encrypted RakNet connections require the authenticated encryption protocol on both ends. Original Raknetify and older Raknetify2 releases cannot connect to updated clients or servers over encrypted RakNet.

@@ -1,6 +1,7 @@
 """Run real Fabric client address classes without starting graphics or joining a server."""
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -117,12 +118,21 @@ def clear_mixin_exports(folder):
         shutil.rmtree(export)
 
 
+def fixture_dns():
+    """Load the loopback SRV authority used for real Minecraft address resolution."""
+    spec = importlib.util.spec_from_file_location('service_dns', Path(__file__).with_name('service-dns.py'))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.running()
+
+
 def run(args, version, metadata, lock):
     """Require all native client address witnesses and fail on mixin or linkage errors."""
     folder, libraries = prepare(args, version, metadata, lock)
     clear_mixin_exports(folder)
     command = launch_command(args, version, folder, libraries)
-    with (folder / 'client.log').open('w', encoding='utf8') as output:
+    with fixture_dns() as dns, (folder / 'client.log').open('w', encoding='utf8') as output:
+        command.insert(1, '-Ddns.server=' + dns)
         result = subprocess.run(command, cwd=folder, stdout=output, stderr=subprocess.STDOUT, timeout=180)
     text = (folder / 'client.log').read_text()
     assert result.returncode == 0, str(folder / 'client.log')
@@ -143,6 +153,7 @@ def run(args, version, metadata, lock):
         check_address_fallback_witness(version, text)
         check_chat_witness(version, text)
         if not args.ordering_only:
+            assert 'PASS native RakNet SRV' in text
             assert text.count('PASS connect address ') == 18
             assert text.count('PASS ping address ') == 18
     for failure in ['Mixin apply failed', 'Critical injection failure', 'NoClassDefFoundError']:

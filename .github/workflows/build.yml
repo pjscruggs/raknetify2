@@ -328,6 +328,15 @@ jobs:
           --lock .github/polymer-versions.json
           --work-dir "$RUNNER_TEMP/raknetify-smoke/transfer-clients"
           --java-21 "${{ steps.java21.outputs.path }}/bin/java"
+      - name: Install Create client display dependencies
+        if: matrix.suite == 'create'
+        run: python .github/scripts/install-client-libraries.py
+      - name: Create trains and mechanical bearings over TCP and delayed RakNet
+        if: matrix.suite == 'create'
+        run: >-
+          xvfb-run -a python .github/scripts/create-smoke.py --jar fabric-universal/build/libs/*.jar
+          --fixture transport-test-client/build/libs/*.jar --java "${{ steps.java21.outputs.path }}/bin/java"
+          --work-dir "$RUNNER_TEMP/raknetify-smoke/create"
       - name: Fast IP Ping client addresses
         if: matrix.suite == 'fastipping'
         run: >-

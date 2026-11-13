@@ -25,23 +25,7 @@
 
 package com.ishland.raknetify.legacy;
 
-import com.ishland.raknetify.common.util.PrefixUtil;
+import com.ishland.raknetify.common.connection.RakNetServiceAddress;
 
-import org.jspecify.annotations.Nullable;
-
-/** Associates one parsed multiplayer server address with its requested transport. */
-public interface TransportAddress {
-    /**
-     * Returns the selection entered by the player, or null for a normal TCP entry.
-     *
-     * @return the transport selection for this address, or null for normal TCP
-     */
-    PrefixUtil.@Nullable Info raknetify$selection();
-
-    /**
-     * Records the transport selection after vanilla-compatible parsing.
-     *
-     * @param selection transport flags captured when parsing the server address
-     */
-    void raknetify$selection(PrefixUtil.Info selection);
-}
+/** Associates a legacy loader address with its original transport selection. */
+public interface TransportAddress extends RakNetServiceAddress {}

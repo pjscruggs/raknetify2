@@ -25,6 +25,7 @@
 
 package com.ishland.raknetify.fabric.mixin.client;
 
+import com.ishland.raknetify.common.connection.RakNetServiceAddress;
 import com.ishland.raknetify.common.util.PrefixUtil;
 import com.ishland.raknetify.fabric.common.client.ServerAddressUtil;
 import com.ishland.raknetify.fabric.common.connection.RakNetClientConnectionUtil;
@@ -76,11 +77,16 @@ public class MixinConnectionScreen1 extends Thread {
     private void onInit(final CallbackInfo ci) {
         final PrefixUtil.Info info = PrefixUtil.getInfo(this.val$hostAndPort.getHost());
         if (info.useRakNet()) {
+            PrefixUtil.Info selection =
+                    ((RakNetServiceAddress) (Object) this.val$hostAndPort).raknetify$selection();
             this.isRaknet = true;
             this.raknetLargeMTU = info.largeMTU();
             this.val$hostAndPort =
                     ServerAddressUtil.withAddress(
                             this.val$hostAndPort, info.stripped(), this.val$hostAndPort.getPort());
+            if (selection != null) {
+                RakNetServiceAddress.mark(this.val$hostAndPort, selection);
+            }
         }
     }
 

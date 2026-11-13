@@ -60,6 +60,9 @@ public final class ClientAddressTest implements PreLaunchEntrypoint {
                 SignedChatTest.verify();
                 TransferNativeTest.verify();
                 AddressFallbackNativeTest.verify();
+                if (System.getProperty("dns.server") != null) {
+                    new AddressChecks().verifyService();
+                }
             }
             if (!Boolean.getBoolean("raknetify.test.orderingOnly")) {
                 AddressChecks checks = new AddressChecks();
@@ -182,6 +185,40 @@ public final class ClientAddressTest implements PreLaunchEntrypoint {
                     checkPing(prefix + destination, destination);
                 }
             }
+        }
+
+        /**
+         * Checks the transformed native SRV provider and preserves an explicitly entered default
+         * port.
+         *
+         * @throws ReflectiveOperationException if a native redirect method is missing
+         */
+        private void verifyService() throws ReflectiveOperationException {
+            if (System.getProperty("dns.server") == null) {
+                return;
+            }
+            Class<?> service =
+                    type(
+                            "net.minecraft.class_6371",
+                            "net.minecraft.client.multiplayer.resolver.ServerRedirectHandler");
+            Object handler =
+                    service.getMethod(modern ? "createDnsSrvRedirectHandler" : "method_36909")
+                            .invoke(null);
+            Method lookup = service.getMethod("lookupRedirect", address);
+            for (String prefix : new String[] {"raknet;", "raknetl;"}) {
+                Object entered = parse.invoke(null, prefix + "fixture.test");
+                Optional<?> answer = (Optional<?>) lookup.invoke(handler, entered);
+                Object target = answer.orElseThrow();
+                require(
+                        "target.fixture.test.".equals(host.invoke(target))
+                                && port.invoke(target).equals(25437),
+                        "Wrong UDP service");
+                Object explicit = parse.invoke(null, prefix + "fixture.test:25565");
+                require(
+                        ((Optional<?>) lookup.invoke(handler, explicit)).isEmpty(),
+                        "Explicit default port followed SRV");
+            }
+            System.out.println("PASS native RakNet SRV");
         }
 
         /**

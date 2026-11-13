@@ -26,20 +26,37 @@
 package com.ishland.raknetify.fabric.mixin.common;
 
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.connection.RakNetServiceAddress;
 import com.ishland.raknetify.common.util.PrefixUtil;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 
 import net.minecraft.client.network.ServerAddress;
 
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 
 /**
  * Preserves transport prefixes through Minecraft address parsing without passing them to host
  * parsing.
  */
 @Mixin(ServerAddress.class)
-public class MixinServerAddress {
+public class MixinServerAddress implements RakNetServiceAddress {
+    /** Original user input for this address, or null for vanilla service lookup. */
+    @Unique private PrefixUtil.@Nullable Info raknetify$info;
+
+    /** {@inheritDoc} */
+    @Override
+    public PrefixUtil.@Nullable Info raknetify$selection() {
+        return raknetify$info;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void raknetify$selection(final PrefixUtil.Info selection) {
+        raknetify$info = selection;
+    }
 
     /**
      * Parses the unprefixed address, then restores transport selection on its normalized hostname.
@@ -54,10 +71,14 @@ public class MixinServerAddress {
         PrefixUtil.Info info = PrefixUtil.getInfo(address);
         if (info.useRakNet()) {
             ServerAddress addr = original.call(info.stripped());
-            return new ServerAddress(
-                    (info.largeMTU() ? Constants.RAKNET_LARGE_MTU_PREFIX : Constants.RAKNET_PREFIX)
-                            + addr.getAddress(),
-                    addr.getPort());
+            return RakNetServiceAddress.mark(
+                    new ServerAddress(
+                            (info.largeMTU()
+                                            ? Constants.RAKNET_LARGE_MTU_PREFIX
+                                            : Constants.RAKNET_PREFIX)
+                                    + addr.getAddress(),
+                            addr.getPort()),
+                    info);
         } else {
             return original.call(address);
         }

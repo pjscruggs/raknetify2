@@ -40,6 +40,7 @@
     "common.MixinServerAddress",
     "client.MixinClientPlayNetworkHandler",
     "client.MixinConnectionScreen1",
+    "client.MixinServiceRedirect",
     "client.MixinMultiplayerServerListPinger",
     "client.MixinMultiplayerServerListPinger1"
   ]
