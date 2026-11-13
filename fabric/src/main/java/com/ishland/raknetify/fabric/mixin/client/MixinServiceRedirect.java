@@ -54,6 +54,9 @@ public interface MixinServiceRedirect {
             final DirContext context,
             final ServerAddress address,
             final CallbackInfoReturnable<Optional<ServerAddress>> result) {
-        RakNetServiceLookup.redirect(address, ServerAddress::new, result::setReturnValue);
+        var decision = RakNetServiceLookup.redirect(address, ServerAddress::new);
+        if (decision.handled()) {
+            result.setReturnValue(decision.destination());
+        }
     }
 }

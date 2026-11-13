@@ -28,35 +28,35 @@ package com.ishland.raknetify.legacy.mixin;
 import com.ishland.raknetify.common.connection.RakNetServiceLookup;
 
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.multiplayer.resolver.ServerNameResolver;
 import net.minecraft.client.multiplayer.resolver.ServerRedirectHandler;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.Optional;
 
-import javax.naming.directory.DirContext;
-
-/** Looks up RakNet service records on Minecraft's resolver thread before vanilla SRV fallback. */
-@Mixin(value = ServerRedirectHandler.class, remap = false)
-public interface MixinServiceRedirect {
+/** Chooses the UDP service inside Minecraft's native host and IP block-list checks. */
+@Mixin(value = ServerNameResolver.class, remap = false)
+abstract class MixinServiceRedirect {
     /**
-     * Handles prefixed names before Minecraft attempts its ordinary redirect.
+     * Resolves an optional UDP service before the ordinary Minecraft redirect.
      *
-     * @param context native DNS context
-     * @param address original address approved by Minecraft
-     * @param result callback receiving the selected service address
+     * @param original native TCP service resolver
+     * @param input address retaining the user's port selection
+     * @return selected service or the normal Minecraft fallback
      */
-    @Inject(
-            method = {"m_171898_", "lambda$createDnsSrvRedirectHandler$1"},
-            at = @At("HEAD"),
-            cancellable = true)
-    static void raknetify$redirect(
-            final DirContext context,
-            final ServerAddress address,
-            final CallbackInfoReturnable<Optional<ServerAddress>> result) {
-        RakNetServiceLookup.redirect(address, ServerAddress::new, result::setReturnValue);
+    @Redirect(
+            method = "resolveAddress",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target =
+                                    "Lnet/minecraft/client/multiplayer/resolver/ServerRedirectHandler;lookupRedirect(Lnet/minecraft/client/multiplayer/resolver/ServerAddress;)Ljava/util/Optional;"))
+    private Optional<ServerAddress> selectNamed(
+            final ServerRedirectHandler original, final ServerAddress input) {
+        var decision = RakNetServiceLookup.redirect(input, ServerAddress::new);
+        return decision.handled() ? decision.destination() : original.lookupRedirect(input);
     }
 }

@@ -145,6 +145,18 @@ def test_proxy(args, launch, server_command, folder):
         await_line(velocity, proxy_log, 'TransportProbe logged in via RakNet')
 
 
+def direct_joins(args, native, launch, server):
+    """Require real FML play over TCP, an explicit UDP port and a DNS-only UDP hostname."""
+    hosts = args.work_dir / 'client/fixture-hosts'
+    hosts.write_text('127.0.0.1 localhost fixture.test target.fixture.test target.fixture.test.\n::1 localhost\n')
+    normal = [('127.0.0.1:28990', 'tcp'), ('raknet;127.0.0.1:28991', 'raknet')]
+    for address, name in normal:
+        native.check_failures(join(args, launch, server, address, name))
+    with native.sibling('service-dns').running(28991) as resolver:
+        dns = ['-Ddns.server=' + resolver, '-Djdk.net.hosts.file=' + str(hosts), *launch]
+        native.check_failures(join(args, dns, server, 'raknet;fixture.test', 'service'))
+
+
 def main():
     """Use distinct TCP and UDP ports so successful quick play cannot be a TCP fallback."""
     parser = argparse.ArgumentParser()
@@ -175,8 +187,7 @@ def main():
     command = [args.java, '-Xmx1200m', '-Draknetify.fabric.portOverride=28991', '@' + str(argfile), 'nogui']
     with running(command, folder, server_log, 'stop') as server:
         await_line(server, server_log, 'Done (')
-        for address, name in [('127.0.0.1:28990', 'tcp'), ('raknet;127.0.0.1:28991', 'raknet')]:
-            native.check_failures(join(args, launch, server, address, name))
+        direct_joins(args, native, launch, server)
     native.check_failures(server_log)
     if args.proxy_bundle:
         server_log.replace(args.work_dir / 'direct-server.log')

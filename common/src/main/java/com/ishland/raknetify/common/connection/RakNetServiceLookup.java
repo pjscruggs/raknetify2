@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
 /**
  * Looks up the optional RakNet UDP service inside Minecraft's normal redirect and block-list
@@ -60,15 +59,13 @@ public final class RakNetServiceLookup {
      * @param address native address carrying transport metadata
      * @param destination constructs a native address with the advertised host and port
      * @param <T> native address type
-     * @param answer receives a redirect or an empty result when the player supplied a port
+     * @return an explicit redirect decision or the instruction to use vanilla DNS
      */
-    public static <T> void redirect(
-            final T address,
-            final BiFunction<String, Integer, T> destination,
-            final Consumer<Optional<T>> answer) {
+    public static <T> Decision<T> redirect(
+            final T address, final BiFunction<String, Integer, T> destination) {
         PrefixUtil.Info info = ((RakNetServiceAddress) address).raknetify$selection();
         if (info == null) {
-            return;
+            return new Decision<>(false, Optional.empty());
         }
         // Snapshot query properties follow the host and do not participate in DNS.
         String input = info.stripped().split("\\?", 2)[0];
@@ -77,11 +74,10 @@ public final class RakNetServiceLookup {
         try {
             endpoint = HostAndPort.fromString(hostPort);
         } catch (IllegalArgumentException invalid) {
-            return;
+            return new Decision<>(false, Optional.empty());
         }
         if (endpoint.hasPort() || InetAddresses.isInetAddress(endpoint.getHost())) {
-            answer.accept(Optional.empty());
-            return;
+            return new Decision<>(true, Optional.empty());
         }
         try {
             String host = IDN.toASCII(endpoint.getHost(), IDN.USE_STD3_ASCII_RULES);
@@ -90,7 +86,8 @@ public final class RakNetServiceLookup {
             if (records != null) {
                 SRVRecord entry = select(records);
                 if (entry != null) {
-                    answer.accept(
+                    return new Decision<>(
+                            true,
                             Optional.of(
                                     destination.apply(
                                             entry.getTarget().equals(Name.root)
@@ -102,7 +99,17 @@ public final class RakNetServiceLookup {
         } catch (TextParseException | IllegalArgumentException invalid) {
             // Continue through the native resolver when the name cannot form a service record.
         }
+        return new Decision<>(false, Optional.empty());
     }
+
+    /**
+     * Distinguishes an absent UDP record from an explicit port that must bypass all SRV lookup.
+     *
+     * @param handled whether Minecraft should skip its normal TCP service lookup
+     * @param destination chosen service, or empty to use the original port
+     * @param <T> native Minecraft destination
+     */
+    public record Decision<T>(boolean handled, Optional<T> destination) {}
 
     /**
      * Draws a target by weight among the records sharing the lowest advertised priority.
