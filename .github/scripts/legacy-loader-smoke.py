@@ -81,6 +81,10 @@ def join(args, launch, server, address, name):
     server_log = args.work_dir / 'server.log'
     client = args.work_dir / 'client'
     offset = server_log.stat().st_size
+    config = client / 'config'
+    config.mkdir(exist_ok=True)
+    name_on_disk = 'neoforge-client.toml' if args.loader.startswith('neoforge') else 'forge-client.toml'
+    (config / name_on_disk).write_text('[client]\nshowLoadWarnings=false\n')
     (client/'options.txt').write_text('onboardAccessibility:false\nsoundCategory_master:0.0\nrenderDistance:3\n')
     arguments = [*launch, '--quickPlayMultiplayer', address]
     argfile = client / 'quickplay.args'
