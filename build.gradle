@@ -18,7 +18,7 @@ buildscript {
 
 plugins {
 	id 'net.ltgt.errorprone' version '5.2.0' apply false
-	id 'org.cyclonedx.bom' version '3.5.1'
+	id 'org.cyclonedx.bom' version '3.6.0'
 	id 'fabric-loom' version '1.19.4' apply false
 	id 'net.fabricmc.fabric-loom' version '1.19.4' apply false
 	id 'com.gradleup.shadow' version '9.6.1' apply false
