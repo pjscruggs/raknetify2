@@ -85,6 +85,10 @@ public class RakNetVelocityChannelEventListener extends ChannelDuplexHandler {
     public void write(
             final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise)
             throws Exception {
+        if ("net.elytrium.limboapi.injection.packet.ServerLoginSuccessHook"
+                .equals(msg.getClass().getName())) {
+            LegacyLimboFrames.install(ctx);
+        }
         if (msg instanceof SetCompressionPacket) {
             final MultiChannelingStreamingCompression compression =
                     ctx.channel().pipeline().get(MultiChannelingStreamingCompression.class);
