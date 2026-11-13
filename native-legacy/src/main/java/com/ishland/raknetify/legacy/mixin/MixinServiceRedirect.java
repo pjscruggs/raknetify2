@@ -53,7 +53,7 @@ public interface MixinServiceRedirect {
             method = {"m_171898_", "lambda$createDnsSrvRedirectHandler$1"},
             at = @At("HEAD"),
             cancellable = true)
-    private static void raknetify$redirect(
+    static void raknetify$redirect(
             final DirContext context,
             final ServerAddress address,
             final CallbackInfoReturnable<Optional<ServerAddress>> result) {

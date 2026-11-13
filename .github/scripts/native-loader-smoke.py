@@ -335,7 +335,7 @@ def authentication_arguments(args):
 def check_failures(log):
     """Reject transformation and ownership failures even if the game continued to a successful probe."""
     text = log.read_text(encoding='utf-8')
-    for failure in ('Critical injection failure', 'Mixin apply failed', 'LEAK:', 'InvalidMixinException',
+    for failure in ('Critical injection failure', 'Mixin apply failed', 'LEAK:', 'InvalidMixinException', 'InvalidInterfaceMixinException',
                     'Error loading class: net/fabricmc', 'Error loading class: org/quiltmc',
                     'DecoderException', 'EncoderException', 'BlockingOperationException'):
         assert failure not in text, (log, failure)
