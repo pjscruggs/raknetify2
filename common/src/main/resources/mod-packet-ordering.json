@@ -404,9 +404,9 @@
   "lain.mods.cos.impl.network.packet.PacketSyncCosArmor": 2,
   "lain.mods.cos.impl.network.packet.PacketSyncHiddenFlags": 2,
   "me.fzzyhmstrs.fzzy_config.networking.ConfigPermissionsS2CCustomPayload": 3,
-  "me.fzzyhmstrs.fzzy_config.networking.ConfigSyncS2CCustomPayload": 3,
-  "me.fzzyhmstrs.fzzy_config.networking.ConfigUpdateC2SCustomPayload": 3,
-  "me.fzzyhmstrs.fzzy_config.networking.ConfigUpdateS2CCustomPayload": 3,
+  "me.fzzyhmstrs.fzzy_config.networking.ConfigSyncS2CCustomPayload": -3,
+  "me.fzzyhmstrs.fzzy_config.networking.ConfigUpdateC2SCustomPayload": -3,
+  "me.fzzyhmstrs.fzzy_config.networking.ConfigUpdateS2CCustomPayload": -3,
   "me.fzzyhmstrs.fzzy_config.networking.DynamicIdsS2CCustomPayload": 3,
   "me.fzzyhmstrs.fzzy_config.networking.SettingForwardCustomPayload": 3,
   "net.addictives.network.visualsyncpacket": 2,
@@ -656,7 +656,10 @@
   "net.ltxprogrammer.changed.network.packet.MountTransfurPacket": 2,
   "net.ltxprogrammer.changed.network.packet.MultiRotateHeadPacket": 2,
   "net.ltxprogrammer.changed.network.packet.QueryTransfurPacket": 2,
-  "net.ltxprogrammer.changed.network.packet.SeatEntityInfoPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.SeatEntityInfoPacket": {
+    "clientbound": -3,
+    "serverbound": 2
+  },
   "net.ltxprogrammer.changed.network.packet.SectionLatexCoversUpdatePacket": 7,
   "net.ltxprogrammer.changed.network.packet.ServerboundSetGluBlockPacket": 2,
   "net.ltxprogrammer.changed.network.packet.SetTransfurVariantDataPacket": 2,
@@ -1025,7 +1028,7 @@
     "serverbound": 2
   },
   "team.creative.creativecore.common.gui.packet.OpenGuiPacket": {
-    "clientbound": 3,
+    "clientbound": -3,
     "serverbound": 2
   },
   "team.creative.creativecore.common.gui.packet.SyncPacket": {
@@ -1047,9 +1050,15 @@
   "top.theillusivec4.curios.common.network.server.SPacketQuickMove": 3,
   "top.theillusivec4.curios.common.network.server.SPacketScroll": 3,
   "top.theillusivec4.curios.common.network.server.SPacketSetIcons": -3,
-  "top.theillusivec4.curios.common.network.server.sync.SPacketSyncCurios": 2,
+  "top.theillusivec4.curios.common.network.server.sync.SPacketSyncCurios": {
+    "clientbound": -3,
+    "serverbound": 2
+  },
   "top.theillusivec4.curios.common.network.server.sync.SPacketSyncData": -3,
-  "top.theillusivec4.curios.common.network.server.sync.SPacketSyncModifiers": 2,
+  "top.theillusivec4.curios.common.network.server.sync.SPacketSyncModifiers": {
+    "clientbound": -3,
+    "serverbound": 2
+  },
   "top.theillusivec4.curios.common.network.server.sync.SPacketSyncRender": 2,
   "top.theillusivec4.curios.common.network.server.sync.SPacketSyncStack": 2,
   "vectorwing.farmersdelight.common.network.ModNetworking$FlipSkilletMessage": 2,
