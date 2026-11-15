@@ -133,7 +133,8 @@ public final class ModPayloadOrdering {
     private static int rawChannel(
             final String identifier, final ByteBuf payload, final boolean clientSender) {
         return switch (identifier) {
-            case "forge:split", "supermartijn642configlib:sync_configs" -> FENCED;
+            case "forge:split", "supermartijn642configlib:sync_configs", "octolib:config_sync" ->
+                    FENCED;
             case "jei:channel",
                     "jei:recipe_transfer_result_channel",
                     "trade_cycling:cycle_trades" ->
@@ -167,7 +168,8 @@ public final class ModPayloadOrdering {
             case "ftblibrary:edit_nbt",
                     "ftblibrary:edit_nbt_response",
                     "ftblibrary:edit_config",
-                    "ftblibrary:sync_known_server_registries" ->
+                    "ftblibrary:sync_known_server_registries",
+                    "octolib:config_sync" ->
                     FENCED;
             case "ftbessentials:update_tab_name" -> 1;
             default -> 0;

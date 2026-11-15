@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -41,6 +42,7 @@ import network.ycc.raknet.frame.FrameData;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -65,7 +67,44 @@ class ModDependencyTransportTest {
     })
     void stateRebuildRetainsBothDeliveryDependencies(
             final String packetClass, final boolean clientSender) {
-        EmbeddedChannel server = endpoint(packetClass, clientSender);
+        exerciseBoundaries(
+                endpoint(packetClass, clientSender), Unpooled.buffer().writeByte(8).writeByte(250));
+    }
+
+    /**
+     * Client-only registration must not hide configuration dependencies from the sending server.
+     *
+     * @param wrapped whether Forge's Architectury envelope carries the inner identifier
+     */
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void clientOnlyConfigurationRegistrationRetainsDeliveryBoundaries(final boolean wrapped) {
+        String identifier = wrapped ? "architectury:network" : "octolib:config_sync";
+        var codec = new RakNetSimpleMultiChannelCodec(0xfd);
+        codec.addHandler((bytes, quiet) -> {
+            int id = bytes.getUnsignedByte(bytes.readerIndex());
+            return id == 8
+                    ? ModPayloadOrdering.channel(
+                            identifier,
+                            bytes.slice(bytes.readerIndex() + 1, bytes.readableBytes() - 1),
+                            false)
+                    : id;
+        });
+        ByteBuf message = Unpooled.buffer().writeByte(8);
+        if (wrapped) {
+            byte[] name = "octolib:config_sync".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            message.writeByte(name.length).writeBytes(name);
+        }
+        exerciseBoundaries(begin(codec), message);
+    }
+
+    /**
+     * Drives independently acknowledged predecessors and successors through a real mod boundary.
+     *
+     * @param server ready production codec and delivery queue
+     * @param message encoded mod payload owned by the endpoint
+     */
+    private static void exerciseBoundaries(final EmbeddedChannel server, final ByteBuf message) {
         Receipts receipts = new Receipts();
         server.pipeline().addFirst(receipts);
         try {
@@ -73,7 +112,7 @@ class ModDependencyTransportTest {
             server.writeOutbound(Unpooled.buffer().writeByte(7));
             expectFrame(server, 2);
             expectFrame(server, 7);
-            server.writeOutbound(Unpooled.buffer().writeByte(8).writeByte(250));
+            server.writeOutbound(message);
             server.writeOutbound(Unpooled.buffer().writeByte(3));
             assertTrue(server.outboundMessages().isEmpty());
             receipts.pending.removeLast().setSuccess();
@@ -108,6 +147,16 @@ class ModDependencyTransportTest {
                             channel, bytes.slice(bytes.readerIndex() + 1, 1), clientSender)
                     : id;
         });
+        return begin(codec);
+    }
+
+    /**
+     * Enables ordinary multichannel framing before controlled acknowledgements are installed.
+     *
+     * @param codec classifier for the scenario's actual mod envelope
+     * @return endpoint with its initial negotiation frame consumed
+     */
+    private static EmbeddedChannel begin(final RakNetSimpleMultiChannelCodec codec) {
         EmbeddedChannel endpoint = new EmbeddedChannel(new BundleDelivery(), codec);
         endpoint.writeOutbound(RakNetSimpleMultiChannelCodec.SIGNAL_START_MULTICHANNEL);
         ((FrameData) endpoint.readOutbound()).release();
