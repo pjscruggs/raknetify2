@@ -357,10 +357,7 @@
     "clientbound": 3,
     "serverbound": 2
   },
-  "fuzs.puzzlesapi.impl.iteminteractions.network.S2CSyncItemContainerProvider": {
-    "clientbound": 3,
-    "serverbound": 2
-  },
+  "fuzs.puzzlesapi.impl.iteminteractions.network.S2CSyncItemContainerProvider": -3,
   "fuzs.puzzlesapi.impl.iteminteractions.network.client.C2SContainerClientInputMessage": {
     "clientbound": 3,
     "serverbound": 2
@@ -454,10 +451,7 @@
   "net.foxyas.changedaddon.network.packet.VariantSecondAbilityActivate": 2,
   "net.gabriele333.kiloton.net.BlastPayload": -3,
   "net.gabriele333.kiloton.net.DoomPayload": 2,
-  "net.gabriele333.kiloton.net.DosePayload": {
-    "clientbound": 3,
-    "serverbound": 2
-  },
+  "net.gabriele333.kiloton.net.DosePayload": 1,
   "net.gabriele333.kiloton.net.LaunchTargetPayload": 2,
   "net.gabriele333.kiloton.net.MissilePayload": 2,
   "net.geforcemods.securitycraft.network.client.InteractWithFrame": {
@@ -469,10 +463,7 @@
     "clientbound": 7,
     "serverbound": 2
   },
-  "net.geforcemods.securitycraft.network.client.SendTip": {
-    "clientbound": 3,
-    "serverbound": 2
-  },
+  "net.geforcemods.securitycraft.network.client.SendTip": 1,
   "net.geforcemods.securitycraft.network.client.SetCameraView": 2,
   "net.geforcemods.securitycraft.network.client.SetTrophySystemTarget": -3,
   "net.geforcemods.securitycraft.network.client.ToggleAlarmSound": {
@@ -1009,18 +1000,12 @@
     "clientbound": 3,
     "serverbound": 2
   },
-  "squeek.appleskin.network.MessageExhaustionSync": {
-    "clientbound": 3,
-    "serverbound": 2
-  },
-  "squeek.appleskin.network.MessageSaturationSync": {
-    "clientbound": 3,
-    "serverbound": 2
-  },
+  "squeek.appleskin.network.MessageExhaustionSync": 1,
+  "squeek.appleskin.network.MessageSaturationSync": 1,
   "streamsreflowing.proprietary.AllRightsReservedNiceJohn_006$ProprietaryNiceJohn_001": 7,
   "streamsreflowing.proprietary.AllRightsReservedNiceJohn_006$SeeAiNoticeConstant_001": 7,
   "streamsreflowing.proprietary.ProprietaryNiceJohn_007$ProprietaryNiceJohn_001": 7,
-  "tamaized.voidscape.network.client.ClientPacketNoFlashOnSetHealth": 2,
+  "tamaized.voidscape.network.client.ClientPacketNoFlashOnSetHealth": 1,
   "tamaized.voidscape.network.client.ClientPacketSendParticles": 4,
   "tamaized.voidscape.network.client.ClientPacketSubCapSync": 2,
   "tamaized.voidscape.network.server.ServerPacketHandlerDonatorSettings": 2,

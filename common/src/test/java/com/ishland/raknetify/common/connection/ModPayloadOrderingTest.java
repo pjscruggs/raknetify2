@@ -82,6 +82,21 @@ class ModPayloadOrderingTest {
         assertRoute("unknown:channel", 0, false, 0);
     }
 
+    /** Health flags and hunger metadata share the ordering lane used by vanilla health updates. */
+    @Test
+    void healthMetadataSharesHealthUpdateOrdering() {
+        int health = ProtocolMultiChannelMappings.INSTANCE.mappings.get(763).s2c.get(87);
+        for (String type :
+                new String[] {
+                    "tamaized.voidscape.network.client.ClientPacketNoFlashOnSetHealth",
+                    "squeek.appleskin.network.MessageExhaustionSync",
+                    "squeek.appleskin.network.MessageSaturationSync"
+                }) {
+            ModPayloadOrdering.register("test:health", 40, type);
+            assertRoute("test:health", 40, false, health);
+        }
+    }
+
     /** Architectury's envelope retains the ordering of the concrete message within it. */
     @Test
     void unwrapsKnownArchitecturyPacketsWithoutChangingUnknownOnes() {
