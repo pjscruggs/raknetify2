@@ -25,15 +25,22 @@
 
 package com.ishland.raknetify.test;
 
+import com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering;
+
+import io.netty.buffer.Unpooled;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.PlayMessages;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 import java.util.function.Supplier;
@@ -65,7 +72,44 @@ public final class ForgeChannelWitness {
                 (value, buf) -> buf.writeInt(value),
                 buf -> buf.readInt(),
                 ForgeChannelWitness::receive);
+        CHANNEL.registerMessage(
+                251,
+                PlayMessages.SpawnEntity.class,
+                (packet, bytes) -> {},
+                bytes -> null,
+                (packet, context) -> {});
+        CHANNEL.registerMessage(
+                252,
+                PlayMessages.OpenContainer.class,
+                (packet, bytes) -> {},
+                bytes -> null,
+                (packet, context) -> {});
+        if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
+            verifyOrdering();
+        }
         MinecraftForge.EVENT_BUS.addListener(this::login);
+    }
+
+    /**
+     * Requires the actual Forge codec hook to bind the IDs allocated by this fixture.
+     *
+     * @throws IllegalStateException if the runtime registration hook did not bind either policy
+     */
+    private static void verifyOrdering() {
+        var bytes = Unpooled.buffer().writeByte(251).writeByte(1);
+        String name = "raknetify_transport_test:witness";
+        try {
+            int spawn = ModPayloadOrdering.channel(name, bytes);
+            bytes.setByte(0, 252);
+            int menu = ModPayloadOrdering.channel(name, bytes);
+            if (spawn != 2 || menu != ModPayloadOrdering.FENCED || bytes.readerIndex() != 0) {
+                throw new IllegalStateException(
+                        "Forge packet registration ordering was not installed");
+            }
+            System.out.println("PASS Forge runtime packet ordering registrations");
+        } finally {
+            bytes.release();
+        }
     }
 
     /**

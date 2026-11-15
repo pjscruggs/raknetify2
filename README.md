@@ -55,6 +55,8 @@ Normally, Raknetify2 lets independent packet channels continue while one channel
 
 Minecraft uses clientbound packet bundles to apply a group of updates in the same client tick. With updated endpoints, multichannel mode delivers each bundle together. A bundle containing packets from multiple ordering channels waits for earlier writes, and later writes wait for that bundle. Bundles confined to one channel use that channel normally. Older peers retain per-packet multichannel delivery. Ordered mode preserves vanilla bundles on its single channel.
 
+Forge 1.20.1 binds built-in compatibility rules to the message classes registered by installed mods. Entity, inventory and chunk messages keep their vanilla dependencies. Messages that combine those kinds of state wait for preceding deliveries, and later writes wait for their acknowledgement.
+
 Create `config/raknetify2-compatibility.json` in the working directory of the server or Minecraft proxy accepting RakNet connections:
 
 ```json

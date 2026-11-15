@@ -26,6 +26,7 @@
 package com.ishland.raknetify.common.connection;
 
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering;
 import com.ishland.raknetify.common.util.ConsoleMessages;
 import com.ishland.raknetify.common.util.MathUtil;
 
@@ -371,16 +372,33 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
             bundle.append(buf, lane, promise);
             return;
         }
+        final FrameData frame = routedFrame(ctx, buf, lane);
+        emit(
+                ctx,
+                frame,
+                lane == ModPayloadOrdering.FENCED ? new FencedWritePromise(ctx, promise) : promise);
+    }
+
+    /**
+     * Copies one encoded packet into its selected reliable lane or independent delivery policy.
+     *
+     * @param ctx allocator for the owned transport frame
+     * @param buf original packet bytes left owned by the caller
+     * @param lane selected ordering or delivery policy
+     * @return owned frame retaining the ordinary game packet identifier
+     */
+    private FrameData routedFrame(
+            final ChannelHandlerContext ctx, final ByteBuf buf, final int lane) {
         final FrameData frame = FrameData.create(ctx.alloc(), packetId, buf);
-        if (lane >= 0) {
-            frame.setOrderChannel(lane);
+        if (lane >= 0 || lane == ModPayloadOrdering.FENCED) {
+            frame.setOrderChannel(lane == ModPayloadOrdering.FENCED ? 0 : lane);
         } else {
             frame.setReliability(
                     lane == -1
                             ? FramedPacket.Reliability.RELIABLE
                             : FramedPacket.Reliability.UNRELIABLE);
         }
-        emit(ctx, frame, promise);
+        return frame;
     }
 
     /**

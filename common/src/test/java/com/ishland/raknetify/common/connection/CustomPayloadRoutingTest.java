@@ -61,7 +61,7 @@ class CustomPayloadRoutingTest {
                 packet.setByte(packet.writerIndex() - 1, message);
                 int reader = packet.readerIndex();
                 assertEquals(
-                        message == 0 ? 2 : message == 1 ? 1 : 3,
+                        message == 0 ? 2 : message == 1 ? -3 : 3,
                         proxyCodec().getChannelOverride(packet, false));
                 assertEquals(reader, packet.readerIndex());
                 assertEquals(1, packet.refCnt());

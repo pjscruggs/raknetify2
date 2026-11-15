@@ -38,6 +38,8 @@ import io.netty.handler.codec.CorruptedFrameException;
 import network.ycc.raknet.frame.FrameData;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayDeque;
 
@@ -56,7 +58,7 @@ class BundleTransportTest {
         final var codec = new RakNetSimpleMultiChannelCodec(0xfd);
         codec.addHandler((bytes, quiet) -> {
             int id = bytes.getUnsignedByte(bytes.readerIndex());
-            return id == 0 ? Integer.MIN_VALUE : id;
+            return id == 0 ? Integer.MIN_VALUE : id == 5 ? -3 : id;
         });
         EmbeddedChannel server = new EmbeddedChannel(new BundleDelivery(), codec);
         server.attr(BundleWire.PEER).set(peer);
@@ -150,6 +152,103 @@ class BundleTransportTest {
             client.writeInbound((Object) server.readOutbound());
             receipts.pending.removeFirst().setSuccess();
             expect(client, 7, 2, 0, 2, 7, 0, 3);
+        } finally {
+            server.finishAndReleaseAll();
+            client.finishAndReleaseAll();
+        }
+    }
+
+    /**
+     * A mod boundary survives frame replacement by authenticated encryption.
+     *
+     * @param encrypted whether the actual frame encryption handlers replace outbound frames
+     */
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void mixedModPacketFencesBothSidesWithoutChangingTheWire(final boolean encrypted) {
+        EmbeddedChannel server = server(false);
+        EmbeddedChannel client = client();
+        Receipts receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        if (encrypted) {
+            var key = new javax.crypto.spec.SecretKeySpec(new byte[16], "AES");
+            server.pipeline()
+                    .addAfter(
+                            server.pipeline().context(BundleDelivery.class).name(),
+                            "cipher",
+                            new MultiChannellingEncryption(key, false));
+            client.pipeline()
+                    .addBefore(
+                            client.pipeline().context(RakNetSimpleMultiChannelCodec.class).name(),
+                            "cipher",
+                            new MultiChannellingEncryption(key, true));
+        }
+        try {
+            send(server, 2, 7, 5, 3);
+            FrameData first = server.readOutbound();
+            client.writeInbound((Object) server.readOutbound());
+            receipts.pending.removeLast().setSuccess();
+            assertNull(server.readOutbound());
+            client.writeInbound(first);
+            receipts.pending.removeFirst().setSuccess();
+            FrameData mixed = server.readOutbound();
+            assertEquals(0xfd, mixed.getPacketId());
+            assertEquals(0, mixed.getOrderChannel());
+            assertNull(server.readOutbound());
+            client.writeInbound(mixed);
+            receipts.pending.removeFirst().setSuccess();
+            client.writeInbound((Object) server.readOutbound());
+            receipts.pending.removeFirst().setSuccess();
+            expect(client, 7, 2, 5, 3);
+        } finally {
+            server.finishAndReleaseAll();
+            client.finishAndReleaseAll();
+        }
+    }
+
+    /** Starting a compression dictionary must retain a mod packet's delivery boundary. */
+    @Test
+    void compressionStartupPreservesModFence() {
+        EmbeddedChannel server =
+                new EmbeddedChannel(
+                        new BundleDelivery(), new MultiChannelingStreamingCompression(0xfd, 0xfe));
+        EmbeddedChannel client =
+                new EmbeddedChannel(new MultiChannelingStreamingCompression(0xfd, 0xfe));
+        try {
+            client.flushOutbound();
+            server.writeInbound((Object) client.readOutbound());
+            server.flushOutbound();
+            FrameData control;
+            while ((control = server.readOutbound()) != null) {
+                client.writeInbound(control);
+            }
+            Receipts receipts = new Receipts();
+            server.pipeline().addFirst(receipts);
+            ChannelHandlerContext context =
+                    server.pipeline().context(MultiChannelingStreamingCompression.class);
+            ChannelPromise original = server.newPromise();
+            ByteBuf body = Unpooled.buffer().writeZero(64);
+            FrameData data = FrameData.create(server.alloc(), 0xfd, body);
+            data.setOrderChannel(1);
+            body.release();
+            assertFalse(server.write(data, new FencedWritePromise(context, original)).isDone());
+            server.flush();
+            FrameData dictionary = server.readOutbound();
+            assertNotNull(dictionary);
+            assertNull(server.readOutbound());
+            assertFalse(original.isDone());
+            client.writeInbound(dictionary);
+            receipts.pending.removeFirst().setSuccess();
+            FrameData compressed = server.readOutbound();
+            assertEquals(0xfe, compressed.getPacketId());
+            assertFalse(original.isDone());
+            client.writeInbound(compressed);
+            receipts.pending.removeFirst().setSuccess();
+            assertTrue(original.isSuccess());
+            FrameData decoded = client.readInbound();
+            assertNotNull(decoded);
+            assertEquals(65, decoded.getDataSize());
+            decoded.release();
         } finally {
             server.finishAndReleaseAll();
             client.finishAndReleaseAll();

@@ -1,0 +1,1103 @@
+{
+  "com.alexander.witherreincarnated.network.ClientboundShakeCameraPacket": 4,
+  "com.alexander.witherreincarnated.network.ClientboundStartLaserPacket": 2,
+  "com.alexander.witherreincarnated.network.ClientboundUpdateLaserPacket": 2,
+  "com.alexander.witherreincarnated.network.ClientboundUpdatePossessedMobPacket": 2,
+  "com.alexander.witherreincarnated.network.ClientboundWitherSkullBlastPacket": 2,
+  "com.alexander.witherreincarnated.network.ClientboundWitherStartAnimationPacket": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.BeyondVisualEntitySyncMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.ClientIndicatorMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.ClientMotionSyncMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.ClientPhosphorusFireMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.ClientSetMotionMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.ClientVehicleItemMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.ContainerDataMessage": 3,
+  "com.atsuishio.superbwarfare.network.message.receive.DataSyncMessage": -3,
+  "com.atsuishio.superbwarfare.network.message.receive.DrawClientMessage": -3,
+  "com.atsuishio.superbwarfare.network.message.receive.EntityRelationSyncMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.ExplosionParticleMessage": 4,
+  "com.atsuishio.superbwarfare.network.message.receive.FinishAssemblingVehicleMessage": 3,
+  "com.atsuishio.superbwarfare.network.message.receive.LivingGunKillMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.MissileTrailParticleMessage": 4,
+  "com.atsuishio.superbwarfare.network.message.receive.OpenTacticalMapScreenMessage": 3,
+  "com.atsuishio.superbwarfare.network.message.receive.OpenVehicleSkinScreenMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.PlayerInfoSyncMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.PlayerVariablesSyncMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.RadarMenuCloseMessage": -3,
+  "com.atsuishio.superbwarfare.network.message.receive.RadarMenuOpenMessage": -3,
+  "com.atsuishio.superbwarfare.network.message.receive.RadarSyncMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.ResetCameraTypeMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.ShakeClientMessage": 4,
+  "com.atsuishio.superbwarfare.network.message.receive.ShootClientMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.receive.SoundClientMessage": 4,
+  "com.atsuishio.superbwarfare.network.message.receive.TDMSyncMessage": 3,
+  "com.atsuishio.superbwarfare.network.message.receive.VehicleShootClientMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.AdjustMortarAngleMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.AdjustZoomFovMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.AimVillagerMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.ArtilleryIndicatorFireMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.AssembleVehicleMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.BlueprintCraftMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.BlueprintSetIndexMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.ChangeVehicleSeatMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.DogTagFinishEditMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.DoubleJumpMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.DroneFireMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.EditMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.EntityAreaClearMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.EntityClearMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.FireKeyMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.FireModeMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.FiringParametersEditMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.GunReforgeMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.InteractMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.LaserShootMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.LoiterConfigMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.LoiterOverrideMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.LungeMineAttackMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.MeleeAttackMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.MouseMoveMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.ParachuteMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.PlayerStopRidingMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.RadarChangeModeMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.RadarSetParametersMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.RadarSetPosMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.RadarSetTargetMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.ReloadMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.SeekingWeaponWarningMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.SensitivityMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.SetFiringParametersMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.SetPerkLevelMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.SetVehicleSkinMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.ShootMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.ShowChargingRangeMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.SwitchScopeMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.SwitchVehicleWeaponMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.UnloadMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.VehicleDisconnectTowingMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.VehicleFireMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.VehicleMovementMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.VehicleUnloadPassengersMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.WeaponZoomingMessage": 2,
+  "com.atsuishio.superbwarfare.network.message.send.ZoomMessage": 2,
+  "com.branders.spawnermod.networking.packet.SyncSpawnerConfig": 3,
+  "com.branders.spawnermod.networking.packet.SyncSpawnerEggDrop": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "com.branders.spawnermod.networking.packet.SyncSpawnerMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "com.dairymoose.sd.sync.ClientboundSerializerSyncPacket": 3,
+  "com.endertech.minecraft.forge.network.TileSharedDataMsg": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "com.example.sbwhelldiver.network.AutoRetractRequestPacket": 2,
+  "com.example.sbwhelldiver.network.AutoRetractStatePacket": 3,
+  "com.example.sbwhelldiver.network.BeaconFailurePacket": 2,
+  "com.example.sbwhelldiver.network.BeaconKeyPacket": 2,
+  "com.example.sbwhelldiver.network.BeaconThrowPacket": 2,
+  "com.example.sbwhelldiver.network.CooldownSnapshotPacket": 2,
+  "com.example.sbwhelldiver.network.DestroyerFirePacket": 2,
+  "com.example.sbwhelldiver.network.DestroyerMenuPacket": -3,
+  "com.example.sbwhelldiver.network.DestroyerSnapshotPacket": 2,
+  "com.example.sbwhelldiver.network.DestroyerWarpPacket": 2,
+  "com.example.sbwhelldiver.network.DropCancelPacket": 2,
+  "com.example.sbwhelldiver.network.DropPreparePacket": 2,
+  "com.example.sbwhelldiver.network.DropReadyPacket": 2,
+  "com.example.sbwhelldiver.network.DropSteerPacket": 2,
+  "com.example.sbwhelldiver.network.EquipmentTerminalInputPacket": 2,
+  "com.example.sbwhelldiver.network.EquipmentTerminalStatePacket": 2,
+  "com.example.sbwhelldiver.network.ExplosionBlockDamageRequestPacket": 2,
+  "com.example.sbwhelldiver.network.ExplosionBlockDamageStatePacket": 3,
+  "com.example.sbwhelldiver.network.GuardDogTogglePacket": 2,
+  "com.example.sbwhelldiver.network.HmgInputPacket": 2,
+  "com.example.sbwhelldiver.network.InfiniteAmmoRequestPacket": 2,
+  "com.example.sbwhelldiver.network.InfiniteAmmoStatePacket": 3,
+  "com.example.sbwhelldiver.network.MarkEnabledPacket": 2,
+  "com.example.sbwhelldiver.network.MarkFeedbackPacket": 2,
+  "com.example.sbwhelldiver.network.MarkRequestPacket": 2,
+  "com.example.sbwhelldiver.network.MarkSnapshotPacket": 2,
+  "com.example.sbwhelldiver.network.TacticalTerminalActionPacket": 2,
+  "com.example.sbwhelldiver.network.TacticalTerminalOpenPacket": -3,
+  "com.example.sbwhelldiver.network.TacticalTerminalResultPacket": -3,
+  "com.github.mcmodderanchor.simplebedrockmodel.v1.network.message.ServerMessageSwapItem": {
+    "clientbound": -3,
+    "serverbound": 2
+  },
+  "com.hlysine.create_connected.config.CCommon$SyncConfig": -3,
+  "com.hlysine.create_connected.content.contraption.jukebox.PlayContraptionJukeboxPacket": 2,
+  "com.hlysine.create_connected.content.sequencedpulsegenerator.ConfigureSequencedPulseGeneratorPacket": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "com.illusivesoulworks.charmofundying.common.network.SPacketUseTotem": 2,
+  "com.illusivesoulworks.polymorph.common.network.client.CPacketBlockEntityListener": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "com.illusivesoulworks.polymorph.common.network.client.CPacketPersistentRecipeSelection": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "com.illusivesoulworks.polymorph.common.network.client.CPacketPlayerRecipeSelection": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "com.illusivesoulworks.polymorph.common.network.client.CPacketStackRecipeSelection": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "com.illusivesoulworks.polymorph.common.network.server.SPacketBlockEntityRecipeSync": 7,
+  "com.illusivesoulworks.polymorph.common.network.server.SPacketHighlightRecipe": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "com.illusivesoulworks.polymorph.common.network.server.SPacketPlayerRecipeSync": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "com.illusivesoulworks.polymorph.common.network.server.SPacketRecipesList": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "com.illusivesoulworks.spectrelib.network.ConfigSyncPacket": -3,
+  "com.leclowndu93150.particular.network.NetworkHandler$DummyPacket": 3,
+  "com.leclowndu93150.wakes.network.NetworkHandler$DummyPacket": 3,
+  "com.lugert.true_transfur.network.ControlModeSyncPacket": 2,
+  "com.lugert.true_transfur.network.RebornGiveUpPacket": 2,
+  "com.lugert.true_transfur.network.RebornPosePacket": 2,
+  "com.lugert.true_transfur.network.RebornPressPacket": 2,
+  "com.lugert.true_transfur.network.RebornStatePacket": 2,
+  "com.lugert.true_transfur.network.ReverseTransfurDeathPacket": -3,
+  "com.lugert.true_transfur.network.ToggleControlModePacket": 2,
+  "com.lugert.true_transfur.network.TransfurPosePacket": 2,
+  "com.natamus.collective_common_forge.networking.packets.CollectiveInstalledPacket": 3,
+  "com.natamus.collective_common_forge.networking.packets.ConfigServerRequestPacket": 3,
+  "com.natamus.collective_common_forge.networking.packets.ConfigServerSavePacket": 3,
+  "com.natamus.collective_common_forge.networking.packets.ConfigServerValuesPacket": -3,
+  "com.natamus.collective_common_forge.networking.packets.ConfigSyncPacket": -3,
+  "com.natamus.collective_common_forge.networking.packets.EntityDataSyncPacket": 2,
+  "com.simibubi.create.compat.computercraft.AttachedComputerPacket": -3,
+  "com.simibubi.create.compat.trainmap.TrainMapSyncPacket": 2,
+  "com.simibubi.create.compat.trainmap.TrainMapSyncRequestPacket": 2,
+  "com.simibubi.create.content.contraptions.ContraptionBlockChangedPacket": 2,
+  "com.simibubi.create.content.contraptions.ContraptionColliderLockPacket": 2,
+  "com.simibubi.create.content.contraptions.ContraptionColliderLockPacket$ContraptionColliderLockPacketRequest": 2,
+  "com.simibubi.create.content.contraptions.ContraptionDisassemblyPacket": -3,
+  "com.simibubi.create.content.contraptions.ContraptionRelocationPacket": 2,
+  "com.simibubi.create.content.contraptions.ContraptionStallPacket": 2,
+  "com.simibubi.create.content.contraptions.MountedStorageSyncPacket": 2,
+  "com.simibubi.create.content.contraptions.TrainCollisionPacket": 2,
+  "com.simibubi.create.content.contraptions.actors.contraptionControls.ContraptionDisableActorPacket": 2,
+  "com.simibubi.create.content.contraptions.actors.trainControls.ControlsInputPacket": 2,
+  "com.simibubi.create.content.contraptions.actors.trainControls.ControlsStopControllingPacket": 2,
+  "com.simibubi.create.content.contraptions.elevator.ElevatorContactEditPacket": 2,
+  "com.simibubi.create.content.contraptions.elevator.ElevatorFloorListPacket": 2,
+  "com.simibubi.create.content.contraptions.elevator.ElevatorFloorListPacket$RequestFloorList": 2,
+  "com.simibubi.create.content.contraptions.elevator.ElevatorTargetFloorPacket": 2,
+  "com.simibubi.create.content.contraptions.gantry.GantryContraptionUpdatePacket": 2,
+  "com.simibubi.create.content.contraptions.glue.GlueEffectPacket": 7,
+  "com.simibubi.create.content.contraptions.glue.SuperGlueRemovalPacket": 2,
+  "com.simibubi.create.content.contraptions.glue.SuperGlueSelectionPacket": 2,
+  "com.simibubi.create.content.contraptions.minecart.CouplingCreationPacket": 2,
+  "com.simibubi.create.content.contraptions.minecart.capability.MinecartControllerUpdatePacket": 2,
+  "com.simibubi.create.content.contraptions.sync.ClientMotionPacket": 2,
+  "com.simibubi.create.content.contraptions.sync.ContraptionInteractionPacket": 2,
+  "com.simibubi.create.content.contraptions.sync.ContraptionSeatMappingPacket": 2,
+  "com.simibubi.create.content.contraptions.sync.LimbSwingUpdatePacket": 2,
+  "com.simibubi.create.content.contraptions.wrench.RadialWrenchMenuSubmitPacket": 2,
+  "com.simibubi.create.content.equipment.bell.SoulPulseEffectPacket": 7,
+  "com.simibubi.create.content.equipment.blueprint.BlueprintAssignCompleteRecipePacket": 2,
+  "com.simibubi.create.content.equipment.clipboard.ClipboardEditPacket": 2,
+  "com.simibubi.create.content.equipment.extendoGrip.ExtendoGripInteractionPacket": 2,
+  "com.simibubi.create.content.equipment.potatoCannon.PotatoCannonPacket": 2,
+  "com.simibubi.create.content.equipment.symmetryWand.ConfigureSymmetryWandPacket": 2,
+  "com.simibubi.create.content.equipment.symmetryWand.SymmetryEffectPacket": 7,
+  "com.simibubi.create.content.equipment.tool.KnockbackPacket": 2,
+  "com.simibubi.create.content.equipment.toolbox.ToolboxDisposeAllPacket": 2,
+  "com.simibubi.create.content.equipment.toolbox.ToolboxEquipPacket": 2,
+  "com.simibubi.create.content.equipment.zapper.ZapperBeamPacket": 2,
+  "com.simibubi.create.content.equipment.zapper.terrainzapper.ConfigureWorldshaperPacket": 2,
+  "com.simibubi.create.content.fluids.transfer.FluidSplashPacket": 7,
+  "com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorConnectionPacket": 2,
+  "com.simibubi.create.content.kinetics.chainConveyor.ChainPackageInteractionPacket": 2,
+  "com.simibubi.create.content.kinetics.chainConveyor.ClientboundChainConveyorRidingPacket": 2,
+  "com.simibubi.create.content.kinetics.chainConveyor.ServerboundChainConveyorRidingPacket": 2,
+  "com.simibubi.create.content.kinetics.gauge.GaugeObservedPacket": 2,
+  "com.simibubi.create.content.kinetics.mechanicalArm.ArmPlacementPacket": 2,
+  "com.simibubi.create.content.kinetics.mechanicalArm.ArmPlacementPacket$ClientBoundRequest": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "com.simibubi.create.content.kinetics.transmission.sequencer.ConfigureSequencedGearshiftPacket": 2,
+  "com.simibubi.create.content.logistics.box.PackageDestroyPacket": 2,
+  "com.simibubi.create.content.logistics.depot.EjectorAwardPacket": 2,
+  "com.simibubi.create.content.logistics.depot.EjectorElytraPacket": 2,
+  "com.simibubi.create.content.logistics.depot.EjectorPlacementPacket": 2,
+  "com.simibubi.create.content.logistics.depot.EjectorPlacementPacket$ClientBoundRequest": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "com.simibubi.create.content.logistics.depot.EjectorTriggerPacket": 2,
+  "com.simibubi.create.content.logistics.factoryBoard.FactoryPanelConfigurationPacket": 2,
+  "com.simibubi.create.content.logistics.factoryBoard.FactoryPanelConnectionPacket": 2,
+  "com.simibubi.create.content.logistics.factoryBoard.FactoryPanelEffectPacket": 7,
+  "com.simibubi.create.content.logistics.filter.FilterScreenPacket": 2,
+  "com.simibubi.create.content.logistics.funnel.FunnelFlapPacket": 7,
+  "com.simibubi.create.content.logistics.packagePort.PackagePortConfigurationPacket": 2,
+  "com.simibubi.create.content.logistics.packagePort.PackagePortPlacementPacket": 2,
+  "com.simibubi.create.content.logistics.packagePort.PackagePortPlacementPacket$ClientBoundRequest": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "com.simibubi.create.content.logistics.packagerLink.WiFiEffectPacket": 7,
+  "com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterConfigurationPacket": 2,
+  "com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterEffectPacket": 7,
+  "com.simibubi.create.content.logistics.stockTicker.LogisticalStockRequestPacket": 2,
+  "com.simibubi.create.content.logistics.stockTicker.LogisticalStockResponsePacket": -3,
+  "com.simibubi.create.content.logistics.stockTicker.PackageOrderRequestPacket": 2,
+  "com.simibubi.create.content.logistics.stockTicker.StockKeeperCategoryEditPacket": 2,
+  "com.simibubi.create.content.logistics.stockTicker.StockKeeperCategoryHidingPacket": 2,
+  "com.simibubi.create.content.logistics.stockTicker.StockKeeperCategoryRefundPacket": 2,
+  "com.simibubi.create.content.logistics.stockTicker.StockKeeperLockPacket": 2,
+  "com.simibubi.create.content.logistics.tableCloth.ShopUpdatePacket": -3,
+  "com.simibubi.create.content.logistics.tunnel.TunnelFlapPacket": 7,
+  "com.simibubi.create.content.redstone.displayLink.DisplayLinkConfigurationPacket": 2,
+  "com.simibubi.create.content.redstone.link.controller.LinkedControllerBindPacket": 2,
+  "com.simibubi.create.content.redstone.link.controller.LinkedControllerInputPacket": 2,
+  "com.simibubi.create.content.redstone.link.controller.LinkedControllerStopLecternPacket": 2,
+  "com.simibubi.create.content.redstone.thresholdSwitch.ConfigureThresholdSwitchPacket": 2,
+  "com.simibubi.create.content.schematics.cannon.ConfigureSchematicannonPacket": 2,
+  "com.simibubi.create.content.schematics.packet.InstantSchematicPacket": 2,
+  "com.simibubi.create.content.schematics.packet.SchematicPlacePacket": 2,
+  "com.simibubi.create.content.schematics.packet.SchematicSyncPacket": 2,
+  "com.simibubi.create.content.schematics.packet.SchematicUploadPacket": 2,
+  "com.simibubi.create.content.trains.HonkPacket": 2,
+  "com.simibubi.create.content.trains.HonkPacket$Serverbound": 2,
+  "com.simibubi.create.content.trains.TrainHUDUpdatePacket": 2,
+  "com.simibubi.create.content.trains.TrainHUDUpdatePacket$Serverbound": 2,
+  "com.simibubi.create.content.trains.entity.TrainPacket": 2,
+  "com.simibubi.create.content.trains.entity.TrainPromptPacket": 2,
+  "com.simibubi.create.content.trains.entity.TrainRelocationPacket": 2,
+  "com.simibubi.create.content.trains.graph.TrackGraphRequestPacket": 2,
+  "com.simibubi.create.content.trains.graph.TrackGraphRollCallPacket": 2,
+  "com.simibubi.create.content.trains.graph.TrackGraphSyncPacket": 2,
+  "com.simibubi.create.content.trains.schedule.ScheduleEditPacket": 2,
+  "com.simibubi.create.content.trains.signal.SignalEdgeGroupPacket": 2,
+  "com.simibubi.create.content.trains.station.StationEditPacket": 2,
+  "com.simibubi.create.content.trains.station.TrainEditPacket": 2,
+  "com.simibubi.create.content.trains.station.TrainEditPacket$TrainEditReturnPacket": 2,
+  "com.simibubi.create.content.trains.track.CurvedTrackDestroyPacket": 2,
+  "com.simibubi.create.content.trains.track.CurvedTrackSelectionPacket": 2,
+  "com.simibubi.create.content.trains.track.PlaceExtendedCurvePacket": 2,
+  "com.simibubi.create.foundation.blockEntity.RemoveBlockEntityPacket": 7,
+  "com.simibubi.create.foundation.blockEntity.behaviour.ValueSettingsPacket": 2,
+  "com.simibubi.create.foundation.gui.menu.ClearMenuPacket": 2,
+  "com.simibubi.create.foundation.gui.menu.GhostItemSubmitPacket": 2,
+  "com.simibubi.create.foundation.networking.ISyncPersistentData$PersistentDataPacket": 2,
+  "com.simibubi.create.foundation.networking.LeftClickPacket": 2,
+  "com.simibubi.create.foundation.utility.ServerSpeedProvider$Packet": 3,
+  "com.simibubi.create.infrastructure.command.HighlightPacket": 7,
+  "com.simibubi.create.infrastructure.debugInfo.ServerDebugInfoPacket": 3,
+  "com.slimewithlime.enderdragondestroysendisland.network.DragonDebrisNetwork$DebrisIdentity": 2,
+  "com.slimewithlime.enderdragondestroysendisland.network.RequestToggleDragonCollisionPacket": 2,
+  "com.slimewithlime.enderdragondestroysendisland.network.SyncDragonCollisionPacket": 2,
+  "dev.shadowsoffire.placebo.packets.ButtonClickMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "dev.shadowsoffire.placebo.packets.PatreonDisableMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "dev.shadowsoffire.placebo.reload.ReloadListenerPacket$Content": -3,
+  "dev.shadowsoffire.placebo.reload.ReloadListenerPacket$End": -3,
+  "dev.shadowsoffire.placebo.reload.ReloadListenerPacket$Start": -3,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundAnimalFedPayload": 2,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundBlockDestroyEffectsPayload": 7,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundChargedCreeperExplosionPayload": 2,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundCompostItemPayload": 7,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundDispenseBucketPayload": 7,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundDrankPotionPayload": 2,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundEntityDamagedPayload": 2,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundEntityFellPayload": 2,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundEntityLandInFluidPayload": 2,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundEntitySpawnSprintingDustCloudsPayload": 2,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundFallingBlockLandPayload": 7,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundItemEnchantedPayload": 7,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundMobSpawnerSpawnPayload": 7,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundMooshroomShearedPayload": 2,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundSheepShearPayload": 2,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundSpawnSnoreParticlePayload": 2,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundStonecutterUsedPayload": 7,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundVillagerWorkPayload": 2,
+  "einstein.subtle_effects.networking.clientbound.ClientBoundXPBottleEffectsPayload": 7,
+  "fuzs.easyanvils.network.S2CAnvilRepairMessage": 7,
+  "fuzs.easyanvils.network.S2COpenNameTagEditorMessage": -3,
+  "fuzs.easyanvils.network.client.C2SNameTagUpdateMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "fuzs.easyanvils.network.client.C2SRenameItemMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "fuzs.easymagic.network.S2CEnchantingDataMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "fuzs.puzzlesapi.impl.iteminteractions.network.S2CEnderChestSetContentMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "fuzs.puzzlesapi.impl.iteminteractions.network.S2CEnderChestSetSlotMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "fuzs.puzzlesapi.impl.iteminteractions.network.S2CSyncItemContainerProvider": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "fuzs.puzzlesapi.impl.iteminteractions.network.client.C2SContainerClientInputMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "fuzs.puzzlesapi.impl.iteminteractions.network.client.C2SEnderChestMenuMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "fuzs.puzzlesapi.impl.iteminteractions.network.client.C2SEnderChestSetSlotMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "fuzs.puzzlesapi.impl.limitlesscontainers.network.ClientboundContainerSetContentMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "fuzs.puzzlesapi.impl.limitlesscontainers.network.ClientboundContainerSetSlotMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "fuzs.puzzlesapi.impl.limitlesscontainers.network.client.ServerboundContainerClickMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "fuzs.puzzlesapi.impl.statues.network.client.C2SArmorStandNameMessage": 2,
+  "fuzs.puzzlesapi.impl.statues.network.client.C2SArmorStandPoseMessage": 2,
+  "fuzs.puzzlesapi.impl.statues.network.client.C2SArmorStandPositionMessage": 2,
+  "fuzs.puzzlesapi.impl.statues.network.client.C2SArmorStandRotationMessage": 2,
+  "fuzs.puzzlesapi.impl.statues.network.client.C2SArmorStandStyleMessage": 2,
+  "fuzs.puzzleslib.impl.capability.v2.ClientboundSyncCapabilityMessage": 2,
+  "fuzs.puzzleslib.impl.capability.v3.ClientboundEntityCapabilityMessage": 2,
+  "fuzs.puzzleslib.impl.core.ClientboundModListMessage": 3,
+  "fuzs.puzzleslib.impl.entity.ClientboundAddEntityDataMessage": 2,
+  "lain.mods.cos.impl.network.packet.PacketOpenCosArmorInventory": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "lain.mods.cos.impl.network.packet.PacketOpenNormalInventory": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "lain.mods.cos.impl.network.packet.PacketSetHiddenFlags": 2,
+  "lain.mods.cos.impl.network.packet.PacketSetSkinArmor": 2,
+  "lain.mods.cos.impl.network.packet.PacketSyncCosArmor": 2,
+  "lain.mods.cos.impl.network.packet.PacketSyncHiddenFlags": 2,
+  "me.fzzyhmstrs.fzzy_config.networking.ConfigPermissionsS2CCustomPayload": 3,
+  "me.fzzyhmstrs.fzzy_config.networking.ConfigSyncS2CCustomPayload": 3,
+  "me.fzzyhmstrs.fzzy_config.networking.ConfigUpdateC2SCustomPayload": 3,
+  "me.fzzyhmstrs.fzzy_config.networking.ConfigUpdateS2CCustomPayload": 3,
+  "me.fzzyhmstrs.fzzy_config.networking.DynamicIdsS2CCustomPayload": 3,
+  "me.fzzyhmstrs.fzzy_config.networking.SettingForwardCustomPayload": 3,
+  "net.addictives.network.visualsyncpacket": 2,
+  "net.blay09.mods.balm.api.network.ClientboundConfigPacket": -3,
+  "net.createmod.catnip.net.ClientboundConfigPacket": 3,
+  "net.createmod.catnip.net.ClientboundSimpleActionPacket": 3,
+  "net.createmod.catnip.net.ServerboundConfigPacket": 3,
+  "net.foxyas.changedaddon.network.ChangedAddonVariables$SyncPacket": 2,
+  "net.foxyas.changedaddon.network.packet.AbilityKeyPressPacket": 2,
+  "net.foxyas.changedaddon.network.packet.C2SReleaseGrabbedEntity": 2,
+  "net.foxyas.changedaddon.network.packet.ClientboundOpenFTKCScreenPacket": 2,
+  "net.foxyas.changedaddon.network.packet.ClientboundSonarUpdatePacket": 2,
+  "net.foxyas.changedaddon.network.packet.ConfirmMovementPacket": 2,
+  "net.foxyas.changedaddon.network.packet.InformantBlockGuiKeyPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.foxyas.changedaddon.network.packet.PatKeyPacket": 2,
+  "net.foxyas.changedaddon.network.packet.RequestMovementCheckPacket": 2,
+  "net.foxyas.changedaddon.network.packet.RespawnAsTransfurPacket": 2,
+  "net.foxyas.changedaddon.network.packet.S2CCheckGrabberEntity": 2,
+  "net.foxyas.changedaddon.network.packet.S2CPlayAnimationAfterParticleFade": 2,
+  "net.foxyas.changedaddon.network.packet.SafeGrabSyncPacket": 2,
+  "net.foxyas.changedaddon.network.packet.ServerboundCustomSelectTradePacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.foxyas.changedaddon.network.packet.ServerboundProgressFTKCPacket": 2,
+  "net.foxyas.changedaddon.network.packet.ServerboundSwitchCuddlePacket": 2,
+  "net.foxyas.changedaddon.network.packet.SyncAllUntransfurImmunityPacket": 2,
+  "net.foxyas.changedaddon.network.packet.SyncGrabControlState": 2,
+  "net.foxyas.changedaddon.network.packet.SyncGrabberEntity": 2,
+  "net.foxyas.changedaddon.network.packet.SyncTransfurVisionsPacket": 2,
+  "net.foxyas.changedaddon.network.packet.SyncUntransfurImmunityPacket": 2,
+  "net.foxyas.changedaddon.network.packet.ToggleButtonPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.foxyas.changedaddon.network.packet.TransfurSoundsGuiButtonPacket": 2,
+  "net.foxyas.changedaddon.network.packet.TurnOffTransfurPacket": 2,
+  "net.foxyas.changedaddon.network.packet.UpdateTimedKeypadTimerPacket": 7,
+  "net.foxyas.changedaddon.network.packet.VariantSecondAbilityActivate": 2,
+  "net.gabriele333.kiloton.net.BlastPayload": -3,
+  "net.gabriele333.kiloton.net.DoomPayload": 2,
+  "net.gabriele333.kiloton.net.DosePayload": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.gabriele333.kiloton.net.LaunchTargetPayload": 2,
+  "net.gabriele333.kiloton.net.MissilePayload": 2,
+  "net.geforcemods.securitycraft.network.client.InteractWithFrame": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.client.OpenScreen": -3,
+  "net.geforcemods.securitycraft.network.client.RefreshDisguisableModel": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.client.SendTip": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.client.SetCameraView": 2,
+  "net.geforcemods.securitycraft.network.client.SetTrophySystemTarget": -3,
+  "net.geforcemods.securitycraft.network.client.ToggleAlarmSound": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.client.UpdateLaserColors": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.client.UpdateLogger": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.CheckBriefcasePasscode": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.CheckPasscode": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.ClearChangeDetectorServer": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.ClearLoggerServer": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.DismountCamera": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.MountCamera": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.RemoteControlMine": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.RemoveCameraTag": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.RemoveMineFromMRAT": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.RemovePositionFromSSS": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.RemoveSentryFromSRAT": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.RequestSecureTradingStationTransactions": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SetBriefcasePasscodeAndOwner": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SetCameraPowered": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SetDefaultCameraViewingDirection": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SetGhostSlot": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SetKeycardUses": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SetListModuleData": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SetPasscode": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SetSentryMode": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SetStateOnDisguiseModule": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SyncAlarmSettings": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SyncBlockChangeDetector": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SyncBlockPocketManager": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SyncBlockReinforcer": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SyncFrame": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SyncKeycardSettings": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SyncLaserSideConfig": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SyncProjector": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SyncRiftStabilizer": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SyncSSSSettingsOnServer": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SyncSecureRedstoneInterface": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.SyncTrophySystem": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.ToggleBlockPocketManager": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.ToggleModule": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.ToggleNightVision": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.ToggleOption": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.geforcemods.securitycraft.network.server.UpdateSliderValue": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "net.ltxprogrammer.changed.block.CustomFallable$UpdateFallingBlockEntityData": 2,
+  "net.ltxprogrammer.changed.entity.AccessoryEntities$SyncPacket": 2,
+  "net.ltxprogrammer.changed.network.ExtraJumpKeybind": 2,
+  "net.ltxprogrammer.changed.network.VariantAbilityActivate": 2,
+  "net.ltxprogrammer.changed.network.packet.AbilityPayloadPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.AccessoryEventPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.AccessorySyncPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.AnimationEventPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.AssimilatedEntitySyncPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.BasicPlayerInfoPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.CustomLevelEventPacket": 7,
+  "net.ltxprogrammer.changed.network.packet.DebuggerPacket": 3,
+  "net.ltxprogrammer.changed.network.packet.EmotePacket": 2,
+  "net.ltxprogrammer.changed.network.packet.GrabEntityPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.GrabEntityPacket$AnnounceEscapeSeed": 2,
+  "net.ltxprogrammer.changed.network.packet.GrabEntityPacket$EscapeKeyState": 2,
+  "net.ltxprogrammer.changed.network.packet.GrabEntityPacket$GrabKeyState": 2,
+  "net.ltxprogrammer.changed.network.packet.GrabEntityPacket$SyncGrabStrength": 2,
+  "net.ltxprogrammer.changed.network.packet.LatexCoverUpdatePacket": 7,
+  "net.ltxprogrammer.changed.network.packet.MenuUpdatePacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.ltxprogrammer.changed.network.packet.MountTransfurPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.MultiRotateHeadPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.QueryTransfurPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.SeatEntityInfoPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.SectionLatexCoversUpdatePacket": 7,
+  "net.ltxprogrammer.changed.network.packet.ServerboundSetGluBlockPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.SetTransfurVariantDataPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.SyncMoversPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.SyncSwitchPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.ltxprogrammer.changed.network.packet.SyncTransfurPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.SyncTransfurProgressPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.SyncVariantAbilityPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.TransfurEntityEventPacket": 2,
+  "net.ltxprogrammer.changed.network.packet.TugCameraPacket": 2,
+  "net.mezzdev.config.server.ServerConfigSyncChunkPayload": -3,
+  "net.mezzdev.config.server.ServerIdentityPayload": -3,
+  "net.minecraftforge.common.TierSortingRegistry$SyncPacket": 3,
+  "net.minecraftforge.network.PlayMessages$OpenContainer": -3,
+  "net.minecraftforge.network.PlayMessages$SpawnEntity": 2,
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.AnotherPlayerBackpackOpenMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackCloseMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.BlockPickMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.BlockToolSwapMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.EntityToolSwapMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.InventoryInteractionMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.MobCatcherCaptureEffectMessage": 2,
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.MobCatcherReleaseMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackInventoryContentsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.SyncClientInfoMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedbackpackscreateintegration.backpack.MountedBackpackClientInfoMessage": -3,
+  "net.p3pp3rf1y.sophisticatedbackpackscreateintegration.backpack.MountedSubBackpackOpenMessage": 2,
+  "net.p3pp3rf1y.sophisticatedbackpackscreateintegration.backpack.OpenMountedBackpackInventoryMessage": 2,
+  "net.p3pp3rf1y.sophisticatedcore.compat.create.MountedStorageContentsMessage": -3,
+  "net.p3pp3rf1y.sophisticatedcore.compat.create.MountedStorageUpdateMessage": 2,
+  "net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.SetGhostSlotMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.SetMemorySlotMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiTransferRecipeMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.LinkedStorageContentsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.LinkedStorageSettingsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.RequestLinkedStorageContentsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.RequestLinkerCraftingDiagnosticsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.SplitPacket": -3,
+  "net.p3pp3rf1y.sophisticatedcore.network.SyncAdditionalSlotInfoMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.SyncBlockHighlightsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.SyncContainerClientDataMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.SyncContainerStacksMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.SyncDatapackSettingsTemplateMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.SyncEmptySlotIconsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.SyncLinkerCraftingDiagnosticsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.SyncRecentCraftedResultsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.SyncSlotChangeErrorMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.SyncSlotStackMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.SyncTemplateSettingsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.TransferFullSlotMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.network.TransferItemsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.PlayDiscMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.StopDiscPlaybackMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankClickMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedstorage.network.OpenStorageInventoryMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedstorage.network.RequestControllerTargetHighlightsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedstorage.network.RequestStorageContentsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedstorage.network.ScrolledToolMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedstorage.network.StorageContentsMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedstorage.network.StorageOpennessMessage": 7,
+  "net.p3pp3rf1y.sophisticatedstorage.network.TankMenuUpdateMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.p3pp3rf1y.sophisticatedstoragecreateintegration.network.MountedStorageOpennessMessage": 2,
+  "net.p3pp3rf1y.sophisticatedstoragecreateintegration.storage.OpenMountedStorageInventoryMessage": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.parkabird.changedsynergy.network.AbsorptionNegotiationStatePacket": 2,
+  "net.parkabird.changedsynergy.network.BondedInventoryOpenPacket": 2,
+  "net.parkabird.changedsynergy.network.ChasePlayInputPacket": 2,
+  "net.parkabird.changedsynergy.network.ChasePlayStatePacket": 2,
+  "net.parkabird.changedsynergy.network.ClothingStylePacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.parkabird.changedsynergy.network.CompanionSeatInputPacket": 2,
+  "net.parkabird.changedsynergy.network.CompanionSeatStatePacket": 2,
+  "net.parkabird.changedsynergy.network.EmoteTransitionPacket": 2,
+  "net.parkabird.changedsynergy.network.ExoskeletonMotionPacket": 2,
+  "net.parkabird.changedsynergy.network.FriendlySocialHugSyncPacket": 2,
+  "net.parkabird.changedsynergy.network.FriendlySuitSyncPacket": 2,
+  "net.parkabird.changedsynergy.network.GrabQteSyncPacket": 2,
+  "net.parkabird.changedsynergy.network.HypnosisQteSyncPacket": 2,
+  "net.parkabird.changedsynergy.network.HypnosisTapPacket": 2,
+  "net.parkabird.changedsynergy.network.MergedPlayerIdentityPacket": 2,
+  "net.parkabird.changedsynergy.network.MuntjacJumpInputPacket": 2,
+  "net.parkabird.changedsynergy.network.NativeOriginChoosePacket": 2,
+  "net.parkabird.changedsynergy.network.NativeOriginPolicyPacket": 2,
+  "net.parkabird.changedsynergy.network.NativeOriginStatePacket": 2,
+  "net.parkabird.changedsynergy.network.NativePetReassimilatePacket": 2,
+  "net.parkabird.changedsynergy.network.NativeRoleplayStatePacket": 2,
+  "net.parkabird.changedsynergy.network.OpenAbsorptionNegotiationPacket": 2,
+  "net.parkabird.changedsynergy.network.PatAnimationControlPacket": 2,
+  "net.parkabird.changedsynergy.network.PatAnimationPacket": 2,
+  "net.parkabird.changedsynergy.network.PatAnimationSpeedPacket": 2,
+  "net.parkabird.changedsynergy.network.PerformanceSnapshotPacket": 3,
+  "net.parkabird.changedsynergy.network.PlayerBodyPacket": 2,
+  "net.parkabird.changedsynergy.network.PlayerHugActionPacket": 2,
+  "net.parkabird.changedsynergy.network.PlayerHugStatePacket": 2,
+  "net.parkabird.changedsynergy.network.PlayerRelationshipOpenPacket": 2,
+  "net.parkabird.changedsynergy.network.ProvisionerTradeSyncPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "net.parkabird.changedsynergy.network.RevivalGrabAbilityPacket": 2,
+  "net.parkabird.changedsynergy.network.ScoutTargetPacket": 2,
+  "net.parkabird.changedsynergy.network.ServerConfigSnapshotPacket": -3,
+  "net.parkabird.changedsynergy.network.SilkMothWingFlapPacket": 2,
+  "net.parkabird.changedsynergy.network.StoryNpcActionPacket": -3,
+  "net.parkabird.changedsynergy.network.StoryNpcStatePacket": -3,
+  "net.parkabird.changedsynergy.network.TakeoverActionPacket": 2,
+  "net.parkabird.changedsynergy.network.TakeoverStatePacket": 2,
+  "net.parkabird.changedsynergy.network.TelepathyDialoguePacket": 2,
+  "net.parkabird.changedsynergy.network.TerritorySyncPacket": 7,
+  "net.parkabird.changedsynergy.network.TransfurVisualPacket": 2,
+  "net.parkabird.changedsynergy.network.WhiteHiveTargetsPacket": 2,
+  "net.tejty.gamediscs.util.networking.packet.SetBestScoreC2SPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "noobanidus.mods.lootr.network.CloseCart": 2,
+  "noobanidus.mods.lootr.network.OpenCart": 2,
+  "noobanidus.mods.lootr.network.UpdateModelData": 7,
+  "oreexcavation.network.PacketExcavation": 2,
+  "org.patryk3211.powergrid.equipment.zapper.ElectroZapperS2CPacket": 2,
+  "org.patryk3211.powergrid.network.packets.AlternatePlacementStatusC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.BlockWireAttachC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.BlockWireCutC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.ChangeScreenC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.CordDetachC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.DisplayBurnoutS2CPacket": 7,
+  "org.patryk3211.powergrid.network.packets.DrillSpeedS2CPacket": 2,
+  "org.patryk3211.powergrid.network.packets.EndpointTrackingC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.EnergyMeterInteractionC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.EntityDataS2CPacket": 2,
+  "org.patryk3211.powergrid.network.packets.LightningSyncS2CPacket": 2,
+  "org.patryk3211.powergrid.network.packets.MultimeterDataC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.NegotiateSyncC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.SaveCardC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.SaveSchematicC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.SetCustomDisplayC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.StateS2CPacket": 7,
+  "org.patryk3211.powergrid.network.packets.TransformerWindingC2SPacket": 2,
+  "org.patryk3211.powergrid.network.packets.UpdateComponentBiPacket": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "org.patryk3211.powergrid.network.packets.ZapProjectileS2CPacket": 2,
+  "org.xszb.protection_pixel_reforge.network.AbilityTriggerMessage": 2,
+  "org.xszb.protection_pixel_reforge.network.ArmorTableTriggerMessage": 2,
+  "org.xszb.protection_pixel_reforge.network.AttachmentVisualMessage": 2,
+  "org.xszb.protection_pixel_reforge.network.ExoskeletonVisualMessage": 2,
+  "org.xszb.protection_pixel_reforge.network.FlightInputMessage": 2,
+  "org.xszb.protection_pixel_reforge.network.MenuActionMessage": 2,
+  "org.xszb.protection_pixel_reforge.network.PlayerRuntimeSyncMessage": 2,
+  "org.xszb.protection_pixel_reforge.network.PlayerStateSyncMessage": 2,
+  "plus.dragons.createenchantmentindustry.content.contraptions.enchanting.enchanter.BlazeEnchanterEditPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "plus.dragons.createenchantmentindustry.content.contraptions.enchanting.enchanter.EnchantingGuideEditPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "snownee.jade.network.ReceiveDataPacket": -3,
+  "snownee.jade.network.RequestEntityPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "snownee.jade.network.RequestTilePacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "snownee.jade.network.ServerPingPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "snownee.jade.network.ShowOverlayPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "software.bernie.geckolib.network.packet.AnimDataSyncPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "software.bernie.geckolib.network.packet.AnimTriggerPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "software.bernie.geckolib.network.packet.BlockEntityAnimDataSyncPacket": 7,
+  "software.bernie.geckolib.network.packet.BlockEntityAnimTriggerPacket": 7,
+  "software.bernie.geckolib.network.packet.EntityAnimDataSyncPacket": 2,
+  "software.bernie.geckolib.network.packet.EntityAnimTriggerPacket": 2,
+  "software.bernie.geckolib.network.packet.StatelessBlockEntityPlayAnimPacket": 7,
+  "software.bernie.geckolib.network.packet.StatelessBlockEntityStopAnimPacket": 7,
+  "software.bernie.geckolib.network.packet.StatelessEntityPlayAnimPacket": 2,
+  "software.bernie.geckolib.network.packet.StatelessEntityStopAnimPacket": 2,
+  "software.bernie.geckolib.network.packet.StatelessSingletonPlayAnimPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "software.bernie.geckolib.network.packet.StatelessSingletonStopAnimPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "software.bernie.geckolib.network.packet.StopTriggeredBlockEntityAnimPacket": 7,
+  "software.bernie.geckolib.network.packet.StopTriggeredEntityAnimPacket": 2,
+  "software.bernie.geckolib.network.packet.StopTriggeredSingletonAnimPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "squeek.appleskin.network.MessageExhaustionSync": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "squeek.appleskin.network.MessageSaturationSync": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "streamsreflowing.proprietary.AllRightsReservedNiceJohn_006$ProprietaryNiceJohn_001": 7,
+  "streamsreflowing.proprietary.AllRightsReservedNiceJohn_006$SeeAiNoticeConstant_001": 7,
+  "streamsreflowing.proprietary.ProprietaryNiceJohn_007$ProprietaryNiceJohn_001": 7,
+  "tamaized.voidscape.network.client.ClientPacketNoFlashOnSetHealth": 2,
+  "tamaized.voidscape.network.client.ClientPacketSendParticles": 4,
+  "tamaized.voidscape.network.client.ClientPacketSubCapSync": 2,
+  "tamaized.voidscape.network.server.ServerPacketHandlerDonatorSettings": 2,
+  "team.creative.creativecore.common.config.sync.ConfigurationChangePacket": -3,
+  "team.creative.creativecore.common.config.sync.ConfigurationClientPacket": -3,
+  "team.creative.creativecore.common.config.sync.ConfigurationPacket": -3,
+  "team.creative.creativecore.common.gui.packet.ControlSyncPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "team.creative.creativecore.common.gui.packet.ImmediateItemStackPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "team.creative.creativecore.common.gui.packet.LayerClosePacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "team.creative.creativecore.common.gui.packet.OpenGuiPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "team.creative.creativecore.common.gui.packet.SyncPacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "technology.roughness.whitenoise.network.ConfigSyncPacket": -3,
+  "top.theillusivec4.caelus.common.network.CPacketFlight": 2,
+  "top.theillusivec4.curios.common.network.client.CPacketDestroy": 2,
+  "top.theillusivec4.curios.common.network.client.CPacketOpenCurios": 2,
+  "top.theillusivec4.curios.common.network.client.CPacketOpenVanilla": 2,
+  "top.theillusivec4.curios.common.network.client.CPacketPage": 2,
+  "top.theillusivec4.curios.common.network.client.CPacketScroll": 2,
+  "top.theillusivec4.curios.common.network.client.CPacketToggleCosmetics": 2,
+  "top.theillusivec4.curios.common.network.client.CPacketToggleRender": 2,
+  "top.theillusivec4.curios.common.network.server.SPacketBreak": 2,
+  "top.theillusivec4.curios.common.network.server.SPacketGrabbedItem": 3,
+  "top.theillusivec4.curios.common.network.server.SPacketPage": 3,
+  "top.theillusivec4.curios.common.network.server.SPacketQuickMove": 3,
+  "top.theillusivec4.curios.common.network.server.SPacketScroll": 3,
+  "top.theillusivec4.curios.common.network.server.SPacketSetIcons": -3,
+  "top.theillusivec4.curios.common.network.server.sync.SPacketSyncCurios": 2,
+  "top.theillusivec4.curios.common.network.server.sync.SPacketSyncData": -3,
+  "top.theillusivec4.curios.common.network.server.sync.SPacketSyncModifiers": 2,
+  "top.theillusivec4.curios.common.network.server.sync.SPacketSyncRender": 2,
+  "top.theillusivec4.curios.common.network.server.sync.SPacketSyncStack": 2,
+  "vectorwing.farmersdelight.common.network.ModNetworking$FlipSkilletMessage": 2,
+  "xaero.common.server.level.LevelMapProperties": 3,
+  "xaero.hud.packet.basic.ClientboundRulesPacket": 3,
+  "xaero.hud.packet.basic.HandshakePacket": 3,
+  "xaero.hud.packet.tracker.ClientboundPlayerTrackerResetPacket": 3,
+  "xaero.hud.packet.tracker.ClientboundTrackedPlayerPacket": 3,
+  "xaero.lib.common.packet.ClientboundDimensionHandshakePacket": 3,
+  "xaero.lib.common.packet.ClientboundServerHandshakePacket": 3,
+  "xaero.lib.common.packet.config.ClientboundEnforcedConfigPacket": 3,
+  "xaero.lib.common.packet.config.ConfigChannelPacket": 3,
+  "xaero.lib.common.packet.config.profile.ConfigProfileCreatePacket": 3,
+  "xaero.lib.common.packet.config.profile.ConfigProfileDeletePacket": 3,
+  "xaero.lib.common.packet.config.profile.ConfigProfileEditPacket": 3,
+  "xaero.lib.common.packet.config.profile.ConfigProfileInfoPacket": 3,
+  "xaero.lib.common.packet.config.profile.ServerboundConfigProfileRequestPacket": 3,
+  "xaero.map.message.basic.ClientboundRulesPacket": 3,
+  "xaero.map.message.basic.HandshakePacket": 3,
+  "xaero.map.message.tracker.ClientboundPlayerTrackerResetPacket": 3,
+  "xaero.map.message.tracker.ClientboundTrackedPlayerPacket": 3,
+  "xaero.map.server.level.LevelMapProperties": 3,
+  "xfacthd.framedblocks.api.block.update.CullingUpdatePacket": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "xfacthd.framedblocks.common.net.OpenSignScreenPacket": {
+    "clientbound": 7,
+    "serverbound": 2
+  },
+  "xfacthd.framedblocks.common.net.SelectFramingSawRecipePacket": {
+    "clientbound": 3,
+    "serverbound": 2
+  },
+  "xfacthd.framedblocks.common.net.SignUpdatePacket": 7
+}

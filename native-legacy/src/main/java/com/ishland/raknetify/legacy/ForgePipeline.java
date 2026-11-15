@@ -98,7 +98,8 @@ final class ForgePipeline extends ChannelInitializer<Channel> {
                                                 == (client
                                                         ? GamePackets.SERVERBOUND_PAYLOAD
                                                         : GamePackets.CLIENTBOUND_PAYLOAD),
-                                channel),
+                                channel,
+                                client),
                         new RakNetSimpleMultiChannelCodec.PacketIdBasedOverrideHandler(
                                 client ? mapping.c2s : mapping.s2c,
                                 Integer.toString(GamePackets.PROTOCOL))));

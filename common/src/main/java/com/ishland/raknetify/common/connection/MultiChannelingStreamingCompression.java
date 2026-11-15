@@ -326,7 +326,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
         if (channelStarts[channel].isSuccess()) {
             return promise;
         }
-        final ChannelPromise delivery = ctx.newPromise();
+        final ChannelPromise delivery = FencedWritePromise.replacement(ctx, promise);
         final PromiseCombiner completion = new PromiseCombiner();
         completion.add(channelStarts[channel]);
         completion.add((io.netty.util.concurrent.Future<?>) delivery);

@@ -42,7 +42,8 @@ import java.util.ArrayDeque;
 import java.util.Objects;
 
 /**
- * Fences only bundles that join different ordering lanes. Single-lane traffic can run concurrently.
+ * Fences bundles and mod messages that join different ordering lanes. Other traffic stays
+ * concurrent.
  */
 final class BundleDelivery extends ChannelDuplexHandler {
     /** Queued writes blocked by an earlier mixed-lane bundle. */
@@ -78,8 +79,7 @@ final class BundleDelivery extends ChannelDuplexHandler {
             promise.tryFailure(new ClosedChannelException());
             return;
         }
-        boolean mixed =
-                message instanceof FrameData frame && frame.getPacketId() == BundleWire.MIXED;
+        boolean mixed = requiresFence(message, promise);
         if (queue.isEmpty() && !fenced && (!mixed || pending == 0)) {
             send(ctx, message, promise, mixed);
             return;
@@ -95,6 +95,18 @@ final class BundleDelivery extends ChannelDuplexHandler {
         }
         bytes += size;
         queue.addLast(new Waiting(message, promise, mixed, size));
+    }
+
+    /**
+     * Recognizes local mod boundaries and negotiated mixed bundle envelopes.
+     *
+     * @param message outgoing frame or control message
+     * @param promise completion carrying any local mod boundary
+     * @return whether earlier and later deliveries must remain outside this write
+     */
+    private static boolean requiresFence(final Object message, final ChannelPromise promise) {
+        return promise instanceof FencedWritePromise
+                || (message instanceof FrameData frame && frame.getPacketId() == BundleWire.MIXED);
     }
 
     /**

@@ -92,6 +92,8 @@ def join(args, launch, server, address, name):
     with running([args.java, '@' + str(argfile)], client, log) as player:
         await_line(player, server_log, 'TransportProbe joined the game', offset=offset)
         await_line(player, server_log, 'PASS FML play channel round trip', offset=offset)
+        if args.loader == 'forge-mc1.20.1':
+            await_line(server, server_log, 'PASS Forge runtime packet ordering registrations')
         server.stdin.write(b'gamemode creative TransportProbe\n')
         server.stdin.write(b'execute as TransportProbe in minecraft:overworld run tp @s 0 100 0\n')
         server.stdin.write(b'execute as TransportProbe in minecraft:the_nether run tp @s 0 100 0\n')

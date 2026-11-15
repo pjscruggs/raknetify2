@@ -34,6 +34,9 @@ import com.ishland.raknetify.common.util.MathUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 
+import network.ycc.raknet.client.channel.RakNetClientChannel;
+import network.ycc.raknet.client.channel.RakNetClientThreadedChannel;
+
 import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
@@ -58,6 +61,9 @@ public class CustomPayloadChannel {
         /** Connection-local peer declarations, absent for classifiers used without a transport. */
         private final @Nullable Channel channel;
 
+        /** Whether this classifier routes outgoing client traffic. */
+        private final boolean clientSender;
+
         /**
          * Local declarations take precedence over peer preferences and stay fixed for this
          * classifier.
@@ -81,6 +87,25 @@ public class CustomPayloadChannel {
          */
         public PayloadClassifier(
                 final IntPredicate isCustomPayload, final @Nullable Channel channel) {
+            this(
+                    isCustomPayload,
+                    channel,
+                    channel instanceof RakNetClientChannel
+                            || channel instanceof RakNetClientThreadedChannel);
+        }
+
+        /**
+         * Creates a classifier for one connection and outgoing direction.
+         *
+         * @param isCustomPayload predicate recognizing payload packet IDs
+         * @param channel owning connection, or null for local registrations
+         * @param clientSender true when routing serverbound packets
+         */
+        public PayloadClassifier(
+                final IntPredicate isCustomPayload,
+                final @Nullable Channel channel,
+                final boolean clientSender) {
+            this.clientSender = clientSender;
             this.isCustomPayload = Objects.requireNonNull(isCustomPayload);
             this.channel = channel;
             this.local = PacketOrdering.snapshot();
@@ -105,6 +130,10 @@ public class CustomPayloadChannel {
                 if (Constants.DEBUG) {
                     System.out.println("Raknetify: Handling custom payload: " + identifier);
                 }
+                int installed = ModPayloadOrdering.channel(identifier, buf, clientSender);
+                if (installed != 0) {
+                    return installed;
+                }
                 // Forge multiplexes entity spawns and container openings on this identifier.
                 if ("fml:play".equals(identifier) && buf.isReadable()) {
                     int discriminator = MathUtil.readVarInt(buf);
@@ -112,7 +141,7 @@ public class CustomPayloadChannel {
                         return 2;
                     }
                     if (discriminator == 1) {
-                        return 1;
+                        return ModPayloadOrdering.FENCED;
                     }
                 }
                 return local.getOrDefault(

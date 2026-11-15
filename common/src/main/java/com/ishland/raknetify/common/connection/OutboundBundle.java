@@ -26,6 +26,7 @@
 package com.ishland.raknetify.common.connection;
 
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -100,7 +101,9 @@ final class OutboundBundle {
                 || packet.readableBytes() + (long) Integer.BYTES > data.maxWritableBytes()) {
             throw new TooLongFrameException("Minecraft bundle exceeds transport limits");
         }
-        if (lane >= 0) {
+        if (lane == ModPayloadOrdering.FENCED) {
+            lanes = 0xFF;
+        } else if (lane >= 0) {
             lanes |= 1 << lane;
         }
         data.writeInt(packet.readableBytes())
