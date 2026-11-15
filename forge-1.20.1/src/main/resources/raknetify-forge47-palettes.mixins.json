@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.ishland.raknetify.legacy.compat",
+  "plugin": "com.ishland.raknetify.legacy.ChangedAntiXrayPlugin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": ["PalettePresetsAccessor", "ChangedSectionMixin"],
+  "injectors": {"defaultRequire": 1}
+}

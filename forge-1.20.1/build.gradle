@@ -33,7 +33,7 @@ jar { archiveClassifier = 'dev' }
 shadowJar {
     configurations = [project.configurations.shadowInclude]
     archiveClassifier = ''
-    manifest { attributes 'MixinConfigs': 'raknetify-forge47.mixins.json' }
+    manifest { attributes 'MixinConfigs': 'raknetify-forge47.mixins.json,raknetify-forge47-palettes.mixins.json' }
     dependencies { exclude(dependency('it.unimi.dsi:fastutil')) }
     from rootProject.file('LICENSE')
     from(rootProject.file('netty-raknet/LICENSE')) { into 'META-INF/licenses/netty-raknet' }
