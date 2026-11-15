@@ -96,7 +96,7 @@ public final class ForgeChannelWitness {
      * @throws IllegalStateException if the runtime registration hook did not bind either policy
      */
     private static void verifyOrdering() {
-        var bytes = Unpooled.buffer().writeByte(251).writeByte(1);
+        var bytes = Unpooled.buffer().writeByte(251).writeByte(99);
         String name = "raknetify_transport_test:witness";
         try {
             int spawn = ModPayloadOrdering.channel(name, bytes);

@@ -71,6 +71,18 @@ class CustomPayloadRoutingTest {
         }
     }
 
+    /** Forge's high message IDs cannot consume payload fields and masquerade as a spawn. */
+    @Test
+    void forgeMessageIdsUseOneUnsignedByte() {
+        ByteBuf packet = payload(CUSTOM_PAYLOAD_ID, "fml:play");
+        packet.setByte(packet.writerIndex() - 1, 128).writeByte(0);
+        try {
+            assertEquals(3, proxyCodec().getChannelOverride(packet, false));
+        } finally {
+            packet.release();
+        }
+    }
+
     /**
      * Keeps trajectory frames ordered with entity updates after negotiation and on channel zero
      * before it.

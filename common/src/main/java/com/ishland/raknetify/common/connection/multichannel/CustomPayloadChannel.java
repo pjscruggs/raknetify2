@@ -136,7 +136,7 @@ public class CustomPayloadChannel {
                 }
                 // Forge multiplexes entity spawns and container openings on this identifier.
                 if ("fml:play".equals(identifier) && buf.isReadable()) {
-                    int discriminator = MathUtil.readVarInt(buf);
+                    int discriminator = buf.readUnsignedByte();
                     if (discriminator == 0) {
                         return 2;
                     }

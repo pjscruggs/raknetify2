@@ -50,6 +50,18 @@ class ModPayloadOrderingTest {
         assertRoute("test:alpha", 251, false, 0);
     }
 
+    /** The registration hook mirrors Forge's byte narrowing and replacement of codec entries. */
+    @Test
+    void mirrorsUnsignedByteCodecRegistration() {
+        String known = "net.minecraftforge.network.PlayMessages$SpawnEntity";
+        ModPayloadOrdering.register("test:wrapped", 276, known);
+        assertRoute("test:wrapped", 20, false, 2);
+        ModPayloadOrdering.register("test:wrapped", 20, "another.mod.Unclassified");
+        assertRoute("test:wrapped", 20, false, 0);
+        ModPayloadOrdering.register("test:wrapped", 250, known);
+        assertRoute("test:wrapped", 250, false, 2);
+    }
+
     /** Container inputs and contents each share their vanilla ordering lane. */
     @Test
     void followsVanillaInventoryInEachDirection() {
@@ -181,12 +193,7 @@ class ModPayloadOrderingTest {
             final boolean clientSender,
             final int expected) {
         var bytes = Unpooled.buffer().writeByte(99);
-        int value = discriminator;
-        while (value > 127) {
-            bytes.writeByte((value & 127) | 128);
-            value >>>= 7;
-        }
-        bytes.writeByte(value);
+        bytes.writeByte(discriminator).writeByte(99);
         bytes.readerIndex(1);
         try {
             assertEquals(expected, ModPayloadOrdering.channel(identifier, bytes, clientSender));

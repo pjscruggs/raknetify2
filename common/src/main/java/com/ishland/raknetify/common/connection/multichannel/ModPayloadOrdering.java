@@ -64,21 +64,26 @@ public final class ModPayloadOrdering {
      * Records an installed mod's message discriminator without loading the optional packet class.
      *
      * @param identifier namespaced Forge channel identifier
-     * @param discriminator message identifier allocated by the installed mod
+     * @param discriminator registration identifier, narrowed to the unsigned Forge 47 wire byte
      * @param packetClass fully qualified packet class captured during registration
      */
     public static void register(
             final String identifier, final int discriminator, final String packetClass) {
         Policy route = CLASSES.get(packetClass);
-        if (route == null || discriminator < 0 || discriminator > 65535) {
+        if (route == null && !CHANNELS.containsKey(identifier)) {
             return;
         }
+        int wireId = discriminator & 0xFF;
         CHANNELS.compute(
                 identifier,
                 (key, previous) -> {
                     Map<Integer, Policy> next =
                             new HashMap<>(previous == null ? Map.of() : previous);
-                    next.put(discriminator, route);
+                    if (route == null) {
+                        next.remove(wireId);
+                    } else {
+                        next.put(wireId, route);
+                    }
                     return Map.copyOf(next);
                 });
     }
@@ -112,7 +117,8 @@ public final class ModPayloadOrdering {
         if (routes == null || !payload.isReadable()) {
             return 0;
         }
-        Policy policy = routes.get(MathUtil.readVarInt(payload.slice()));
+        int discriminator = payload.getUnsignedByte(payload.readerIndex());
+        Policy policy = routes.get(discriminator);
         return policy == null ? 0 : policy.lane(clientSender);
     }
 
