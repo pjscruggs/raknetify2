@@ -105,6 +105,16 @@ public class CustomPayloadChannel {
                 if (Constants.DEBUG) {
                     System.out.println("Raknetify: Handling custom payload: " + identifier);
                 }
+                // Forge multiplexes entity spawns and container openings on this identifier.
+                if ("fml:play".equals(identifier) && buf.isReadable()) {
+                    int discriminator = MathUtil.readVarInt(buf);
+                    if (discriminator == 0) {
+                        return 2;
+                    }
+                    if (discriminator == 1) {
+                        return 1;
+                    }
+                }
                 return local.getOrDefault(
                         identifier, PayloadOrderingNegotiation.remoteChannel(channel, identifier));
             } else {

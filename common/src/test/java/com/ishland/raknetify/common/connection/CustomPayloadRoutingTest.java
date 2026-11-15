@@ -52,6 +52,25 @@ class CustomPayloadRoutingTest {
     /** Packet ID supplied by the proxy protocol registry in this deterministic fixture. */
     private static final int CUSTOM_PAYLOAD_ID = 24;
 
+    /** Forge spawn packets must arrive before metadata and container packets before contents. */
+    @Test
+    void forgePlayMessagesKeepTheirVanillaDependencies() {
+        for (int message = 0; message < 3; message++) {
+            ByteBuf packet = payload(CUSTOM_PAYLOAD_ID, "fml:play");
+            try {
+                packet.setByte(packet.writerIndex() - 1, message);
+                int reader = packet.readerIndex();
+                assertEquals(
+                        message == 0 ? 2 : message == 1 ? 1 : 3,
+                        proxyCodec().getChannelOverride(packet, false));
+                assertEquals(reader, packet.readerIndex());
+                assertEquals(1, packet.refCnt());
+            } finally {
+                packet.release();
+            }
+        }
+    }
+
     /**
      * Keeps trajectory frames ordered with entity updates after negotiation and on channel zero
      * before it.
