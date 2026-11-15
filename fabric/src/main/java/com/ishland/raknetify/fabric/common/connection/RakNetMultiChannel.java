@@ -27,6 +27,7 @@ package com.ishland.raknetify.fabric.common.connection;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
+import com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering;
 import com.ishland.raknetify.common.util.ConsoleMessages;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -463,6 +464,29 @@ public class RakNetMultiChannel {
         channel7.forEach(clazz -> classToChannelIdOverride.put(clazz, 7));
         unreliable.forEach(clazz -> classToChannelIdOverride.put(clazz, -2));
         theVoid.forEach(clazz -> classToChannelIdOverride.put(clazz, Integer.MIN_VALUE));
+        installLegacyBoundaries();
+    }
+
+    /** Keeps protocol 763's native routes and generated proxy mappings in agreement. */
+    private static void installLegacyBoundaries() {
+        String version =
+                FabricLoader.getInstance()
+                        .getModContainer("minecraft")
+                        .map(container -> container.getMetadata().getVersion().getFriendlyString())
+                        .orElse("");
+        if (!"1.20".equals(version) && !"1.20.1".equals(version)) {
+            return;
+        }
+        createClassSet(
+                        new String[] {
+                            // Player spawning also needs the player list.
+                            "net/minecraft/class_2613",
+                            // Horse menus need their entity first.
+                            "net/minecraft/class_2648",
+                            // Mod menu factories can require entity or chunk state.
+                            "net/minecraft/class_3944"
+                        })
+                .forEach(clazz -> classToChannelIdOverride.put(clazz, ModPayloadOrdering.FENCED));
     }
 
     //    private static final ThreadLocal<Class<?>> currentPacketClass = new ThreadLocal<>();
