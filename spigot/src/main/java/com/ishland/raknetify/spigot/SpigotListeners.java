@@ -48,6 +48,7 @@ import org.jspecify.annotations.Nullable;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /** Keeps UDP resources separate from server-owned TCP channels and shuts them down together. */
 final class SpigotListeners implements AutoCloseable {
@@ -222,8 +223,10 @@ final class SpigotListeners implements AutoCloseable {
             channel.close().syncUninterruptibly();
         }
         channels.clear();
-        transport.shutdownGracefully().syncUninterruptibly();
-        application.shutdownGracefully().syncUninterruptibly();
+        // Listener close waits for its children. Drain queued work in transport-to-application
+        // order without making the server thread wait for idle time on either private loop.
+        transport.shutdownGracefully(0, 15, TimeUnit.SECONDS).syncUninterruptibly();
+        application.shutdownGracefully(0, 15, TimeUnit.SECONDS).syncUninterruptibly();
     }
 
     /**

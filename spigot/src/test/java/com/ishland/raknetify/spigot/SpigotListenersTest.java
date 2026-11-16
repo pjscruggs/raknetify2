@@ -46,6 +46,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -145,7 +146,7 @@ class SpigotListenersTest {
                 ports.udp().close();
                 listeners.bind();
                 assertTrue(tcp.channel().isActive());
-                listeners.close();
+                assertTimeout(Duration.ofSeconds(3), listeners::close);
                 assertTrue(tcp.channel().isActive());
                 try (DatagramSocket replacement = new DatagramSocket(null)) {
                     replacement.bind(tcp.channel().localAddress());
