@@ -3,13 +3,13 @@ buildscript {
 	repositories { mavenCentral() }
 	dependencies {
 		// Patch plugin dependencies independently of libraries supplied by Minecraft at runtime.
-		classpath platform('com.fasterxml.jackson:jackson-bom:2.22.3')
-		classpath platform('org.apache.logging.log4j:log4j-bom:2.25.5')
+		classpath platform('com.fasterxml.jackson:jackson-bom:2.22.4')
+		classpath platform('org.apache.logging.log4j:log4j-bom:2.26.1')
 		constraints {
-			classpath('com.google.guava:guava:33.7.2-jre') {
+			classpath('com.google.guava:guava:33.8.0-jre') {
 				because 'CVE-2026-102554 fixes unbounded allocation during deserialization.'
 			}
-			classpath('org.codehaus.plexus:plexus-utils:4.0.3') {
+			classpath('org.codehaus.plexus:plexus-utils:4.2.0') {
 				because 'CVE-2025-67030 fixes archive extraction outside the destination.'
 			}
 		}
@@ -18,12 +18,12 @@ buildscript {
 
 plugins {
 	id 'net.ltgt.errorprone' version '5.2.0' apply false
-	id 'org.cyclonedx.bom' version '3.6.0'
+	id 'org.cyclonedx.bom' version '3.6.1'
 	id 'fabric-loom' version '1.19.4' apply false
 	id 'net.fabricmc.fabric-loom' version '1.19.4' apply false
 	id 'com.gradleup.shadow' version '9.6.1' apply false
 	id 'net.neoforged.moddev' version '2.0.148' apply false
-	id 'net.minecraftforge.gradle' version '7.0.17' apply false
+	id 'net.minecraftforge.gradle' version '7.0.40' apply false
 	id 'dev.yumi.gradle.licenser' version '4.0.0' apply false
 	id 'com.modrinth.minotaur' version '2.10.0' apply false
 }
