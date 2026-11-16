@@ -32,6 +32,12 @@ neoForge {
 }
 
 sourceSets.main.java.srcDir rootProject.file('native-legacy/src/main/java')
+// The pinned userdev config runs the fat JAR. Resolve it independently of NeoForm's other tool versions.
+tasks.named('createMinecraftArtifacts') {
+    def patcher = project.dependencies.create('net.neoforged.installertools:binarypatcher:2.1.2:fatjar@jar')
+    addArtifactsToManifest(project.configurations.detachedConfiguration(patcher))
+}
+
 configurations { shadowInclude }
 dependencies {
     shadowInclude implementation(project(':common')) { exclude group: 'it.unimi.dsi', module: 'fastutil' }
