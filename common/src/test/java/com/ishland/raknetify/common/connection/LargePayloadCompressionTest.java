@@ -63,13 +63,14 @@ class LargePayloadCompressionTest {
         }
         for (int capacity : new int[] {16, 17}) {
             var endpoint = new io.netty.channel.embedded.EmbeddedChannel();
-            var out = io.netty.buffer.Unpooled.buffer(0, capacity);
+            var out = io.netty.buffer.Unpooled.buffer(1, capacity + 1).writeByte(RAW);
             var inflater = new java.util.zip.Inflater();
             try {
                 inflater.setInput(encoded.toByteArray());
                 if (capacity == 17) {
                     MultiChannelingStreamingCompression.inflateInto(
                             endpoint, inflater, new byte[8], out);
+                    org.junit.jupiter.api.Assertions.assertEquals(RAW, out.readUnsignedByte());
                     org.junit.jupiter.api.Assertions.assertEquals(17, out.readableBytes());
                 } else {
                     org.junit.jupiter.api.Assertions.assertThrows(
@@ -322,6 +323,12 @@ class LargePayloadCompressionTest {
             assertNotNull(compressed);
         }
         try {
+            ByteBuf encoded = compressed.createData();
+            try {
+                assertEquals(1, encoded.nioBufferCount());
+            } finally {
+                encoded.release();
+            }
             assertEquals(COMPRESSED, compressed.getPacketId());
             assertTrue(compressed.getDataSize() < TransportTestPayload.LARGE_SIZE);
             receiver.writeInbound(compressed.retain());
@@ -345,6 +352,7 @@ class LargePayloadCompressionTest {
         assertNotNull(decoded);
         ByteBuf bytes = decoded.createData();
         try {
+            assertEquals(1, bytes.nioBufferCount());
             assertEquals(RAW, bytes.readUnsignedByte());
             assertEquals(channel, decoded.getOrderChannel());
             assertEquals(FramedPacket.Reliability.RELIABLE_ORDERED, decoded.getReliability());

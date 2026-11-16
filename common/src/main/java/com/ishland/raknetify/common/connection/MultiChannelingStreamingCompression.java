@@ -406,12 +406,12 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
 
             inBytesCompressed.addAndGet(data.readableBytes());
 
-            out = ctx.alloc().buffer(256, Constants.MAX_QUEUED_SIZE - 1);
+            out = ctx.alloc().buffer(256, Constants.MAX_QUEUED_SIZE).writeByte(rawPacketId);
             inflateInto(ctx.channel(), inflater, scratch(), out);
 
-            inBytesRaw.addAndGet(out.writerIndex());
+            inBytesRaw.addAndGet(out.readableBytes() - 1);
 
-            rawFrameData = FrameData.create(ctx.alloc(), rawPacketId, out);
+            rawFrameData = FrameData.read(out, out.readableBytes(), false);
             rawFrameData.setReliability(compressedFrameData.getReliability());
             rawFrameData.setOrderChannel(orderChannel);
             ctx.fireChannelRead(rawFrameData);
@@ -438,7 +438,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
      * @param channel application channel supplying the error language
      * @param inflater channel dictionary positioned at this packet's compressed input
      * @param scratch reusable transient output from zlib
-     * @param out bounded destination excluding the frame identifier
+     * @param out bounded destination positioned after any frame identifier
      * @throws DataFormatException if the stream is malformed
      * @throws CorruptedFrameException if decompression exceeds the frame budget
      */
@@ -448,11 +448,12 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
             final byte[] scratch,
             final ByteBuf out)
             throws DataFormatException {
+        final int payloadLimit = out.maxWritableBytes();
         int count;
         while ((count = inflater.inflate(scratch)) != 0) {
             if (count > out.maxWritableBytes()) {
                 throw new CorruptedFrameException(
-                        ConsoleMessages.transport(channel, "inflated_limit", out.maxCapacity()));
+                        ConsoleMessages.transport(channel, "inflated_limit", payloadLimit));
             }
             out.writeBytes(scratch, 0, count);
         }
@@ -490,7 +491,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
 
             outBytesRaw.addAndGet(data.readableBytes());
 
-            out = ctx.alloc().buffer();
+            out = ctx.alloc().buffer().writeByte(compressedPacketId);
             {
                 int deflatedBytes;
                 while ((deflatedBytes =
@@ -504,9 +505,9 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
                 }
             }
 
-            outBytesCompressed.addAndGet(out.writerIndex());
+            outBytesCompressed.addAndGet(out.readableBytes() - 1);
 
-            compressedFrameData = FrameData.create(ctx.alloc(), compressedPacketId, out);
+            compressedFrameData = FrameData.read(out, out.readableBytes(), false);
             compressedFrameData.setReliability(rawFrameData.getReliability());
             compressedFrameData.setOrderChannel(orderChannel);
             super.write(ctx, compressedFrameData, promise);
