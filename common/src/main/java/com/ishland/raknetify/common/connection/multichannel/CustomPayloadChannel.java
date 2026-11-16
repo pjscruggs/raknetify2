@@ -44,8 +44,8 @@ import java.util.Objects;
 import java.util.function.IntPredicate;
 
 /**
- * Routes known mod payload identifiers onto the same ordering channels as their related vanilla
- * traffic.
+ * Routes declared payloads with their vanilla dependencies and preserves send boundaries around
+ * payloads whose dependencies are unknown.
  */
 public class CustomPayloadChannel {
 
@@ -116,9 +116,8 @@ public class CustomPayloadChannel {
          * buffer.
          *
          * @param origBuf Minecraft payload beginning with its packet ID
-         * @param suppressWarning unused because unrecognized identifiers silently defer to other
-         *     classifiers
-         * @return configured ordering channel, or zero for unrelated or unregistered payloads
+         * @param suppressWarning unused because unregistered payloads need no diagnostic
+         * @return declared route or a delivery fence for a custom payload, zero for other packets
          */
         @Override
         public int getChannelOverride(final ByteBuf origBuf, final boolean suppressWarning) {
@@ -144,8 +143,12 @@ public class CustomPayloadChannel {
                         return ModPayloadOrdering.FENCED;
                     }
                 }
-                return local.getOrDefault(
-                        identifier, PayloadOrderingNegotiation.remoteChannel(channel, identifier));
+                Integer declared = local.get(identifier);
+                if (declared != null) {
+                    return declared;
+                }
+                int remote = PayloadOrderingNegotiation.remoteChannel(channel, identifier);
+                return remote == 0 ? ModPayloadOrdering.FENCED : remote;
             } else {
                 return 0;
             }

@@ -206,6 +206,57 @@ class BundleTransportTest {
         }
     }
 
+    /**
+     * A fenced payload may follow terrain immediately on its FIFO lane. A receipt for the payload
+     * alone cannot release the next entity update while terrain is still missing.
+     *
+     * @param success whether the delayed terrain frame is ultimately delivered
+     */
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void fenceSharesThePredecessorLaneButWaitsForItsDelivery(final boolean success) {
+        var server = server(true);
+        var receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        try {
+            var terrainWrite = server.writeAndFlush(Unpooled.buffer(1).writeByte(7));
+            var fence = server.writeAndFlush(Unpooled.buffer(1).writeByte(5));
+            var entity = server.writeAndFlush(Unpooled.buffer(1).writeByte(2));
+            assertEquals(2, receipts.pending.size());
+            FrameData terrain = server.readOutbound();
+            FrameData payload = server.readOutbound();
+            try {
+                assertEquals(7, terrain.getOrderChannel());
+                assertEquals(7, payload.getOrderChannel());
+            } finally {
+                terrain.release();
+                payload.release();
+            }
+            receipts.pending.removeLast().setSuccess();
+            assertFalse(fence.isDone());
+            assertNull(server.readOutbound());
+            var first = receipts.pending.removeFirst();
+            if (success) {
+                first.setSuccess();
+                assertTrue(fence.isSuccess());
+                FrameData next = server.readOutbound();
+                assertEquals(2, next.getOrderChannel());
+                next.release();
+                receipts.pending.removeFirst().setSuccess();
+                assertTrue(entity.isSuccess());
+            } else {
+                var failure = new java.io.IOException("Undelivered terrain");
+                first.setFailure(failure);
+                assertSame(failure, terrainWrite.cause());
+                assertSame(failure, fence.cause());
+                assertSame(failure, entity.cause());
+                assertFalse(server.isActive());
+            }
+        } finally {
+            server.finishAndReleaseAll();
+        }
+    }
+
     /** Same-lane fences can travel together while a late fragment still holds the next lane. */
     @Test
     void sameLaneFencesShareOneAcknowledgementRound() {
@@ -315,14 +366,14 @@ class BundleTransportTest {
             assertFalse(server.write(data, new FencedWritePromise(context, original)).isDone());
             server.flush();
             FrameData dictionary = server.readOutbound();
+            FrameData compressed = server.readOutbound();
             assertNotNull(dictionary);
-            assertNull(server.readOutbound());
+            assertNotNull(compressed);
+            assertEquals(0xfe, compressed.getPacketId());
+            assertEquals(dictionary.getOrderChannel(), compressed.getOrderChannel());
+            receipts.pending.removeLast().setSuccess();
             assertFalse(original.isDone());
             client.writeInbound(dictionary);
-            receipts.pending.removeFirst().setSuccess();
-            FrameData compressed = server.readOutbound();
-            assertEquals(0xfe, compressed.getPacketId());
-            assertFalse(original.isDone());
             client.writeInbound(compressed);
             receipts.pending.removeFirst().setSuccess();
             assertTrue(original.isSuccess());

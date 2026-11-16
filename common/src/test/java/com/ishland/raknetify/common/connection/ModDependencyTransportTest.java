@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.ishland.raknetify.common.connection.multichannel.CustomPayloadChannel;
 import com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering;
 
 import io.netty.buffer.ByteBuf;
@@ -49,6 +50,29 @@ import java.util.Deque;
 
 /** Checks real mod policies against independently acknowledged entity, chunk and menu traffic. */
 class ModDependencyTransportTest {
+    /**
+     * A previously unseen payload must stay between the vanilla state it reads and the next update.
+     *
+     * @param clientSender whether the mod packet is travelling to the server
+     */
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void undeclaredPayloadRetainsBothDeliveryDependencies(final boolean clientSender) {
+        var codec = new RakNetSimpleMultiChannelCodec(0xfd);
+        codec.addHandler(
+                new CustomPayloadChannel.PayloadClassifier(id -> id == 24, null, clientSender));
+        codec.addHandler((bytes, quiet) ->
+                bytes.getUnsignedByte(bytes.readerIndex()) == 24
+                        ? 3
+                        : bytes.getUnsignedByte(bytes.readerIndex()));
+        byte[] identifier =
+                ("unregistered:" + java.util.UUID.randomUUID())
+                        .getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+        var message =
+                Unpooled.buffer().writeByte(24).writeByte(identifier.length).writeBytes(identifier);
+        exerciseBoundaries(begin(codec), message);
+    }
+
     /**
      * A state rebuild cannot overtake earlier domains or be overtaken by later menu contents.
      *

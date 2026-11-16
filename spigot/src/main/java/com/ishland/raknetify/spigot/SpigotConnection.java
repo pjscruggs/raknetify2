@@ -29,6 +29,7 @@ import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
+import com.ishland.raknetify.common.connection.multichannel.CustomPayloadChannel;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
 import com.ishland.raknetify.common.proxy.ProxyProtocol;
 import com.ishland.raknetify.common.util.ConsoleMessages;
@@ -44,6 +45,9 @@ import java.security.PrivateKey;
  * machine.
  */
 final class SpigotConnection {
+    /** Clientbound play custom_payload in the generated Minecraft 26.3 protocol report. */
+    private static final int CLIENTBOUND_CUSTOM_PAYLOAD = 24;
+
     /** Prevents instantiation of the channel setup utility. */
     private SpigotConnection() {}
 
@@ -74,26 +78,42 @@ final class SpigotConnection {
             ProxyProtocol.requireForwarded(channel);
             pipeline.remove("haproxy-decoder");
         }
-        var mapping = ProtocolMultiChannelMappings.INSTANCE.mappings.get(777);
-        if (mapping == null) {
-            throw new IllegalStateException(ConsoleMessages.text("spigot_mappings"));
-        }
         for (String name : new String[] {"timeout", "splitter", "prepender"}) {
             pipeline.replace(name, name, new ChannelDuplexHandler());
         }
         remove(pipeline, "legacy_query");
         SpigotCipherState cipher = new SpigotCipherState(key);
         SpigotTransportGuard guard = new SpigotTransportGuard(cipher);
-        var classifier =
-                new RakNetSimpleMultiChannelCodec.PacketIdBasedOverrideHandler(
-                        mapping.s2c, "Spigot 26.3 clientbound");
-        SpigotPacketHandler packets = new SpigotPacketHandler(cipher, guard, classifier);
+        SpigotPacketHandler packets = new SpigotPacketHandler(cipher, guard);
         pipeline.addBefore(
                 MultiChannelingStreamingCompression.NAME, "raknetify-spigot-transport", guard);
         pipeline.addBefore("packet_handler", "raknetify-spigot-packets", packets);
         pipeline.addBefore(
                 "packet_handler", "raknetify-spigot-disconnect", new SpigotDisconnectHandler());
-        pipeline.get(RakNetSimpleMultiChannelCodec.class).addHandler(packets::classify);
+        installPlayRoutes(channel, packets::isPlaying);
+    }
+
+    /**
+     * Routes plugin messages on the same terms as mod payloads, including client declarations.
+     *
+     * @param channel initialized transport connection
+     * @param playing whether the native encoder currently uses the play protocol
+     * @throws IllegalStateException if the supported protocol has no packet map
+     */
+    static void installPlayRoutes(
+            final Channel channel, final java.util.function.BooleanSupplier playing) {
+        var mapping = ProtocolMultiChannelMappings.INSTANCE.mappings.get(777);
+        if (mapping == null) {
+            throw new IllegalStateException(ConsoleMessages.text("spigot_mappings"));
+        }
+        channel.pipeline()
+                .get(RakNetSimpleMultiChannelCodec.class)
+                .addPlayHandlers(
+                        playing,
+                        new CustomPayloadChannel.PayloadClassifier(
+                                id -> id == CLIENTBOUND_CUSTOM_PAYLOAD, channel, false),
+                        new RakNetSimpleMultiChannelCodec.PacketIdBasedOverrideHandler(
+                                mapping.s2c, "Spigot 26.3 clientbound"));
     }
 
     /**

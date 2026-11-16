@@ -31,7 +31,7 @@ import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetify.common.connection.MultiChannellingEncryption;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
-import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
+import com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -82,19 +82,29 @@ class SpigotCipherStateTest {
      */
     @Test
     void statusPacketNeverUsesPlayDiscardRules() {
-        SpigotCipherState state = new SpigotCipherState(SERVER_KEY);
-        var mapping = ProtocolMultiChannelMappings.INSTANCE.mappings.get(777);
-        var classifier =
-                new RakNetSimpleMultiChannelCodec.PacketIdBasedOverrideHandler(mapping.s2c, "test");
-        SpigotPacketHandler packets =
-                new SpigotPacketHandler(state, new SpigotTransportGuard(state), classifier);
-        ByteBuf payload = Unpooled.buffer().writeByte(0).writeByte(2).writeByte('{').writeByte('}');
+        var playing = new java.util.concurrent.atomic.AtomicBoolean();
+        var codec = new RakNetSimpleMultiChannelCodec(0xfd);
+        var channel = new EmbeddedChannel(codec);
+        SpigotConnection.installPlayRoutes(channel, playing::get);
+        var routes =
+                java.util.Objects.requireNonNull(
+                        codec.getHandler(RakNetSimpleMultiChannelCodec.OverrideHandler.class));
+        ByteBuf status = Unpooled.buffer().writeByte(0).writeByte(2).writeByte('{').writeByte('}');
+        ByteBuf plugin = Unpooled.buffer().writeByte(24).writeByte(11);
+        plugin.writeCharSequence("unseen:menu", java.nio.charset.StandardCharsets.US_ASCII);
         try {
-            assertEquals(Integer.MIN_VALUE, classifier.getChannelOverride(payload, true));
-            assertEquals(0, packets.classify(payload, true));
-            assertEquals(0, payload.readerIndex());
+            for (boolean play : new boolean[] {false, true, false}) {
+                playing.set(play);
+                assertEquals(play ? Integer.MIN_VALUE : 0, routes.getChannelOverride(status, true));
+                assertEquals(
+                        play ? ModPayloadOrdering.FENCED : 0,
+                        routes.getChannelOverride(plugin, true));
+            }
+            assertEquals(0, plugin.readerIndex());
         } finally {
-            payload.release();
+            plugin.release();
+            status.release();
+            channel.finishAndReleaseAll();
         }
     }
 

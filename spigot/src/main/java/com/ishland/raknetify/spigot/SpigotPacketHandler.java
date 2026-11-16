@@ -28,7 +28,6 @@ package com.ishland.raknetify.spigot;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.connection.SynchronizationLayer;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -44,12 +43,6 @@ final class SpigotPacketHandler extends ChannelDuplexHandler {
     /** Shared pipeline reconciler for encryption and negotiated compression. */
     private final SpigotTransportGuard guard;
 
-    /**
-     * Play-state routing table, which must never classify status, login, or configuration packet
-     * IDs.
-     */
-    private final RakNetSimpleMultiChannelCodec.OverrideHandler classifier;
-
     /** Whether outgoing packet IDs currently belong to the play protocol. */
     private boolean play;
 
@@ -58,28 +51,19 @@ final class SpigotPacketHandler extends ChannelDuplexHandler {
      *
      * @param cipher key exchange state owned by this connection
      * @param guard inbound guard sharing compression and encryption decisions
-     * @param classifier packet routing rules for the tested play protocol
      */
-    SpigotPacketHandler(
-            final SpigotCipherState cipher,
-            final SpigotTransportGuard guard,
-            final RakNetSimpleMultiChannelCodec.OverrideHandler classifier) {
+    SpigotPacketHandler(final SpigotCipherState cipher, final SpigotTransportGuard guard) {
         this.cipher = cipher;
         this.guard = guard;
-        this.classifier = classifier;
     }
 
     /**
-     * Applies play rules only after entering that protocol, including explicit packet-discard
-     * policies. Packet zero is a bundle delimiter during play but a required status response during
-     * server discovery.
+     * Identifies the protocol used by the native outbound encoder.
      *
-     * @param payload encoded packet beginning at its protocol-specific ID
-     * @param quiet whether the routing table should avoid unknown-ID diagnostics
-     * @return play routing policy, or ordered channel zero outside play
+     * @return whether play packet IDs and custom payload identifiers can be interpreted
      */
-    int classify(final ByteBuf payload, final boolean quiet) {
-        return play ? classifier.getChannelOverride(payload, quiet) : 0;
+    boolean isPlaying() {
+        return play;
     }
 
     /**

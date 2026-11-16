@@ -390,8 +390,10 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     private FrameData routedFrame(
             final ChannelHandlerContext ctx, final ByteBuf buf, final int lane) {
         final FrameData frame = FrameData.create(ctx.alloc(), packetId, buf);
-        if (lane >= 0 || lane == ModPayloadOrdering.FENCED) {
-            frame.setOrderChannel(lane == ModPayloadOrdering.FENCED ? 0 : lane);
+        if (lane == ModPayloadOrdering.FENCED) {
+            frame.setOrderChannel(BundleDelivery.preferredFenceLane(ctx.pipeline()));
+        } else if (lane >= 0) {
+            frame.setOrderChannel(lane);
         } else {
             frame.setReliability(
                     lane == -1

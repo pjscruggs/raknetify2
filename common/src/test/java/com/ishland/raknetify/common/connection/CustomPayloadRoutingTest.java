@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ishland.raknetify.api.PacketOrdering;
 import com.ishland.raknetify.common.connection.multichannel.CustomPayloadChannel;
+import com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -61,7 +62,7 @@ class CustomPayloadRoutingTest {
                 packet.setByte(packet.writerIndex() - 1, message);
                 int reader = packet.readerIndex();
                 assertEquals(
-                        message == 0 ? 2 : message == 1 ? -3 : 3,
+                        message == 0 ? 2 : ModPayloadOrdering.FENCED,
                         proxyCodec().getChannelOverride(packet, false));
                 assertEquals(reader, packet.readerIndex());
                 assertEquals(1, packet.refCnt());
@@ -77,7 +78,7 @@ class CustomPayloadRoutingTest {
         ByteBuf packet = payload(CUSTOM_PAYLOAD_ID, "fml:play");
         packet.setByte(packet.writerIndex() - 1, 128).writeByte(0);
         try {
-            assertEquals(3, proxyCodec().getChannelOverride(packet, false));
+            assertEquals(ModPayloadOrdering.FENCED, proxyCodec().getChannelOverride(packet, false));
         } finally {
             packet.release();
         }
@@ -133,17 +134,16 @@ class CustomPayloadRoutingTest {
     }
 
     /**
-     * Leaves capability/configuration and unrelated custom payloads on their ordinary proxy
-     * channel.
+     * Preserves ordering around play payloads with no registered dependency group.
      *
      * @param identifier payload identifier that must not inherit the trajectory override
      */
     @ParameterizedTest
     @ValueSource(strings = {"example:hello", "example:config", "other-mod:trajectory_v1"})
-    void unrelatedPayloadsKeepTheirFallback(final String identifier) {
+    void undeclaredPayloadsKeepTheirBoundaries(final String identifier) {
         ByteBuf packet = payload(CUSTOM_PAYLOAD_ID, identifier);
         try {
-            assertEquals(3, proxyCodec().getChannelOverride(packet, false));
+            assertEquals(ModPayloadOrdering.FENCED, proxyCodec().getChannelOverride(packet, false));
         } finally {
             packet.release();
         }

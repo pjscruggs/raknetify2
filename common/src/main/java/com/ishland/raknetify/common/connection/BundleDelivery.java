@@ -55,6 +55,12 @@ final class BundleDelivery extends ChannelDuplexHandler {
     /** Ordinary writes awaiting delivery before a cross-lane fence may start. */
     private int pending;
 
+    /**
+     * Common reliable FIFO lane of the outstanding ordinary writes, or minus one for a mixed
+     * prefix.
+     */
+    private int pendingLane;
+
     /** Bounds completion records when newer datagrams arrive before the oldest one. */
     private static final int MAX_IN_FLIGHT_FENCES = 32;
 
@@ -124,7 +130,9 @@ final class BundleDelivery extends ChannelDuplexHandler {
      */
     private boolean canSend(final Object message, final boolean mixed) {
         if (fences.isEmpty()) {
-            return !mixed || pending == 0;
+            return !mixed
+                    || pending == 0
+                    || (pendingLane >= 0 && pendingLane == orderedLane(message));
         }
         if (!mixed
                 || !(message instanceof FrameData frame)
@@ -139,14 +147,36 @@ final class BundleDelivery extends ChannelDuplexHandler {
     /**
      * Identifies the ordered stream that will reassemble and deliver this frame.
      *
-     * @param frame outgoing frame with its final reliability and channel
+     * @param message outgoing frame or transport control
      * @return FIFO lane, or minus one if this frame needs exclusive delivery
      */
-    private static int orderedLane(final FrameData frame) {
+    private static int orderedLane(final Object message) {
+        if (!(message instanceof FrameData frame)) {
+            return -1;
+        }
         var policy = frame.getReliability();
         return policy.isReliable && policy.isOrdered && !policy.isSequenced
                 ? frame.getOrderChannel()
                 : -1;
+    }
+
+    /**
+     * Selects the stream before compression so both peers use the same per-lane dictionary.
+     * Eligibility is checked again against actual frames when the write reaches this handler.
+     *
+     * @param pipeline channel containing the delivery handler
+     * @return a current reliable FIFO lane, or the default lane for independent predecessors
+     */
+    static int preferredFenceLane(final io.netty.channel.ChannelPipeline pipeline) {
+        ChannelHandlerContext context = pipeline.context(BundleDelivery.class);
+        if (context == null || !context.executor().inEventLoop()) {
+            return 0;
+        }
+        BundleDelivery delivery = (BundleDelivery) context.handler();
+        if (!delivery.fences.isEmpty()) {
+            return Math.max(0, delivery.fences.getLast().lane());
+        }
+        return delivery.pending == 0 ? 0 : Math.max(0, delivery.pendingLane);
     }
 
     /**
@@ -166,14 +196,20 @@ final class BundleDelivery extends ChannelDuplexHandler {
             sendFence(ctx, message, promise.unvoid());
             return;
         }
+        int lane = orderedLane(message);
+        if (pending == 0) {
+            pendingLane = lane;
+        } else if (pendingLane != lane) {
+            pendingLane = -1;
+        }
         pending++;
         ctx.write(message, promise.unvoid())
                 .addListener(result -> {
                     pending--;
-                    if (!closed && !result.isSuccess() && !queue.isEmpty()) {
+                    if (!closed && !result.isSuccess() && (!queue.isEmpty() || !fences.isEmpty())) {
                         abort(ctx, Objects.requireNonNull(result.cause()));
                     } else {
-                        drain(ctx);
+                        releaseDelivered(ctx);
                     }
                 });
     }
@@ -192,7 +228,7 @@ final class BundleDelivery extends ChannelDuplexHandler {
             abort(ctx, Objects.requireNonNull(promise.cause()));
             return;
         }
-        int lane = message instanceof FrameData frame ? orderedLane(frame) : -1;
+        int lane = orderedLane(message);
         int size = message instanceof FrameData frame ? frame.getDataSize() : 0;
         var transport = ctx.newPromise();
         fences.addLast(new Fence(lane, size, transport, promise));
@@ -214,7 +250,17 @@ final class BundleDelivery extends ChannelDuplexHandler {
             abort(ctx, Objects.requireNonNull(result.cause()));
             return;
         }
-        while (!fences.isEmpty() && fences.getFirst().transport().isSuccess()) {
+        releaseDelivered(ctx);
+    }
+
+    /**
+     * Holds even acknowledged fences while a preceding fragment on their lane is outstanding. No
+     * ordinary successor is submitted while a fence is outstanding.
+     *
+     * @param ctx transport context owning the pending writes
+     */
+    private void releaseDelivered(final ChannelHandlerContext ctx) {
+        while (pending == 0 && !fences.isEmpty() && fences.getFirst().transport().isSuccess()) {
             Fence next = fences.removeFirst();
             fenceBytes -= next.size();
             next.promise().trySuccess();
