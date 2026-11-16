@@ -52,11 +52,17 @@ final class BundleDelivery extends ChannelDuplexHandler {
     /** Owned queue bytes including a header reservation for empty control messages. */
     private long bytes;
 
-    /** Transport writes awaiting delivery before a mixed-lane bundle may start. */
+    /** Ordinary writes awaiting delivery before a cross-lane fence may start. */
     private int pending;
 
-    /** Whether an emitted mixed bundle is awaiting acknowledgement. */
-    private boolean fenced;
+    /** Bounds completion records when newer datagrams arrive before the oldest one. */
+    private static final int MAX_IN_FLIGHT_FENCES = 32;
+
+    /** Submitted fenced writes whose ordered prefix has not yet been acknowledged. */
+    private final java.util.Deque<Fence> fences = new ArrayDeque<>();
+
+    /** Total framed bytes represented by the outstanding fenced writes. */
+    private long fenceBytes;
 
     /** Guards synchronous completion during a queue drain. */
     private boolean draining;
@@ -80,7 +86,7 @@ final class BundleDelivery extends ChannelDuplexHandler {
             return;
         }
         boolean mixed = requiresFence(message, promise);
-        if (queue.isEmpty() && !fenced && (!mixed || pending == 0)) {
+        if (queue.isEmpty() && canSend(message, mixed)) {
             send(ctx, message, promise, mixed);
             return;
         }
@@ -110,42 +116,108 @@ final class BundleDelivery extends ChannelDuplexHandler {
     }
 
     /**
-     * Tracks actual transport delivery, including independently acknowledged fragments.
+     * Allows adjacent fences to share RakNet's ordering guarantee only on one reliable FIFO lane.
      *
-     * @param ctx context transferring message ownership
-     * @param message queued or immediately deliverable packet
-     * @param promise original completion
-     * @param mixed whether following writes must wait for this delivery
+     * @param message next write in submission order
+     * @param mixed whether the write has dependencies across lanes
+     * @return whether the transport can accept the write now
+     */
+    private boolean canSend(final Object message, final boolean mixed) {
+        if (fences.isEmpty()) {
+            return !mixed || pending == 0;
+        }
+        if (!mixed
+                || !(message instanceof FrameData frame)
+                || fences.size() >= MAX_IN_FLIGHT_FENCES) {
+            return false;
+        }
+        return orderedLane(frame) >= 0
+                && frame.getOrderChannel() == fences.getFirst().lane()
+                && fenceBytes + frame.getDataSize() <= Constants.MAX_QUEUED_SIZE;
+    }
+
+    /**
+     * Identifies the ordered stream that will reassemble and deliver this frame.
+     *
+     * @param frame outgoing frame with its final reliability and channel
+     * @return FIFO lane, or minus one if this frame needs exclusive delivery
+     */
+    private static int orderedLane(final FrameData frame) {
+        var policy = frame.getReliability();
+        return policy.isReliable && policy.isOrdered && !policy.isSequenced
+                ? frame.getOrderChannel()
+                : -1;
+    }
+
+    /**
+     * Tracks ordinary deliveries and preserves submission order for fenced write completions.
+     *
+     * @param ctx transport context
+     * @param message owned write
+     * @param promise caller completion
+     * @param mixed whether this write fences traffic on other channels
      */
     private void send(
             final ChannelHandlerContext ctx,
             final Object message,
             final ChannelPromise promise,
             final boolean mixed) {
+        if (mixed) {
+            sendFence(ctx, message, promise.unvoid());
+            return;
+        }
         pending++;
-        fenced = mixed;
-        ctx.write(message, promise.unvoid()).addListener(result -> delivered(ctx, result, mixed));
+        ctx.write(message, promise.unvoid())
+                .addListener(result -> {
+                    pending--;
+                    if (!closed && !result.isSuccess() && !queue.isEmpty()) {
+                        abort(ctx, Objects.requireNonNull(result.cause()));
+                    } else {
+                        drain(ctx);
+                    }
+                });
     }
 
     /**
-     * Advances waiting traffic once its preceding delivery dependencies are satisfied.
+     * Records a fence before forwarding it so a synchronous transport completion sees its entry.
      *
-     * @param ctx server event-loop context
-     * @param result transport completion
-     * @param mixed whether this acknowledgement releases an active fence
+     * @param ctx transport context on the owning event loop
+     * @param message owned frame or exclusive control
+     * @param promise application completion released in submission order
      */
-    private void delivered(
-            final ChannelHandlerContext ctx, final Future<?> result, final boolean mixed) {
-        pending--;
+    private void sendFence(
+            final ChannelHandlerContext ctx, final Object message, final ChannelPromise promise) {
+        if (!promise.setUncancellable()) {
+            ReferenceCountUtil.release(message);
+            abort(ctx, Objects.requireNonNull(promise.cause()));
+            return;
+        }
+        int lane = message instanceof FrameData frame ? orderedLane(frame) : -1;
+        int size = message instanceof FrameData frame ? frame.getDataSize() : 0;
+        var transport = ctx.newPromise();
+        fences.addLast(new Fence(lane, size, transport, promise));
+        fenceBytes += size;
+        ctx.write(message, transport).addListener(result -> finishFence(ctx, result));
+    }
+
+    /**
+     * Publishes the acknowledged prefix. A later ACK cannot release a gap or the next lane.
+     *
+     * @param ctx transport context owning pending completions
+     * @param result individual frame delivery, including every fragment
+     */
+    private void finishFence(final ChannelHandlerContext ctx, final Future<?> result) {
         if (closed) {
             return;
         }
-        if (!result.isSuccess() && (mixed || !queue.isEmpty())) {
+        if (!result.isSuccess()) {
             abort(ctx, Objects.requireNonNull(result.cause()));
             return;
         }
-        if (mixed) {
-            fenced = false;
+        while (!fences.isEmpty() && fences.getFirst().transport().isSuccess()) {
+            Fence next = fences.removeFirst();
+            fenceBytes -= next.size();
+            next.promise().trySuccess();
         }
         drain(ctx);
     }
@@ -156,14 +228,14 @@ final class BundleDelivery extends ChannelDuplexHandler {
      * @param ctx connection owning every queued write
      */
     private void drain(final ChannelHandlerContext ctx) {
-        if (draining || queue.isEmpty()) {
+        if (closed || draining || queue.isEmpty()) {
             return;
         }
         draining = true;
         try {
-            while (!queue.isEmpty() && !fenced) {
+            while (!queue.isEmpty()) {
                 final Waiting next = queue.getFirst();
-                if (next.mixed() && pending != 0) {
+                if (!canSend(next.message(), next.mixed())) {
                     break;
                 }
                 queue.removeFirst();
@@ -194,6 +266,10 @@ final class BundleDelivery extends ChannelDuplexHandler {
      */
     private void discard(final Throwable cause) {
         closed = true;
+        while (!fences.isEmpty()) {
+            fences.removeFirst().promise().tryFailure(cause);
+        }
+        fenceBytes = 0;
         while (!queue.isEmpty()) {
             final Waiting waiting = queue.removeFirst();
             ReferenceCountUtil.release(waiting.message());
@@ -222,6 +298,16 @@ final class BundleDelivery extends ChannelDuplexHandler {
     public void handlerRemoved(final ChannelHandlerContext ctx) {
         discard(new ClosedChannelException());
     }
+
+    /**
+     * One sent fence, retained only until it and its predecessors have completed.
+     *
+     * @param lane reliable ordered lane, or minus one for an exclusive write
+     * @param size framed bytes charged to the in-flight limit
+     * @param transport actual transport completion
+     * @param promise caller completion waiting for earlier fences
+     */
+    private record Fence(int lane, int size, ChannelPromise transport, ChannelPromise promise) {}
 
     /**
      * Holds a message until preceding bundle dependencies have completed.

@@ -206,6 +206,87 @@ class BundleTransportTest {
         }
     }
 
+    /** Same-lane fences can travel together while a late fragment still holds the next lane. */
+    @Test
+    void sameLaneFencesShareOneAcknowledgementRound() {
+        EmbeddedChannel server = server(true);
+        var receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        try {
+            var first = server.writeAndFlush(Unpooled.buffer(1).writeByte(5));
+            var second = server.writeAndFlush(Unpooled.buffer(1).writeByte(5));
+            send(server, 3, 5);
+            assertEquals(2, receipts.pending.size());
+            receipts.pending.removeLast().setSuccess();
+            assertFalse(first.isDone());
+            assertFalse(second.isDone());
+            assertEquals(2, server.outboundMessages().size());
+            receipts.pending.removeFirst().setSuccess();
+            assertTrue(first.isSuccess());
+            assertTrue(second.isSuccess());
+            assertEquals(3, server.outboundMessages().size());
+            receipts.pending.removeFirst().setSuccess();
+            assertEquals(4, server.outboundMessages().size());
+            receipts.pending.removeFirst().setSuccess();
+        } finally {
+            server.finishAndReleaseAll();
+        }
+    }
+
+    /** A pair of mixed envelopes on different lanes still requires two delivery rounds. */
+    @Test
+    void mixedEnvelopesOnDifferentLanesStayExclusive() {
+        var receipts = new Receipts();
+        var server = new EmbeddedChannel(receipts, new BundleDelivery());
+        try {
+            for (int lane : new int[] {2, 7}) {
+                ByteBuf body = Unpooled.buffer(1).writeByte(0);
+                try {
+                    FrameData data = FrameData.create(server.alloc(), BundleWire.MIXED, body);
+                    data.setOrderChannel(lane);
+                    server.writeOutbound(data);
+                } finally {
+                    body.release();
+                }
+            }
+            assertEquals(1, receipts.pending.size());
+            assertEquals(1, server.outboundMessages().size());
+            receipts.pending.removeFirst().setSuccess();
+            assertEquals(2, server.outboundMessages().size());
+            receipts.pending.removeFirst().setSuccess();
+        } finally {
+            server.finishAndReleaseAll();
+        }
+    }
+
+    /** A missing first ACK limits pipelining and a failed fence fails the remaining prefix. */
+    @Test
+    void missingFenceBoundsReceiptsAndFailureClosesTheRun() {
+        EmbeddedChannel server = server(true);
+        var receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        try {
+            var writes = new java.util.ArrayList<io.netty.channel.ChannelFuture>();
+            for (int i = 0; i < 100; i++) {
+                writes.add(server.writeAndFlush(Unpooled.buffer(1).writeByte(5)));
+            }
+            int submitted = receipts.pending.size();
+            assertTrue(submitted > 1 && submitted < writes.size());
+            var missing = receipts.pending.removeFirst();
+            while (!receipts.pending.isEmpty()) {
+                receipts.pending.removeLast().setSuccess();
+            }
+            assertEquals(submitted, server.outboundMessages().size());
+            assertTrue(writes.stream().noneMatch(io.netty.channel.ChannelFuture::isDone));
+            var failure = new java.io.IOException("Missing fenced frame");
+            missing.setFailure(failure);
+            writes.forEach(write -> assertSame(failure, write.cause()));
+            assertFalse(server.isActive());
+        } finally {
+            server.finishAndReleaseAll();
+        }
+    }
+
     /** Starting a compression dictionary must retain a mod packet's delivery boundary. */
     @Test
     void compressionStartupPreservesModFence() {
