@@ -69,8 +69,11 @@ def prepare_source(folder, url, revision, output):
     folder.mkdir(exist_ok=True)
     source_git(folder, output, 'init', '--quiet')
     source_git(folder, output, 'config', 'remote.origin.url', url)
+    # Match BuildTools' JGit clone so generated Windows sources enter the patch index with LF.
+    source_git(folder, output, 'config', 'core.autocrlf', 'true' if os.name == 'nt' else 'false')
     fetch_source(folder, revision, output)
-    source_git(folder, output, 'checkout', '--detach', revision)
+    # BuildTools returns to master after applying its generated CraftBukkit patches.
+    source_git(folder, output, 'checkout', '-B', 'master', revision)
     actual = subprocess.check_output(['git', '-C', str(folder), 'rev-parse', 'HEAD'], text=True).strip()
     assert actual == revision, 'Spigot source changed before compilation: ' + str(folder)
 

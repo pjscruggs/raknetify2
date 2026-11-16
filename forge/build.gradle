@@ -32,10 +32,9 @@ minecraft {
 
 repositories {
     minecraft.mavenizer(it)
-    // Forge lists CreeperHost in its installer mirror manifest. Keep the canonical artifact fallback.
+    // Forge lists CreeperHost in its installer mirror manifest.
     maven {
         url = 'https://maven.creeperhost.net/'
-        artifactUrls 'https://maven.minecraftforge.net/'
         content { includeGroup 'net.minecraftforge' }
     }
     maven fg.forgeMaven

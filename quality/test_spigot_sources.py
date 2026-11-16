@@ -46,7 +46,14 @@ class SpigotSourceTests(unittest.TestCase):
             with tempfile.TemporaryFile() as output:
                 SMOKE.prepare_source(checkout, remote.as_uri(), locked, output)
             self.assertEqual((checkout / 'source.txt').read_text(encoding='utf-8'), 'reviewed\n')
+            generated = checkout / 'Generated.java'
+            generated.write_text('class Generated {}\n', encoding='utf-8')
+            normalized = subprocess.check_output(['git', 'hash-object', '--stdin'], input=b'class Generated {}\n')
+            self.assertEqual(subprocess.check_output(
+                ['git', '-C', str(checkout), 'hash-object', '--path=Generated.java', str(generated)]), normalized)
             self.assertNotEqual(locked, git('rev-parse', 'HEAD'))
+            self.assertEqual(subprocess.check_output(
+                ['git', '-C', str(checkout), 'symbolic-ref', 'HEAD'], text=True).strip(), 'refs/heads/master')
             present = subprocess.run(['git', '-C', str(checkout), 'cat-file', '-e', ancestor],
                                      check=False, capture_output=True)
             self.assertNotEqual(present.returncode, 0)
