@@ -35,8 +35,9 @@ def prepare_server(args, lock, native):
         for name, expected in entry['refs'].items():
             url = 'https://hub.spigotmc.org/stash/scm/spigot/' + name.lower() + '.git'
             prepare_source(folder / name, url, expected, output)
-        subprocess.run([args.java, '-jar', str(tool), '--rev', lock['minecraft'], '--compile', 'SPIGOT',
-                        '--nogui', '--dont-update'],
+        info = json.loads((folder / 'BuildData/info.json').read_text(encoding='utf-8'))
+        assert info['minecraftVersion'] == lock['minecraft'], 'Spigot BuildData targets another Minecraft version'
+        subprocess.run([args.java, '-jar', str(tool), '--compile', 'SPIGOT', '--nogui', '--dont-update'],
                        cwd=folder, env=maven_environment(args, entry['maven'], native),
                        stdout=output, stderr=subprocess.STDOUT, check=True, timeout=1200)
     for name, expected in entry['refs'].items():
