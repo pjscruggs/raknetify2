@@ -3,9 +3,11 @@ import hashlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import importlib.util
 from pathlib import Path
+import subprocess
 import tempfile
 import threading
 import unittest
+from unittest.mock import patch
 
 
 class NativeDownloadTests(unittest.TestCase):
@@ -75,6 +77,25 @@ class NativeDownloadTests(unittest.TestCase):
         self.assertEqual(2, self.requests)
         self.assertEqual(self.payload, self.artifact.read_bytes())
         self.assertFalse(self.artifact.with_suffix('.jar.part').exists())
+
+    def test_forge_mirror_falls_back_to_the_locked_artifact(self):
+        """A failed Forge mirror transfer must retry the canonical URL before checking the pinned digest."""
+        url = 'https://maven.minecraftforge.net/releases/artifact.jar'
+        attempts = []
+
+        def transfer(command, **options):
+            """Leave a partial first response and supply the expected bytes on the second attempt."""
+            target = Path(command[command.index('--output') + 1])
+            attempts.append(command[-1])
+            if len(attempts) == 1:
+                target.write_bytes(b'partial')
+                raise subprocess.CalledProcessError(28, command)
+            target.write_bytes(self.payload)
+
+        with patch.object(self.native.subprocess, 'run', side_effect=transfer):
+            self.native.download(self.artifact, url, self.digest)
+        self.assertEqual(attempts, ['https://maven.creeperhost.net/releases/artifact.jar', url])
+        self.assertEqual(self.artifact.read_bytes(), self.payload)
 
     def test_rejects_changed_response(self):
         """Leave unexpected server bytes unpromoted instead of treating a successful HTTP response as valid content."""

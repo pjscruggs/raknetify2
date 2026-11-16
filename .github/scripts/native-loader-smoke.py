@@ -31,15 +31,31 @@ def download(path, url, digest, algorithm='sha1'):
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.exists():
         temporary = path.with_name(path.name + '.part')
-        subprocess.run(['curl', '--fail', '--location', '--silent', '--show-error', '--retry', '3', '--retry-all-errors',
-                        '--connect-timeout', '10', '--max-time', '60',
-                        '--output', str(temporary), url], check=True, timeout=300)
+        fetch_artifact(temporary, url)
         if hashlib.new(algorithm, temporary.read_bytes()).hexdigest() != digest:
             raise ValueError("Artifact digest mismatch: " + str(url))
         temporary.replace(path)
     if hashlib.new(algorithm, path.read_bytes()).hexdigest() != digest:
         raise ValueError("Artifact digest mismatch: " + str(path))
     return path
+
+
+def fetch_artifact(temporary, url):
+    """Allow active transfers to finish and use Forge's installer mirror for pinned Forge downloads."""
+    forge = 'https://maven.minecraftforge.net/'
+    sources = [url]
+    if url.startswith(forge):
+        sources.insert(0, 'https://maven.creeperhost.net/' + url[len(forge):])
+    for source in sources:
+        try:
+            subprocess.run(['curl', '--fail', '--location', '--silent', '--show-error', '--retry', '2',
+                            '--retry-all-errors', '--connect-timeout', '10', '--speed-limit', '1024',
+                            '--speed-time', '30', '--max-time', '300', '--retry-max-time', '180',
+                            '--output', str(temporary), source], check=True, timeout=490)
+            return
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            if source == url:
+                raise
 
 
 def minecraft_metadata(version):
