@@ -87,6 +87,82 @@ class LargePayloadCompressionTest {
         }
     }
 
+    /** Repeated world changes restart each previously used lane only when it carries traffic. */
+    @Test
+    void inactiveLanesWaitForTheirNextPacketToRestart() {
+        var sender = new EmbeddedChannel(new MultiChannelingStreamingCompression(RAW, COMPRESSED));
+        var peer = new EmbeddedChannel(new MultiChannelingStreamingCompression(RAW, COMPRESSED));
+        try {
+            transferControl(sender, peer);
+            transferControl(peer, sender);
+            transferControl(sender, peer);
+            sendAfterRestart(sender, peer, 2, true);
+            sendAfterRestart(sender, peer, 4, true);
+            for (int i = 0; i < 2; i++) {
+                sender.writeOutbound(SynchronizationLayer.SYNC_REQUEST_OBJECT);
+                assertSame(SynchronizationLayer.SYNC_REQUEST_OBJECT, sender.readOutbound());
+                assertTrue(sender.outboundMessages().isEmpty());
+            }
+            sendAfterRestart(sender, peer, 4, true);
+            sendAfterRestart(sender, peer, 4, false);
+            sendAfterRestart(sender, peer, 2, true);
+        } finally {
+            sender.finishAndReleaseAll();
+            peer.finishAndReleaseAll();
+        }
+    }
+
+    /**
+     * Checks marker placement and decodes the following payload using the peer's dictionary.
+     *
+     * @param sender endpoint being synchronized
+     * @param peer receiver retaining dictionaries between writes
+     * @param lane independent ordering channel
+     * @param marker whether this write must establish a fresh dictionary
+     */
+    private static void sendAfterRestart(
+            final EmbeddedChannel sender,
+            final EmbeddedChannel peer,
+            final int lane,
+            final boolean marker) {
+        ByteBuf body = sender.alloc().buffer(64).writeZero(64);
+        FrameData frame;
+        try {
+            frame = FrameData.create(sender.alloc(), RAW, body);
+        } finally {
+            body.release();
+        }
+        frame.setOrderChannel(lane);
+        sender.writeOutbound(frame);
+        if (marker) {
+            FrameData start = sender.readOutbound();
+            try {
+                assertEquals(
+                        Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID,
+                        start.getPacketId());
+                assertEquals(lane, start.getOrderChannel());
+                peer.writeInbound(start.retain());
+            } finally {
+                start.release();
+            }
+        }
+        FrameData data = sender.readOutbound();
+        try {
+            assertEquals(COMPRESSED, data.getPacketId());
+            peer.writeInbound(data.retain());
+        } finally {
+            data.release();
+        }
+        FrameData decoded = peer.readInbound();
+        try {
+            assertEquals(lane, decoded.getOrderChannel());
+            assertEquals(65, decoded.getDataSize());
+        } finally {
+            decoded.release();
+        }
+        assertTrue(sender.outboundMessages().isEmpty());
+    }
+
     /** Receives an independent channel before the peer's channel-zero handshake arrives. */
     @Test
     void channelStartCanOvertakeCapabilityHandshake() {
@@ -167,19 +243,43 @@ class LargePayloadCompressionTest {
             } finally {
                 handshake.release();
             }
-            ByteBuf bytes = channel.alloc().buffer().writeZero(32);
-            FrameData frame = FrameData.create(channel.alloc(), RAW, bytes);
-            bytes.release();
-            var result = channel.writeAndFlush(frame);
-            ((FrameData) channel.readOutbound()).release();
+            var result = writeWithPendingMarker(channel);
             assertFalse(
                     result.isDone(),
                     "Dictionary marker must be delivered before the payload completes");
-            java.util.Objects.requireNonNull(marker.get()).trySuccess();
+            var firstMarker = java.util.Objects.requireNonNull(marker.getAndSet(null));
+            channel.writeOutbound(SynchronizationLayer.SYNC_REQUEST_OBJECT);
+            assertSame(SynchronizationLayer.SYNC_REQUEST_OBJECT, channel.readOutbound());
+            var next = writeWithPendingMarker(channel);
+            assertFalse(next.isDone());
+            java.util.Objects.requireNonNull(marker.get()).setSuccess();
+            assertTrue(next.isSuccess());
+            assertFalse(result.isDone());
+            firstMarker.setSuccess();
             assertTrue(result.isSuccess());
         } finally {
             channel.finishAndReleaseAll();
         }
+    }
+
+    /**
+     * Sends a compressed packet and retains its completion while the gate holds its marker.
+     *
+     * @param channel endpoint with a marker gate installed
+     * @return delivery future for the packet and its own dictionary marker
+     */
+    private static io.netty.channel.ChannelFuture writeWithPendingMarker(
+            final EmbeddedChannel channel) {
+        ByteBuf bytes = channel.alloc().buffer().writeZero(32);
+        FrameData frame;
+        try {
+            frame = FrameData.create(channel.alloc(), RAW, bytes);
+        } finally {
+            bytes.release();
+        }
+        var result = channel.writeAndFlush(frame);
+        ((FrameData) channel.readOutbound()).release();
+        return result;
     }
 
     /** Rejects invalid channel metadata without leaking incoming payloads or control frames. */

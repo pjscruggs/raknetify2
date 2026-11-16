@@ -41,6 +41,7 @@ import network.ycc.raknet.frame.FrameData;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -70,7 +71,9 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     /** Outbound zlib dictionaries indexed by ordering channel, owned by the event loop. */
     private final Deflater[] deflaters = new Deflater[Constants.ORDER_CHANNEL_COUNT];
 
-    /** Delivery of each dictionary marker, which must precede completion of dependent data. */
+    /**
+     * Delivery of each current dictionary marker, or null until the channel starts after a reset.
+     */
     private final ChannelFuture[] channelStarts = new ChannelFuture[Constants.ORDER_CHANNEL_COUNT];
 
     /**
@@ -150,24 +153,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     }
 
     /**
-     * Sends dictionary-reset markers only for channels whose outgoing streams have started. Does
-     * nothing until the peer has advertised compression support.
-     *
-     * @param ctx outbound context preserving each marker's order relative to later payloads
-     */
-    private void doChannelStart(final ChannelHandlerContext ctx) {
-        if (!active) {
-            return;
-        }
-        for (int channel = 0; channel < deflaters.length; channel++) {
-            if (deflaters[channel] != null) {
-                startChannel(ctx, channel);
-            }
-        }
-    }
-
-    /**
-     * Starts a dictionary on its first use, after any login encryption transition.
+     * Starts a fresh stream before the first dependent write in this synchronization period.
      *
      * @param ctx outbound context preserving marker order
      * @param channel ordering channel whose dictionary starts here
@@ -190,7 +176,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     }
 
     /**
-     * Replaces one outbound zlib dictionary after releasing its native resources.
+     * Starts an outbound zlib stream, reusing its native storage across world changes.
      *
      * @param channel ordering-channel index whose outgoing stream is restarting
      */
@@ -199,10 +185,11 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
         if (!active) {
             return;
         }
-        if (deflaters[channel] != null) {
-            deflaters[channel].end();
+        if (deflaters[channel] == null) {
+            deflaters[channel] = new Deflater();
+        } else {
+            deflaters[channel].reset();
         }
-        deflaters[channel] = new Deflater();
         if (Constants.DEBUG) {
             System.out.println(
                     "Raknetify: Streaming compression deflater for ch%d is ready"
@@ -211,17 +198,18 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     }
 
     /**
-     * Replaces one inbound zlib dictionary after releasing its native resources.
+     * Starts an inbound zlib stream, reusing its native storage across world changes.
      *
      * @param channel ordering-channel index whose incoming stream is restarting
      */
     private void initInflater(final int channel) {
         Objects.checkIndex(channel, inflaters.length);
         // Independent channels can deliver their start marker before the capability handshake.
-        if (inflaters[channel] != null) {
-            inflaters[channel].end();
+        if (inflaters[channel] == null) {
+            inflaters[channel] = new Inflater();
+        } else {
+            inflaters[channel].reset();
         }
-        inflaters[channel] = new Inflater();
         if (Constants.DEBUG) {
             System.out.println(
                     "Raknetify: Streaming compression inflater for ch%d is ready"
@@ -284,8 +272,9 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
             final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise)
             throws Exception {
         if (msg instanceof SynchronizationLayer.SyncRequest) {
+            // An earlier write keeps its own marker future. Later writes start a fresh stream.
+            Arrays.fill(channelStarts, null);
             super.write(ctx, msg, promise);
-            doChannelStart(ctx);
             return;
         } else if (msg instanceof FrameData rawFrameData) {
             rawFrameData.touch();
@@ -295,7 +284,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
                     && rawFrameData.getReliability().isOrdered
                     && !rawFrameData.getReliability().isSequenced
                     && active) {
-                if (deflaters[channel] == null) {
+                if (channelStarts[channel] == null) {
                     startChannel(ctx, channel);
                 }
                 final ChannelPromise delivery = includeChannelStart(ctx, channel, promise);
