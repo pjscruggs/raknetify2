@@ -30,7 +30,7 @@ import com.ishland.raknetify.common.connection.GracefulCloseHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.EventLoopGroup;
 
 import network.ycc.raknet.client.RakNetClient;
 
@@ -47,12 +47,12 @@ public final class ThreadedChannelCloseWitness {
     /**
      * A lower transport can close before an application drain has requested its own close.
      *
+     * @param group dedicated NIO event loops owned and shut down by this check
      * @throws InterruptedException if socket registration or bounded cleanup fails
      * @throws IllegalStateException if the application channel remains open after its physical
      *     socket closes
      */
-    public static void verify() throws InterruptedException {
-        NioEventLoopGroup group = new NioEventLoopGroup(1);
+    public static void verify(final EventLoopGroup group) throws InterruptedException {
         Channel client = null;
         try {
             client =

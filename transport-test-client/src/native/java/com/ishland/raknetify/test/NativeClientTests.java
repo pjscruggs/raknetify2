@@ -27,6 +27,9 @@ package com.ishland.raknetify.test;
 
 import com.ishland.raknetify.minecraft.ModPlatform;
 
+import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.nio.NioIoHandler;
+
 /**
  * Runs the shared packet contracts after the native loader completes ordinary mod initialization.
  */
@@ -44,7 +47,8 @@ public final class NativeClientTests {
             if (!ModPlatform.get().isClient()) {
                 throw new IllegalStateException("Client fixture loaded on server");
             }
-            ThreadedChannelCloseWitness.verify();
+            ThreadedChannelCloseWitness.verify(
+                    new MultiThreadIoEventLoopGroup(1, NioIoHandler.newFactory()));
             System.out.println("PASS native threaded transport closure");
             GameplayOrderingTest.verify();
             SignedChatTest.verify();

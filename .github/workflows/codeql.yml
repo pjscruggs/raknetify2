@@ -33,7 +33,19 @@ jobs:
           CODEQL_CLI: ${{ steps.query-tools.outputs.codeql-path }}
         run: |
           # Keep fixture extraction separate from the traced application database.
-          "$CODEQL_CLI" pack install quality/codeql
+          # The pinned CLI bundle supplies official packs locally. Verify the actual query search path
+          # against the committed lock, including transitive packs supplied by the bundle.
+          "$CODEQL_CLI" pack ci --no-strict-mode quality/codeql
+          "$CODEQL_CLI" resolve library-path --query quality/codeql/FrameworkUnusedParameter.ql --format=json > "$RUNNER_TEMP/query-path.json"
+          ruby -rjson -ryaml - "$RUNNER_TEMP/query-path.json" <<'RUBY'
+          expected = YAML.load_file('quality/codeql/codeql-pack.lock.yml').fetch('dependencies').transform_values { |pin| pin.fetch('version') }
+          directories = JSON.parse(File.read(ARGV.fetch(0))).fetch('libraryPath')
+          actual = directories.reject { |dir| File.identical?(dir, 'quality/codeql') }.to_h do |dir|
+            pack = YAML.load_file(File.join(dir, 'qlpack.yml'))
+            [pack.fetch('name'), pack.fetch('version')]
+          end
+          abort "Resolved CodeQL packs differ from the lock: #{actual.inspect}" unless actual == expected
+          RUBY
           "$CODEQL_CLI" test run quality/codeql/tests --threads=2
 
   analyze:

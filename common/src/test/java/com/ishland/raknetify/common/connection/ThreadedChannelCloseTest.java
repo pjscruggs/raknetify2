@@ -27,6 +27,8 @@ package com.ishland.raknetify.common.connection;
 
 import com.ishland.raknetify.test.ThreadedChannelCloseWitness;
 
+import io.netty.channel.nio.NioEventLoopGroup;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -42,6 +44,6 @@ class ThreadedChannelCloseTest {
      */
     @Test
     void parentClosureCompletesApplicationFuture() throws Exception {
-        ThreadedChannelCloseWitness.verify();
+        ThreadedChannelCloseWitness.verify(new NioEventLoopGroup(1));
     }
 }

@@ -78,6 +78,7 @@ shadowJar {
     dependencies { exclude(dependency('it.unimi.dsi:fastutil')) }
     from rootProject.file('LICENSE')
     from(rootProject.file('netty-raknet/LICENSE')) { into 'META-INF/licenses/netty-raknet' }
+    filesMatching('META-INF/services/**') { duplicatesStrategy = DuplicatesStrategy.INCLUDE }
     mergeServiceFiles()
     manifest { attributes 'MixinConfigs': 'raknetify-fabric.mixins.json,raknetify-forge.mixins.json' }
 }
