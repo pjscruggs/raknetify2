@@ -28,14 +28,18 @@ package com.ishland.raknetify.test;
 import com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering;
 
 import io.netty.buffer.Unpooled;
+import io.netty.util.AttributeKey;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerNegotiationEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.network.HandshakeHandler;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
@@ -43,6 +47,8 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.PlayMessages;
 import net.minecraftforge.network.simple.SimpleChannel;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -86,8 +92,37 @@ public final class ForgeChannelWitness {
                 (packet, context) -> {});
         if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
             verifyOrdering();
+            MinecraftForge.EVENT_BUS.addListener(ForgeChannelWitness::verifyLoginReplies);
         }
         MinecraftForge.EVENT_BUS.addListener(this::login);
+    }
+
+    /**
+     * Checks the acknowledgement removal lock before Forge sends the first nonnegative login index.
+     *
+     * @param event negotiation for the real connection under test
+     * @throws IllegalStateException if removal can race with registration
+     */
+    private static void verifyLoginReplies(final PlayerNegotiationEvent event) {
+        var handler =
+                event.getConnection()
+                        .channel()
+                        .attr(AttributeKey.<HandshakeHandler>valueOf("fml:handshake"))
+                        .get();
+        List<Integer> replies =
+                Objects.requireNonNull(
+                        ObfuscationReflectionHelper.getPrivateValue(
+                                HandshakeHandler.class, handler, "sentMessages"));
+        replies.add(-1);
+        try {
+            if (!replies.removeIf(index -> index == -1 && Thread.holdsLock(replies))) {
+                throw new IllegalStateException(
+                        "Forge login reply removal ran without the registration lock");
+            }
+        } finally {
+            replies.removeIf(index -> index == -1);
+        }
+        System.out.println("PASS Forge login reply tracking");
     }
 
     /**

@@ -405,7 +405,9 @@ jobs:
         if: always()
         with:
           name: ${{ matrix.target }}-runtime-logs
-          path: ${{ runner.temp }}/legacy-*/*.log
+          path: |
+            ${{ runner.temp }}/legacy-*/*.log
+            ${{ runner.temp }}/legacy-*/server/logs/debug.log
 
   native-loaders:
     name: ${{ matrix.loader }} packaged runtime (${{ matrix.os }})
