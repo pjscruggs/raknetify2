@@ -32,6 +32,10 @@ class SpigotSourceTests(unittest.TestCase):
             git('config', 'user.name', 'Fixture')
             git('config', 'user.email', 'fixture@example.invalid')
             git('config', 'commit.gpgsign', 'false')
+            (remote / 'source.txt').write_text('obsolete history\n', encoding='utf-8')
+            git('add', 'source.txt')
+            git('commit', '--quiet', '-m', 'obsolete ancestor')
+            ancestor = git('rev-parse', 'HEAD')
             (remote / 'source.txt').write_text('reviewed\n', encoding='utf-8')
             git('add', 'source.txt')
             git('commit', '--quiet', '-m', 'reviewed source')
@@ -43,6 +47,9 @@ class SpigotSourceTests(unittest.TestCase):
                 SMOKE.prepare_source(checkout, remote.as_uri(), locked, output)
             self.assertEqual((checkout / 'source.txt').read_text(encoding='utf-8'), 'reviewed\n')
             self.assertNotEqual(locked, git('rev-parse', 'HEAD'))
+            present = subprocess.run(['git', '-C', str(checkout), 'cat-file', '-e', ancestor],
+                                     check=False, capture_output=True)
+            self.assertNotEqual(present.returncode, 0)
 
     def test_interrupted_fetch_recovers_without_changing_the_revision(self):
         """A transient timeout must retry the same locked revision and then complete."""

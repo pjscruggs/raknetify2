@@ -55,7 +55,7 @@ def fetch_source(folder, revision, output):
     """Retry an interrupted exact-revision fetch without discarding verified Git objects."""
     for attempt in range(3):
         try:
-            source_git(folder, output, 'fetch', '--no-tags', 'origin', revision)
+            source_git(folder, output, 'fetch', '--no-tags', '--depth=1', 'origin', revision)
             return
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
             if attempt == 2:
