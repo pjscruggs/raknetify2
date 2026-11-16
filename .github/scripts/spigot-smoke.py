@@ -32,13 +32,46 @@ def prepare_server(args, lock, native):
     entry = lock['spigot']
     tool = native.download(folder / 'BuildTools.jar', entry['buildTools'], entry['sha256'], 'sha256')
     with (args.work_dir / 'buildtools.log').open('w', encoding='utf-8') as output:
-        subprocess.run([args.java, '-jar', str(tool), '--rev', lock['minecraft'], '--compile', 'SPIGOT', '--nogui'],
+        for name, expected in entry['refs'].items():
+            url = 'https://hub.spigotmc.org/stash/scm/spigot/' + name.lower() + '.git'
+            prepare_source(folder / name, url, expected, output)
+        subprocess.run([args.java, '-jar', str(tool), '--rev', lock['minecraft'], '--compile', 'SPIGOT',
+                        '--nogui', '--dont-update'],
                        cwd=folder, env=maven_environment(args, entry['maven'], native),
                        stdout=output, stderr=subprocess.STDOUT, check=True, timeout=1200)
     for name, expected in entry['refs'].items():
         actual = subprocess.check_output(['git', '-C', str(folder / name), 'rev-parse', 'HEAD'], text=True).strip()
         assert actual == expected, 'Spigot source changed: ' + name
     return folder / ('spigot-' + lock['minecraft'] + '.jar')
+
+
+def source_git(folder, output, *arguments):
+    """Run native Git with bounded transport and process time inside a fixture-owned source checkout."""
+    subprocess.run(['git', '-C', str(folder), '-c', 'http.lowSpeedLimit=1024', '-c', 'http.lowSpeedTime=30',
+                    *arguments], check=True, timeout=180, stdout=output, stderr=subprocess.STDOUT)
+
+
+def fetch_source(folder, revision, output):
+    """Retry an interrupted exact-revision fetch without discarding verified Git objects."""
+    for attempt in range(3):
+        try:
+            source_git(folder, output, 'fetch', '--no-tags', 'origin', revision)
+            return
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            if attempt == 2:
+                raise
+            time.sleep(2 ** attempt)
+
+
+def prepare_source(folder, url, revision, output):
+    """Prefetch a locked official revision so BuildTools cannot stall in its unbounded JGit clone."""
+    folder.mkdir(exist_ok=True)
+    source_git(folder, output, 'init', '--quiet')
+    source_git(folder, output, 'config', 'remote.origin.url', url)
+    fetch_source(folder, revision, output)
+    source_git(folder, output, 'checkout', '--detach', revision)
+    actual = subprocess.check_output(['git', '-C', str(folder), 'rev-parse', 'HEAD'], text=True).strip()
+    assert actual == revision, 'Spigot source changed before compilation: ' + str(folder)
 
 
 def maven_environment(args, entry, native):
