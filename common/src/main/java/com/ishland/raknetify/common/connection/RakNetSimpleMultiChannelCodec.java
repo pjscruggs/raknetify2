@@ -152,6 +152,17 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
         return null;
     }
 
+    /** Bound the extra traffic that can delay another lane behind an undeclared payload. */
+    private static final int MAX_OPAQUE_SUCCESSOR_BYTES = 512;
+
+    /**
+     * Delivery of the immediately preceding undeclared payload, cleared on each subsequent write.
+     */
+    private @Nullable ChannelPromise opaqueDelivery;
+
+    /** Reliable FIFO lane chosen before compression for that payload. */
+    private int opaqueLane;
+
     /** Whether the negotiation marker has completed and channel overrides may affect delivery. */
     private boolean isMultichannelEnabled;
 
@@ -176,6 +187,7 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     @Override
     public void handlerRemoved(final ChannelHandlerContext ctx) throws Exception {
         super.handlerRemoved(ctx);
+        opaqueDelivery = null;
         final var failure = new IllegalStateException("Channel closed");
         bundle.fail(failure);
         failPendingWrites(failure);
@@ -195,6 +207,9 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     public void write(
             final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise)
             throws Exception {
+        if (!(msg instanceof ByteBuf)) {
+            opaqueDelivery = null;
+        }
         if (ignoreControl(ctx, msg)) {
             promise.trySuccess();
             return;
@@ -230,6 +245,7 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
             return;
         }
 
+        opaqueDelivery = null;
         super.write(ctx, msg, promise);
     }
 
@@ -359,11 +375,13 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
             final ChannelHandlerContext ctx, final ByteBuf buf, final ChannelPromise promise)
             throws Exception {
         if (CompatibilityPolicy.isOrdered(ctx.channel())) {
+            opaqueDelivery = null;
             writeFrame(ctx, FrameData.create(ctx.alloc(), packetId, buf), promise);
             return;
         }
         final int route = getChannelOverride(buf, !isMultichannelEnabled);
         if (route == Integer.MIN_VALUE) {
+            opaqueDelivery = null;
             delimiter(ctx, buf, promise);
             return;
         }
@@ -372,11 +390,41 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
             bundle.append(buf, lane, promise);
             return;
         }
-        final FrameData frame = routedFrame(ctx, buf, lane);
-        emit(
-                ctx,
-                frame,
-                lane == ModPayloadOrdering.FENCED ? new FencedWritePromise(ctx, promise) : promise);
+        writeStandalone(ctx, buf, lane, promise);
+    }
+
+    /**
+     * Carries one small reliable successor on the same FIFO lane as an outstanding opaque payload.
+     * Its own fence prevents a later update from overtaking the migrated packet.
+     *
+     * @param ctx outbound application context
+     * @param buf encoded game packet
+     * @param lane logical route selected for this write
+     * @param promise original write completion
+     * @throws Exception if the transport rejects the frame
+     */
+    private void writeStandalone(
+            final ChannelHandlerContext ctx,
+            final ByteBuf buf,
+            final int lane,
+            final ChannelPromise promise)
+            throws Exception {
+        boolean follows =
+                opaqueDelivery != null
+                        && !opaqueDelivery.isDone()
+                        && lane >= 0
+                        && buf.readableBytes() <= MAX_OPAQUE_SUCCESSOR_BYTES;
+        opaqueDelivery = null;
+        final FrameData frame = routedFrame(ctx, buf, follows ? opaqueLane : lane);
+        ChannelPromise completion = promise;
+        if (follows || ModPayloadOrdering.requiresFence(lane)) {
+            completion = new FencedWritePromise(ctx, promise);
+        }
+        if (lane == ModPayloadOrdering.UNDECLARED) {
+            opaqueDelivery = completion;
+            opaqueLane = frame.getOrderChannel();
+        }
+        emit(ctx, frame, completion);
     }
 
     /**
@@ -390,7 +438,7 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     private FrameData routedFrame(
             final ChannelHandlerContext ctx, final ByteBuf buf, final int lane) {
         final FrameData frame = FrameData.create(ctx.alloc(), packetId, buf);
-        if (lane == ModPayloadOrdering.FENCED) {
+        if (ModPayloadOrdering.requiresFence(lane)) {
             frame.setOrderChannel(BundleDelivery.preferredFenceLane(ctx.pipeline()));
         } else if (lane >= 0) {
             frame.setOrderChannel(lane);

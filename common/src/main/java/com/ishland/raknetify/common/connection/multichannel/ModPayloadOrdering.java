@@ -44,6 +44,19 @@ public final class ModPayloadOrdering {
     /** Delivery boundary for a packet whose handler joins independent vanilla ordering domains. */
     public static final int FENCED = -3;
 
+    /** An undeclared payload has a boundary and may carry one small successor on its FIFO lane. */
+    public static final int UNDECLARED = -4;
+
+    /**
+     * Identifies routes that must preserve both sides of a cross-channel dependency.
+     *
+     * @param route classifier result before choosing the physical ordering lane
+     * @return whether the write is a delivery boundary
+     */
+    public static boolean requiresFence(final int route) {
+        return route == FENCED || route == UNDECLARED;
+    }
+
     /** Packet classes whose handlers depend on vanilla entity, menu or chunk state. */
     private static final Map<String, Policy> CLASSES = load();
 

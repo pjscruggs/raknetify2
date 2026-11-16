@@ -89,7 +89,8 @@ class PayloadOrderingNegotiationTest {
                     new CustomPayloadChannel.PayloadClassifier(id -> id == 24, receiver)
                             .getChannelOverride(packet, false));
             assertEquals(
-                    com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering.FENCED,
+                    com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering
+                            .UNDECLARED,
                     new CustomPayloadChannel.PayloadClassifier(id -> id == 24, unrelated)
                             .getChannelOverride(packet, false));
             assertEquals(

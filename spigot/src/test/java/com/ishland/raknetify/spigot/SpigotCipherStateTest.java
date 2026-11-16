@@ -97,7 +97,7 @@ class SpigotCipherStateTest {
                 playing.set(play);
                 assertEquals(play ? Integer.MIN_VALUE : 0, routes.getChannelOverride(status, true));
                 assertEquals(
-                        play ? ModPayloadOrdering.FENCED : 0,
+                        play ? ModPayloadOrdering.UNDECLARED : 0,
                         routes.getChannelOverride(plugin, true));
             }
             assertEquals(0, plugin.readerIndex());

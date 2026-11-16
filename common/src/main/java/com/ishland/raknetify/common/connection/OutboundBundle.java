@@ -101,7 +101,7 @@ final class OutboundBundle {
                 || packet.readableBytes() + (long) Integer.BYTES > data.maxWritableBytes()) {
             throw new TooLongFrameException("Minecraft bundle exceeds transport limits");
         }
-        if (lane == ModPayloadOrdering.FENCED) {
+        if (ModPayloadOrdering.requiresFence(lane)) {
             lanes = 0xFF;
         } else if (lane >= 0) {
             lanes |= 1 << lane;

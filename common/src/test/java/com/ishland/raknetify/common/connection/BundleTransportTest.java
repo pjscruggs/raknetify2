@@ -27,6 +27,8 @@ package com.ishland.raknetify.common.connection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -58,7 +60,12 @@ class BundleTransportTest {
         final var codec = new RakNetSimpleMultiChannelCodec(0xfd);
         codec.addHandler((bytes, quiet) -> {
             int id = bytes.getUnsignedByte(bytes.readerIndex());
-            return id == 0 ? Integer.MIN_VALUE : id == 5 ? -3 : id;
+            return switch (id) {
+                case 0 -> Integer.MIN_VALUE;
+                case 5 -> ModPayloadOrdering.FENCED;
+                case 6 -> ModPayloadOrdering.UNDECLARED;
+                default -> id;
+            };
         });
         EmbeddedChannel server = new EmbeddedChannel(new BundleDelivery(), codec);
         server.attr(BundleWire.PEER).set(peer);
@@ -108,6 +115,23 @@ class BundleTransportTest {
             }
         }
         assertNull(client.readInbound());
+    }
+
+    /** A bundle containing only an opaque payload still has dependencies outside the envelope. */
+    @Test
+    void opaqueBundleMemberFencesTheWholeEnvelope() {
+        var server = server(true);
+        var client = client();
+        try {
+            send(server, 0, 6, 0);
+            FrameData envelope = server.readOutbound();
+            assertEquals(BundleWire.MIXED, envelope.getPacketId());
+            client.writeInbound(envelope);
+            expect(client, 0, 6, 0);
+        } finally {
+            server.finishAndReleaseAll();
+            client.finishAndReleaseAll();
+        }
     }
 
     /** Reversing independent lane delivery cannot splice a chunk update into an entity bundle. */

@@ -62,7 +62,11 @@ class CustomPayloadRoutingTest {
                 packet.setByte(packet.writerIndex() - 1, message);
                 int reader = packet.readerIndex();
                 assertEquals(
-                        message == 0 ? 2 : ModPayloadOrdering.FENCED,
+                        message == 0
+                                ? 2
+                                : message == 1
+                                        ? ModPayloadOrdering.FENCED
+                                        : ModPayloadOrdering.UNDECLARED,
                         proxyCodec().getChannelOverride(packet, false));
                 assertEquals(reader, packet.readerIndex());
                 assertEquals(1, packet.refCnt());
@@ -78,7 +82,8 @@ class CustomPayloadRoutingTest {
         ByteBuf packet = payload(CUSTOM_PAYLOAD_ID, "fml:play");
         packet.setByte(packet.writerIndex() - 1, 128).writeByte(0);
         try {
-            assertEquals(ModPayloadOrdering.FENCED, proxyCodec().getChannelOverride(packet, false));
+            assertEquals(
+                    ModPayloadOrdering.UNDECLARED, proxyCodec().getChannelOverride(packet, false));
         } finally {
             packet.release();
         }
@@ -143,7 +148,8 @@ class CustomPayloadRoutingTest {
     void undeclaredPayloadsKeepTheirBoundaries(final String identifier) {
         ByteBuf packet = payload(CUSTOM_PAYLOAD_ID, identifier);
         try {
-            assertEquals(ModPayloadOrdering.FENCED, proxyCodec().getChannelOverride(packet, false));
+            assertEquals(
+                    ModPayloadOrdering.UNDECLARED, proxyCodec().getChannelOverride(packet, false));
         } finally {
             packet.release();
         }

@@ -73,6 +73,36 @@ class ModDependencyTransportTest {
         exerciseBoundaries(begin(codec), message);
     }
 
+    /** Only the first small reliable successor may travel immediately behind an opaque payload. */
+    @org.junit.jupiter.api.Test
+    void opaquePayloadPipelinesOneSmallSuccessorWithoutOpeningAnotherLane() {
+        var codec = new RakNetSimpleMultiChannelCodec(0xfd);
+        codec.addHandler(new CustomPayloadChannel.PayloadClassifier(id -> id == 24));
+        codec.addHandler((bytes, quiet) -> bytes.getUnsignedByte(bytes.readerIndex()));
+        var server = begin(codec);
+        var receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        try {
+            server.writeOutbound(Unpooled.buffer().writeByte(7));
+            var payload = Unpooled.buffer().writeByte(24).writeByte(8);
+            payload.writeCharSequence("test:new", java.nio.charset.StandardCharsets.US_ASCII);
+            server.writeOutbound(payload);
+            server.writeOutbound(Unpooled.buffer().writeByte(2));
+            server.writeOutbound(Unpooled.buffer().writeByte(3));
+            expectFrame(server, 7);
+            expectFrame(server, 7);
+            expectFrame(server, 7);
+            receipts.pending.removeLast().setSuccess();
+            receipts.pending.removeLast().setSuccess();
+            assertTrue(server.outboundMessages().isEmpty());
+            receipts.pending.removeFirst().setSuccess();
+            expectFrame(server, 3);
+            receipts.pending.removeFirst().setSuccess();
+        } finally {
+            server.finishAndReleaseAll();
+        }
+    }
+
     /**
      * A state rebuild cannot overtake earlier domains or be overtaken by later menu contents.
      *
@@ -137,7 +167,7 @@ class ModDependencyTransportTest {
             expectFrame(server, 2);
             expectFrame(server, 7);
             server.writeOutbound(message);
-            server.writeOutbound(Unpooled.buffer().writeByte(3));
+            server.writeOutbound(Unpooled.buffer().writeByte(3).writeZero(1400));
             assertTrue(server.outboundMessages().isEmpty());
             receipts.pending.removeLast().setSuccess();
             assertTrue(server.outboundMessages().isEmpty());

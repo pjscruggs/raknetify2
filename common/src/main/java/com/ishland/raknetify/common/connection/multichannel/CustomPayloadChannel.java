@@ -148,7 +148,7 @@ public class CustomPayloadChannel {
                     return declared;
                 }
                 int remote = PayloadOrderingNegotiation.remoteChannel(channel, identifier);
-                return remote == 0 ? ModPayloadOrdering.FENCED : remote;
+                return remote == 0 ? ModPayloadOrdering.UNDECLARED : remote;
             } else {
                 return 0;
             }
