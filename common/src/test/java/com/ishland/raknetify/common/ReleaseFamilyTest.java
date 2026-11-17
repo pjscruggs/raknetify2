@@ -40,7 +40,7 @@ class ReleaseFamilyTest {
     @Test
     void recognizesSupportedVersionForms() {
         for (String version :
-                List.of("26.4", "26.4.1", "26.4-alpha.9", "26.4-snapshot-9", "26.4+build.1")) {
+                List.of("26.4", "26.4.1", "26.4-alpha.10", "26.4-snapshot-10", "26.4+build.1")) {
             assertEquals(new ReleaseFamily(26, 4), ReleaseFamily.parse(version));
         }
         assertEquals(new ReleaseFamily(1, 21), ReleaseFamily.parse("1.21.11"));

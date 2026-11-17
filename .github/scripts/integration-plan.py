@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 def cases(tier):
     """Keep pull requests short and reserve larger version sweeps for release and scheduled builds."""
-    selected = [('snapshot', '26.4-snapshot-9'), ('via-client', '26.2'), ('via-plus', '26.2'), ('mod-payloads', '26.3'), ('paper-plugins', '26.3'), ('proxy-native', '26.3')]
+    selected = [('snapshot', '26.4-snapshot-10'), ('via-client', '26.2'), ('via-plus', '26.2'), ('mod-payloads', '26.3'), ('paper-plugins', '26.3'), ('proxy-native', '26.3')]
     if tier != 'pull_request':
         selected.extend([('via-client', '1.21.11'), ('via-plus', '1.21.11'), ('terrain', '26.3'), ('proxy', '26.2')])
     if tier in ('schedule', 'workflow_dispatch'):
