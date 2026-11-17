@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 def cases(tier):
     """Keep pull requests short and reserve larger version sweeps for release and scheduled builds."""
-    selected = [('via-client', '26.2'), ('via-plus', '26.2'), ('mod-payloads', '26.3'), ('paper-plugins', '26.3'), ('proxy-native', '26.3')]
+    selected = [('snapshot', '26.4-snapshot-9'), ('via-client', '26.2'), ('via-plus', '26.2'), ('mod-payloads', '26.3'), ('paper-plugins', '26.3'), ('proxy-native', '26.3')]
     if tier != 'pull_request':
         selected.extend([('via-client', '1.21.11'), ('via-plus', '1.21.11'), ('terrain', '26.3'), ('proxy', '26.2')])
     if tier in ('schedule', 'workflow_dispatch'):
@@ -58,7 +58,8 @@ def collect(folder, tier, revision):
         row = json.loads(path.read_text())
         identity = key(row)
         assert identity in expected and identity not in results, 'Unexpected or duplicate compatibility case'
-        assert (row['schema'], row['revision'], row['status'], row['client']) == (1, revision, 'passed', '26.3'), 'Invalid receipt'
+        client = row['server'] if row['scenario'] == 'snapshot' else '26.3'
+        assert (row['schema'], row['revision'], row['status'], row['client']) == (1, revision, 'passed', client), 'Invalid receipt'
         assert row['inputs'] == expected_inputs(row['scenario']), 'Integration lock mismatch'
         results[identity] = row
     assert set(results) == expected, 'Incomplete compatibility results'
@@ -74,7 +75,8 @@ def report(args):
     lines = ['## Tested compatibility', '', f'Raknetify2 {version} · {date} UTC', '',
              '| Scenario | Client | Server | Transport |', '| --- | --- | --- | --- |']
     for case, version, mode in sorted(rows):
-        lines.append(f'| {case} | 26.3 | {version} | {mode} |')
+        client = rows[case, version, mode]['client']
+        lines.append(f'| {case} | {client} | {version} | {mode} |')
     sha = os.environ['GITHUB_SHA']
     lines.extend(['', f'[Pinned versions and hashes](https://github.com/pjscruggs/raknetify2/blob/{sha}/.github/integration-inputs.json)'])
     with Path(os.environ['GITHUB_STEP_SUMMARY']).open('a', encoding='utf-8') as output:

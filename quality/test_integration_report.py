@@ -28,13 +28,13 @@ class CompatibilityReportTest(unittest.TestCase):
         for entry in self.plan.cases(self.tier):
             folder = self.folder / entry['scenario']
             folder.mkdir()
-            row = dict(entry, schema=1, client='26.3', status='passed', revision='expected', raknetify='fixture', sha256='a' * 64,
+            row = dict(entry, schema=1, client=entry['server'] if entry['scenario'] == 'snapshot' else '26.3', status='passed', revision='expected', raknetify='fixture', sha256='a' * 64,
                        inputs=self.plan.expected_inputs(entry['scenario']))
             (folder / 'result.json').write_text(json.dumps(row))
 
     def test_missing_and_duplicate(self):
         """Neither another copy nor a missing artifact proves a complete matrix."""
-        self.assertEqual(len(self.plan.collect(self.folder, self.tier, 'expected')), 5)
+        self.assertEqual(len(self.plan.collect(self.folder, self.tier, 'expected')), 6)
         original = self.folder / 'via-client/result.json'
         copy = self.folder / 'result.json'
         copy.write_bytes(original.read_bytes())

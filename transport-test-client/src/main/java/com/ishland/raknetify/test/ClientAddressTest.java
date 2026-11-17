@@ -86,7 +86,7 @@ public final class ClientAddressTest implements PreLaunchEntrypoint {
      * @throws Exception if the native packet classes or version predicate cannot be resolved
      */
     private static void verifyEntityImpulse() throws Exception {
-        if (FixtureRuntime.atLeast("26.4-alpha.8")) {
+        if (FixtureRuntime.atLeast("26.4-alpha.9")) {
             GameplayOrderingTest.verifyGroup(
                     new String[][] {
                         {"", "ClientboundAddEntityPacket"},

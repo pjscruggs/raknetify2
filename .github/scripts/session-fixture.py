@@ -60,7 +60,7 @@ class SessionAuthority:
         """Record only the fixture credential, identity, and bounded native session digest."""
         valid = (body.get('accessToken') == '0' and body.get('selectedProfile') == PLAYER_ID
                  and isinstance(body.get('serverId'), str)
-                 and re.fullmatch(r'-?[0-9a-f]{1,40}', body['serverId']))
+                 and re.fullmatch(r'(?:-?[0-9a-f]{1,40}|[0-9A-V]{40})', body['serverId']))
         if not valid:
             return 403, None
         with self.lock:

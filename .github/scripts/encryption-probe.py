@@ -38,7 +38,7 @@ def run(probe_dir, work_dir, request):
     if result.returncode != 0 or 'PASS native client login packet serialization' not in text:
         raise RuntimeError('Native encryption probe failed: ' + os.fspath(log) + '\n' + text[-6000:])
     for mode in request.modes:
-        marker = 'PASS native RSA and bidirectional RakNet encryption' if mode == 'echo' else 'PASS native authentication ' + mode
+        marker = 'PASS native key exchange and bidirectional RakNet encryption' if mode == 'echo' else 'PASS native authentication ' + mode
         if marker not in text:
             raise RuntimeError('Missing encryption witness ' + marker + ': ' + os.fspath(log))
     print('PASS', request.version, 'native login packet serialization and', ', '.join(request.modes), flush=True)

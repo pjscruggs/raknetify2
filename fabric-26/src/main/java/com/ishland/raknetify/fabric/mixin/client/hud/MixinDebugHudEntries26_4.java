@@ -30,11 +30,12 @@ import com.ishland.raknetify.fabric.common.client.DebugHudUtil1_21_9;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.gui.components.debug.DebugScreenEntry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.WritableRegistry;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /** Registers transport diagnostics through the snapshot's registry bootstrap API. */
 @Mixin(DebugScreenEntries.class)
@@ -46,11 +47,11 @@ public class MixinDebugHudEntries26_4 {
      * Adds the Raknetify debug entry after vanilla populates the snapshot debug registry.
      *
      * @param registry debug-entry registry being bootstrapped
-     * @param ci return callback, unused because registration mutates the supplied registry
+     * @param ci bootstrap completion callback
      */
     @Inject(method = "bootstrap", at = @At("RETURN"))
     private static void registerDebugEntry(
-            final Registry<DebugScreenEntry> registry, final CallbackInfoReturnable<Object> ci) {
+            final WritableRegistry<DebugScreenEntry> registry, final CallbackInfo ci) {
         Registry.register(registry, DebugHudUtil1_21_9.ID, DebugHudUtil1_21_9.createEntry());
     }
 }

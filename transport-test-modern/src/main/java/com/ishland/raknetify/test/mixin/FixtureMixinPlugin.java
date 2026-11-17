@@ -82,7 +82,7 @@ public final class FixtureMixinPlugin implements IMixinConfigPlugin {
                         .getMetadata()
                         .getVersion()
                         .getFriendlyString();
-        boolean snapshot = "26.4-alpha.8".equals(version) || "26.4-snapshot-8".equals(version);
+        boolean snapshot = "26.4-alpha.9".equals(version) || "26.4-snapshot-9".equals(version);
         return mixinClassName.endsWith(".EncryptionLogin26_4Mixin") == snapshot;
     }
 

@@ -26,38 +26,28 @@
 package com.ishland.raknetify.test.mixin;
 
 import com.ishland.raknetify.test.EncryptionExchange;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.network.Connection;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
-import net.minecraft.util.Crypt;
-import net.minecraft.util.CryptException;
+import net.minecraft.util.crypto.SessionKeys;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.security.PublicKey;
 import java.util.UUID;
 
-import javax.crypto.SecretKey;
-
-/** Exercises the snapshot's native options acknowledgement after real RSA challenge validation. */
+/** Exercises the snapshot's native options acknowledgement after native key confirmation. */
 @Mixin(value = ServerLoginPacketListenerImpl.class, priority = 2000)
 public abstract class EncryptionLogin26_4Mixin {
     /** Native connection receiving the options acknowledgement and installing the real ciphers. */
     @Shadow @Final public Connection connection;
-
-    /**
-     * Secret already decrypted and challenge-validated by Minecraft before the digest invocation.
-     */
-    @Unique private @org.jspecify.annotations.Nullable SecretKey fixtureSecret;
 
     /**
      * Invokes the native options request instead of fabricating a cipher installation in the test.
@@ -66,34 +56,12 @@ public abstract class EncryptionLogin26_4Mixin {
      * @param secret native validated secret retained until the options acknowledgement
      */
     @Invoker("applyConnectionEncryption")
-    protected abstract void requestOptions(GameProfile profile, SecretKey secret);
-
-    /**
-     * Observes the validated secret while preserving Minecraft's actual session digest computation.
-     *
-     * @param serverId vanilla server identity passed to the digest
-     * @param publicKey native server public key
-     * @param secret secret whose challenge Minecraft has already validated
-     * @return unchanged native session digest
-     * @throws CryptException if Minecraft's digest operation fails
-     */
-    @Redirect(
-            method = "handleKey",
-            at =
-                    @At(
-                            value = "INVOKE",
-                            target =
-                                    "Lnet/minecraft/util/Crypt;digestData(Ljava/lang/String;Ljava/security/PublicKey;Ljavax/crypto/SecretKey;)[B"))
-    private byte[] captureSecret(
-            final String serverId, final PublicKey publicKey, final SecretKey secret)
-            throws CryptException {
-        fixtureSecret = secret;
-        return Crypt.digestData(serverId, publicKey, secret);
-    }
+    protected abstract void requestOptions(GameProfile profile, SessionKeys secret);
 
     /**
      * Substitutes a disposable profile before the external account lookup thread can start.
      *
+     * @param keys session keys validated by the native server
      * @param callback stops this isolated login from contacting the account service
      * @throws ReflectiveOperationException if the native Netty channel cannot be inspected
      */
@@ -101,14 +69,10 @@ public abstract class EncryptionLogin26_4Mixin {
             method = "handleKey",
             at = @At(value = "INVOKE", target = "Ljava/lang/Thread;start()V"),
             cancellable = true)
-    private void requestFixtureOptions(final CallbackInfo callback)
+    private void requestFixtureOptions(final CallbackInfo callback, @Local final SessionKeys keys)
             throws ReflectiveOperationException {
         EncryptionExchange.requireTestConnection(EncryptionExchange.channel(connection));
-        requestOptions(
-                new GameProfile(new UUID(0, 1), "EncryptionProbe"),
-                java.util.Objects.requireNonNull(
-                        fixtureSecret, "Native login secret was not captured"));
-        fixtureSecret = null;
+        requestOptions(new GameProfile(new UUID(0, 1), "EncryptionProbe"), keys);
         callback.cancel();
     }
 

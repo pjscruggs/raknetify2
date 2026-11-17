@@ -378,7 +378,7 @@ def report_success(version, transport, log, features):
         checks += ', PacketFixer native size limits'
     if features.encryption:
         assert 'PASS native encrypted challenge exchange' in log.read_text()
-        checks += ', native RSA and bidirectional encryption'
+        checks += ', native key exchange and bidirectional encryption'
     print('PASS', version, transport, checks, flush=True)
 
 

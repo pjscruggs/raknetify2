@@ -77,7 +77,7 @@ def receipt(args, case, keys):
     result = {'schema': 1, 'scenario': case, 'status': 'passed', 'revision': revision,
               'raknetify': version, 'sha256': hashlib.sha256(args.jar.read_bytes()).hexdigest(),
               'mode': args.mode, 'server': args.server_version,
-              'client': '26.3', 'inputs': pinned_inputs(case, keys)}
+              'client': client_version(args), 'inputs': pinned_inputs(case, keys)}
     (args.work_dir / 'result.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
 
 
@@ -100,17 +100,23 @@ def configure_client(game, args):
         (config / 'minihud.json').write_text(json.dumps(settings))
 
 
+def client_version(args):
+    """Use matching game versions for the native snapshot pair and the stable client for compatibility cases."""
+    return args.server_version if args.scenario == 'snapshot' else '26.3'
+
+
 def client_command(args, authority, runtime):
     """Launch the real Fabric client with a synthetic login and an explicit gameplay contract."""
     game, libraries, metadata = runtime
-    return [args.java, '-Xmx2G', '--enable-native-access=ALL-UNNAMED',
+    return [args.java, '-Xmx2G', '-Dfabric.noErrorGui=true', '--enable-native-access=ALL-UNNAMED',
             '-Draknetify.test.join=true', '-Draknetify.test.worldChanges=true',
             '-Draknetify.test.encrypted=' + str(not args.scenario.startswith('proxy')).lower(),
             '-Draknetify.test.dimensions=' + ','.join(args.dimensions),
             '-Draknetify.test.port=' + str(args.client_port), '-Dminecraft.api.discovery.host=' + authority.url,
             '-cp', os.pathsep.join(map(str, libraries)), 'net.fabricmc.loader.impl.launch.knot.KnotClient',
             '--gameDir', str(game), '--assetsDir', str(args.assets_dir), '--assetIndex', metadata['assetIndex']['id'],
-            '--version', '26.3', '--accessToken', '0', '--username', 'TransportProbe', '--offlineDeveloperMode']
+            '--version', metadata['id'], '--accessToken', '0', '--username', 'TransportProbe', '--offlineDeveloperMode',
+            *(['--graphicsBackend', 'opengl'] if args.scenario == 'snapshot' else [])]
 
 
 def prepare_client(args, keys):
@@ -122,8 +128,8 @@ def prepare_client(args, keys):
     root.mkdir(exist_ok=True)
     settings = SimpleNamespace(work_dir=root, jar=args.jar, fixture=args.fixture, baseline=False,
                                cache_dir=args.cache_dir / 'client-libraries')
-    metadata = native.minecraft_metadata('26.3')
-    game, libraries = address.prepare(settings, '26.3', metadata, {})
+    metadata = native.minecraft_metadata(client_version(args))
+    game, libraries = address.prepare(settings, metadata['id'], metadata, {})
     install(keys, game / 'mods', args.cache_dir)
     configure_client(game, args)
     native.assets(args.assets_dir, metadata)

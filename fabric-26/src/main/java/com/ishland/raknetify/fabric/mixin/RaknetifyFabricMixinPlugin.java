@@ -82,11 +82,13 @@ public class RaknetifyFabricMixinPlugin implements IMixinConfigPlugin {
                     ModPlatform.get().isModLoaded("quilt_networking");
             case "compat.packetfixer.MixinSplitterHandler" ->
                     ModPlatform.get().isModLoaded("packetfixer");
-            case "access.IDebugHudEntries", "compat.krypton.MixinServerLoginNetworkHandler" ->
+            case "access.IDebugHudEntries",
+                    "common.encryption.MixinClientConnection",
+                    "compat.krypton.MixinServerLoginNetworkHandler" ->
                     !MinecraftVersions.IS_26_4_SNAPSHOT;
             case "client.hud.MixinDebugHudEntries26_4",
-                    "common.encryption.MixinClientConnection26_4",
-                    "compat.krypton.MixinServerLoginNetworkHandler26_4" ->
+                    "client.MixinClientHandshake26_4",
+                    "server.MixinServerLoginEncryption26_4" ->
                     MinecraftVersions.IS_26_4_SNAPSHOT;
             default -> true;
         };

@@ -27,6 +27,7 @@ package com.ishland.raknetify.common.connection;
 
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.test.NativeLoginPacket;
+import com.ishland.raknetify.test.NativeLoginTrafficKeys;
 import com.ishland.raknetify.test.TransportTestPayload;
 
 import io.netty.bootstrap.Bootstrap;
@@ -55,7 +56,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Performs native RSA negotiation and a bidirectional AES challenge against the isolated server
+ * Performs native key negotiation and a bidirectional AES challenge against the isolated server
  * fixture.
  */
 public final class RaknetEncryptionProbe extends SimpleChannelInboundHandler<Object> {
@@ -68,7 +69,7 @@ public final class RaknetEncryptionProbe extends SimpleChannelInboundHandler<Obj
     /**
      * Exact supported snapshot protocol with an options acknowledgement before cipher installation.
      */
-    private static final int OPTIONS_PROTOCOL = 1073742170;
+    private static final int OPTIONS_PROTOCOL = 1073742171;
 
     /** Known payload checked after the server's real frame decryption. */
     private static final long CHALLENGE = 0x5d37a91b046ce28fL;
@@ -81,6 +82,9 @@ public final class RaknetEncryptionProbe extends SimpleChannelInboundHandler<Obj
 
     /** Expected native outcome: fixture echo, rejected session, or rejected nonce. */
     private final String mode;
+
+    /** Snapshot traffic secrets established by the native client handshake. */
+    private @org.jspecify.annotations.Nullable NativeLoginTrafficKeys trafficKeys;
 
     /** Distinguishes the initial encryption request from the later native rejection packet. */
     private boolean answered;
@@ -142,7 +146,7 @@ public final class RaknetEncryptionProbe extends SimpleChannelInboundHandler<Obj
                 probe.result.get(30, TimeUnit.SECONDS);
                 System.out.println(
                         "echo".equals(mode)
-                                ? "PASS native RSA and bidirectional RakNet encryption"
+                                ? "PASS native key exchange and bidirectional RakNet encryption"
                                 : "PASS native authentication " + mode);
             }
         }
@@ -227,24 +231,19 @@ public final class RaknetEncryptionProbe extends SimpleChannelInboundHandler<Obj
         if (RaknetStatusProbe.readVarint(request) != 1) {
             throw new IllegalArgumentException("Expected encryption request");
         }
-        readBytes(request);
-        PublicKey key =
-                KeyFactory.getInstance("RSA")
-                        .generatePublic(new X509EncodedKeySpec(readBytes(request)));
-        byte[] nonce = readBytes(request);
-        if ("rejected-nonce".equals(mode)) {
-            nonce[0] ^= 1;
-        }
-        if (request.isReadable()) {
-            request.readBoolean();
-        }
-        if (request.isReadable()) {
-            throw new IllegalArgumentException("Trailing encryption request data");
-        }
         ByteBuf reply = Unpooled.buffer().writeByte(1);
         try {
-            NativeLoginPacket.write(reply, KEY, key, nonce);
-        } catch (ReflectiveOperationException | RuntimeException failure) {
+            if (protocol == OPTIONS_PROTOCOL) {
+                trafficKeys =
+                        NativeLoginTrafficKeys.negotiate(
+                                request, reply, protocol, "rejected-nonce".equals(mode));
+            } else {
+                writeLegacyKey(request, reply);
+            }
+            if (request.isReadable()) {
+                throw new IllegalArgumentException("Trailing encryption request data");
+            }
+        } catch (Exception failure) {
             reply.release();
             throw failure;
         }
@@ -257,6 +256,28 @@ public final class RaknetEncryptionProbe extends SimpleChannelInboundHandler<Obj
         if (protocol != OPTIONS_PROTOCOL) {
             enableEncryption(context);
         }
+    }
+
+    /**
+     * Encodes the RSA response required by earlier Minecraft versions.
+     *
+     * @param request native plaintext encryption request after the packet ID
+     * @param reply destination for the native key packet
+     * @throws Exception if the legacy exchange cannot be encoded
+     */
+    private void writeLegacyKey(final ByteBuf request, final ByteBuf reply) throws Exception {
+        readBytes(request);
+        PublicKey key =
+                KeyFactory.getInstance("RSA")
+                        .generatePublic(new X509EncodedKeySpec(readBytes(request)));
+        byte[] nonce = readBytes(request);
+        if ("rejected-nonce".equals(mode)) {
+            nonce[0] ^= 1;
+        }
+        if (request.isReadable()) {
+            request.readBoolean();
+        }
+        NativeLoginPacket.write(reply, KEY, key, nonce);
     }
 
     /**
@@ -287,7 +308,21 @@ public final class RaknetEncryptionProbe extends SimpleChannelInboundHandler<Obj
                 Boolean.getBoolean("raknetify.test.ordered")
                         ? CompatibilityNegotiation.NAME
                         : "game";
-        context.pipeline().addBefore(boundary, "encryption", new MultiChannellingEncryption(KEY));
+        if (trafficKeys == null) {
+            context.pipeline()
+                    .addBefore(boundary, "encryption", new MultiChannellingEncryption(KEY));
+        } else {
+            context.pipeline()
+                    .addBefore(
+                            boundary,
+                            "decrypt-frames",
+                            MultiChannellingEncryption.inbound(trafficKeys.inbound()));
+            context.pipeline()
+                    .addBefore(
+                            boundary,
+                            "encrypt-frames",
+                            MultiChannellingEncryption.outbound(trafficKeys.outbound()));
+        }
         if ("rejected-session".equals(mode)) {
             return;
         }

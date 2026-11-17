@@ -3,6 +3,8 @@ import argparse
 import concurrent.futures
 import importlib.util
 import json
+import os
+import sys
 from pathlib import Path
 import queue
 import subprocess
@@ -27,6 +29,7 @@ def inputs(args, common):
         'mod-payloads': (api + ['carpet-fabric', 'servux-fabric', 'no-chat-reports-fabric'],
                          api + ['carpet-fabric', 'minihud-26.3', 'malilib-26.3', 'no-chat-reports-fabric']),
         'terrain': ([], []),
+        'snapshot': ([], []),
         'reference-pack': (common.manifest()['packs']['server'], common.manifest()['packs']['client']),
         'grim': (api + ['grimac-26.3'], []),
         'proxy-native': (api + ['fabricproxy-lite'], []),
@@ -94,9 +97,13 @@ def play(args, common, authority, server):
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
         controller = pool.submit(transitions, server, args, common, cancelled)
         try:
+            env = os.environ.copy()
+            if args.scenario == 'snapshot' and sys.platform == 'linux':
+                # SDL releases EGL before a native shutdown callback returns to it under Xvfb.
+                env['LD_PRELOAD'] = 'libEGL.so.1 ' + env.get('LD_PRELOAD', '')
             with log.open('w', encoding='utf-8') as output:
                 subprocess.run(common.client_command(args, authority, runtime), cwd=runtime[0],
-                               stdout=output, stderr=subprocess.STDOUT, check=True, timeout=240)
+                               stdout=output, stderr=subprocess.STDOUT, check=True, timeout=240, env=env)
             controller.result(timeout=5)
         finally:
             cancelled.set()
@@ -161,7 +168,7 @@ def main():
     parser = argparse.ArgumentParser()
     for name in ['jar', 'fixture', 'work-dir', 'assets-dir', 'cache-dir']:
         parser.add_argument('--' + name, type=Path, required=True)
-    parser.add_argument('--scenario', choices=['via-client', 'via-plus', 'mod-payloads', 'terrain', 'reference-pack', 'grim', 'proxy', 'proxy-native'], required=True)
+    parser.add_argument('--scenario', choices=['via-client', 'via-plus', 'mod-payloads', 'terrain', 'snapshot', 'reference-pack', 'grim', 'proxy', 'proxy-native'], required=True)
     parser.add_argument('--proxy-jar', type=Path)
     parser.add_argument('--server-version', default='26.3')
     parser.add_argument('--mode', choices=['multichannel', 'ordered'], default='multichannel')

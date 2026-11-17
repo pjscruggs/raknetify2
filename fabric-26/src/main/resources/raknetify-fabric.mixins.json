@@ -15,11 +15,10 @@
     "common.MixinClientConnection1",
     "common.MixinClientConnection1_20_2",
     "common.encryption.MixinClientConnection",
-    "common.encryption.MixinClientConnection26_4",
     "compat.fabricapi.MixinServerLoginNetworkAddon",
     "compat.krypton.MixinServerLoginNetworkHandler",
     "compat.packetfixer.MixinSplitterHandler",
-    "compat.krypton.MixinServerLoginNetworkHandler26_4",
+    "server.MixinServerLoginEncryption26_4",
     "compat.qsl.MixinServerLoginNetworkAddon",
     "server.MixinPlayerManager1_20_2",
     "server.MixinServerCommonNetworkHandler",
@@ -32,6 +31,7 @@
     "defaultRequire": 1
   },
   "client": [
+    "client.MixinClientHandshake26_4",
     "client.MixinClientFoodPrediction",
     "client.MixinTransferCapability",
     "access.IDebugHudEntries",

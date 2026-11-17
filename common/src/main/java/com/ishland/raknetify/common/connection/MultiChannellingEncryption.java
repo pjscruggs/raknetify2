@@ -155,8 +155,17 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
      * @return handler that authenticates incoming frames only
      */
     public static MultiChannellingEncryption inbound(final Cipher cipher) {
-        return new MultiChannellingEncryption(
-                FrameKeyDerivation.minecraftSecret(cipher), true, false, null);
+        return inbound(FrameKeyDerivation.minecraftSecret(cipher));
+    }
+
+    /**
+     * Uses the negotiated inbound traffic key directly when Minecraft supplies a separate IV.
+     *
+     * @param key secret for this direction of the connection
+     * @return handler for inbound frames
+     */
+    public static MultiChannellingEncryption inbound(final SecretKey key) {
+        return new MultiChannellingEncryption(key, true, false, null);
     }
 
     /**
@@ -166,8 +175,17 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
      * @return handler that encrypts outgoing frames only
      */
     public static MultiChannellingEncryption outbound(final Cipher cipher) {
-        return new MultiChannellingEncryption(
-                FrameKeyDerivation.minecraftSecret(cipher), false, true, null);
+        return outbound(FrameKeyDerivation.minecraftSecret(cipher));
+    }
+
+    /**
+     * Uses the negotiated outbound traffic key directly when Minecraft supplies a separate IV.
+     *
+     * @param key secret for this direction of the connection
+     * @return handler for outbound frames
+     */
+    public static MultiChannellingEncryption outbound(final SecretKey key) {
+        return new MultiChannellingEncryption(key, false, true, null);
     }
 
     /**
