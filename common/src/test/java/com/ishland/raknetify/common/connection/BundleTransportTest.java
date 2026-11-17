@@ -153,19 +153,25 @@ class BundleTransportTest {
         }
     }
 
-    /** Neither an early ACK on a different lane nor a later write may cross a mixed bundle. */
-    @Test
-    void mixedBundleWaitsForEveryPredecessorAndBlocksSuccessors() {
+    /**
+     * Checks both acknowledgement orders while a mixed bundle waits behind two lanes.
+     *
+     * @param remainingLane lane with a delayed receipt
+     */
+    @ParameterizedTest
+    @ValueSource(ints = {2, 7})
+    void mixedBundlePreservesBothPredecessorsAndBlocksSuccessors(final int remainingLane) {
         EmbeddedChannel server = server(true);
         EmbeddedChannel client = client();
         Receipts receipts = new Receipts();
         server.pipeline().addFirst(receipts);
         try {
-            send(server, 2, 7, 0, 2, 7, 0, 3);
+            int otherLane = remainingLane == 2 ? 7 : 2;
+            send(server, remainingLane, otherLane, 0, 2, 7, 0, 3);
             FrameData first = server.readOutbound();
             client.writeInbound((Object) server.readOutbound());
             receipts.pending.removeLast().setSuccess();
-            assertNull(server.readOutbound());
+            assertEquals(remainingLane == 2 ? 1 : 0, server.outboundMessages().size());
             client.writeInbound(first);
             receipts.pending.removeFirst().setSuccess();
             FrameData group = server.readOutbound();
@@ -175,7 +181,7 @@ class BundleTransportTest {
             receipts.pending.removeFirst().setSuccess();
             client.writeInbound((Object) server.readOutbound());
             receipts.pending.removeFirst().setSuccess();
-            expect(client, 7, 2, 0, 2, 7, 0, 3);
+            expect(client, otherLane, remainingLane, 0, 2, 7, 0, 3);
         } finally {
             server.finishAndReleaseAll();
             client.finishAndReleaseAll();
@@ -276,6 +282,41 @@ class BundleTransportTest {
                 assertSame(failure, entity.cause());
                 assertFalse(server.isActive());
             }
+        } finally {
+            server.finishAndReleaseAll();
+        }
+    }
+
+    /** A busy lane can carry a mod update as soon as the other lane has drained. */
+    @Test
+    void modFenceUsesTheRemainingLaneAfterPartialAcknowledgements() {
+        var server = server(true);
+        var receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        try {
+            send(server, 7, 2, 2, 7);
+            for (int i = 0; i < 4; i++) {
+                ((FrameData) server.readOutbound()).release();
+            }
+            var terrain = receipts.pending.removeLast();
+            receipts.pending.removeLast().setSuccess();
+            assertEquals(0, BundleDelivery.preferredFenceLane(server.pipeline()));
+            receipts.pending.removeLast().setSuccess();
+            var fence = server.writeAndFlush(Unpooled.buffer(1).writeByte(5));
+            var next = server.writeAndFlush(Unpooled.buffer(1).writeByte(3));
+            FrameData payload = server.readOutbound();
+            assertNotNull(payload);
+            assertEquals(7, payload.getOrderChannel());
+            payload.release();
+            receipts.pending.removeLast().setSuccess();
+            terrain.setSuccess();
+            assertFalse(fence.isDone());
+            assertNull(server.readOutbound());
+            receipts.pending.removeFirst().setSuccess();
+            assertTrue(fence.isSuccess());
+            assertEquals(1, server.outboundMessages().size());
+            receipts.pending.removeFirst().setSuccess();
+            assertTrue(next.isSuccess());
         } finally {
             server.finishAndReleaseAll();
         }

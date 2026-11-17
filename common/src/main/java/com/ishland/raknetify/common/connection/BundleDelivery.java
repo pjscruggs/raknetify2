@@ -52,14 +52,11 @@ final class BundleDelivery extends ChannelDuplexHandler {
     /** Owned queue bytes including a header reservation for empty control messages. */
     private long bytes;
 
-    /** Ordinary writes awaiting delivery before a cross-lane fence may start. */
-    private int pending;
+    /** Ordinary writes awaiting delivery per FIFO lane. Slot zero holds all non-FIFO writes. */
+    private final int[] pendingCounts = new int[Constants.ORDER_CHANNEL_COUNT + 1];
 
-    /**
-     * Common reliable FIFO lane of the outstanding ordinary writes, or minus one for a mixed
-     * prefix.
-     */
-    private int pendingLane;
+    /** One bit per occupied slot in the delivery counts. */
+    private int pendingLanes;
 
     /** Bounds completion records when newer datagrams arrive before the oldest one. */
     private static final int MAX_IN_FLIGHT_FENCES = 32;
@@ -130,9 +127,8 @@ final class BundleDelivery extends ChannelDuplexHandler {
      */
     private boolean canSend(final Object message, final boolean mixed) {
         if (fences.isEmpty()) {
-            return !mixed
-                    || pending == 0
-                    || (pendingLane >= 0 && pendingLane == orderedLane(message));
+            int lane = solePendingLane();
+            return !mixed || pendingLanes == 0 || (lane >= 0 && lane == orderedLane(message));
         }
         if (!mixed
                 || !(message instanceof FrameData frame)
@@ -155,8 +151,24 @@ final class BundleDelivery extends ChannelDuplexHandler {
             return -1;
         }
         var policy = frame.getReliability();
-        return policy.isReliable && policy.isOrdered && !policy.isSequenced
-                ? frame.getOrderChannel()
+        int lane = frame.getOrderChannel();
+        return policy.isReliable
+                        && policy.isOrdered
+                        && !policy.isSequenced
+                        && lane >= 0
+                        && lane < Constants.ORDER_CHANNEL_COUNT
+                ? lane
+                : -1;
+    }
+
+    /**
+     * Finds the lane whose FIFO ordering covers every outstanding ordinary write.
+     *
+     * @return the sole pending FIFO lane or minus one when none qualifies
+     */
+    private int solePendingLane() {
+        return Integer.bitCount(pendingLanes) == 1
+                ? Integer.numberOfTrailingZeros(pendingLanes) - 1
                 : -1;
     }
 
@@ -176,7 +188,7 @@ final class BundleDelivery extends ChannelDuplexHandler {
         if (!delivery.fences.isEmpty()) {
             return Math.max(0, delivery.fences.getLast().lane());
         }
-        return delivery.pending == 0 ? 0 : Math.max(0, delivery.pendingLane);
+        return Math.max(0, delivery.solePendingLane());
     }
 
     /**
@@ -196,16 +208,14 @@ final class BundleDelivery extends ChannelDuplexHandler {
             sendFence(ctx, message, promise.unvoid());
             return;
         }
-        int lane = orderedLane(message);
-        if (pending == 0) {
-            pendingLane = lane;
-        } else if (pendingLane != lane) {
-            pendingLane = -1;
-        }
-        pending++;
+        int slot = orderedLane(message) + 1;
+        pendingCounts[slot]++;
+        pendingLanes |= 1 << slot;
         ctx.write(message, promise.unvoid())
                 .addListener(result -> {
-                    pending--;
+                    if (--pendingCounts[slot] == 0) {
+                        pendingLanes &= ~(1 << slot);
+                    }
                     if (!closed && !result.isSuccess() && (!queue.isEmpty() || !fences.isEmpty())) {
                         abort(ctx, Objects.requireNonNull(result.cause()));
                     } else {
@@ -260,7 +270,9 @@ final class BundleDelivery extends ChannelDuplexHandler {
      * @param ctx transport context owning the pending writes
      */
     private void releaseDelivered(final ChannelHandlerContext ctx) {
-        while (pending == 0 && !fences.isEmpty() && fences.getFirst().transport().isSuccess()) {
+        while (pendingLanes == 0
+                && !fences.isEmpty()
+                && fences.getFirst().transport().isSuccess()) {
             Fence next = fences.removeFirst();
             fenceBytes -= next.size();
             next.promise().trySuccess();
