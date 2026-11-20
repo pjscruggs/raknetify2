@@ -34,6 +34,8 @@ import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
 import io.netty.buffer.Unpooled;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /** Checks runtime mod registration without linking optional game or mod classes. */
 class ModPayloadOrderingTest {
@@ -96,19 +98,58 @@ class ModPayloadOrderingTest {
     }
 
     /**
-     * Only complete protocol 17 headers for audited server replies qualify for the terrain lane.
+     * Only audited server replies qualify for the terrain lane in each wire format.
+     *
+     * @param version Distant Horizons network protocol
+     * @param terrain first of the three consecutive terrain message IDs
+     * @param channel Distant Horizons payload identifier for this release
+     * @param legacyForge whether Forge prepends zero to the two-byte protocol version
      */
-    @Test
-    void distantHorizonsTerrainRequiresKnownVersionDirectionAndType() {
-        for (int type : new int[] {8, 9, 10}) {
-            assertDistantHorizonsRoute(17, type, false, Constants.BACKGROUND_TERRAIN_CHANNEL);
-            assertDistantHorizonsRoute(17, type, true, 0);
-            assertDistantHorizonsRoute(18, type, false, 0);
+    @ParameterizedTest
+    @CsvSource({
+        "10, 7, distant_horizons:message, false",
+        "10, 7, distant_horizons:message, true",
+        "11, 7, distant_horizons:message, false",
+        "13, 7, distant_horizons:message, false",
+        "13, 7, distant_horizons:msg, false",
+        "15, 8, distant_horizons:msg, false",
+        "16, 8, distant_horizons:msg, false",
+        "17, 8, distant_horizons:msg, false"
+    })
+    void distantHorizonsTerrainRequiresKnownVersionDirectionAndType(
+            final int version, final int terrain, final String channel, final boolean legacyForge) {
+        for (int type : new int[] {terrain, terrain + 1, terrain + 2}) {
+            assertDistantHorizonsRoute(
+                    channel,
+                    version,
+                    type,
+                    legacyForge,
+                    false,
+                    Constants.BACKGROUND_TERRAIN_CHANNEL);
+            assertDistantHorizonsRoute(channel, version, type, legacyForge, true, 0);
         }
-        assertDistantHorizonsRoute(17, 2, false, 0);
-        assertDistantHorizonsRoute(17, 11, false, 0);
-        var truncated = Unpooled.buffer().writeShort(17).writeByte(10);
+        assertDistantHorizonsRoute(channel, version, 2, legacyForge, false, 0);
+        assertDistantHorizonsRoute(channel, version, terrain - 1, legacyForge, false, 0);
+        assertDistantHorizonsRoute(channel, version, terrain + 3, legacyForge, false, 0);
+    }
+
+    /** Unreleased versions and truncated control or terrain data retain the existing boundary. */
+    @Test
+    void distantHorizonsUnknownVersionsAndTruncatedHeadersDefer() {
+        for (int version : new int[] {1, 12, 14, 18}) {
+            assertDistantHorizonsRoute("distant_horizons:msg", version, 8, false, false, 0);
+        }
+        assertDistantHorizonsRoute("distant_horizons:msg", 10, 7, false, false, 0);
+        assertDistantHorizonsRoute("distant_horizons:message", 16, 8, false, false, 0);
+        assertDistantHorizonsRoute("distant_horizons:msg", 17, 8, true, false, 0);
+        var truncated = Unpooled.buffer().writeByte(0).writeShort(10);
         try {
+            assertEquals(
+                    0, ModPayloadOrdering.channel("distant_horizons:message", truncated, false));
+            truncated.writeByte(0);
+            assertEquals(
+                    0, ModPayloadOrdering.channel("distant_horizons:message", truncated, false));
+            truncated.clear().writeShort(16).writeByte(8);
             assertEquals(0, ModPayloadOrdering.channel("distant_horizons:msg", truncated, false));
         } finally {
             truncated.release();
@@ -118,18 +159,28 @@ class ModPayloadOrderingTest {
     /**
      * Checks a protocol discriminator without changing the packet read position.
      *
+     * @param channel custom payload identifier
      * @param version Distant Horizons protocol version
      * @param type registered message type
+     * @param legacyForge whether the header has the legacy Forge discriminator
      * @param clientSender whether the packet is serverbound
      * @param lane expected route
      */
     private static void assertDistantHorizonsRoute(
-            final int version, final int type, final boolean clientSender, final int lane) {
-        var header = Unpooled.buffer().writeByte(0).writeShort(version).writeShort(type);
+            final String channel,
+            final int version,
+            final int type,
+            final boolean legacyForge,
+            final boolean clientSender,
+            final int lane) {
+        var header = Unpooled.buffer().writeByte(0);
         try {
+            if (legacyForge) {
+                header.writeByte(0);
+            }
+            header.writeShort(version).writeShort(type);
             header.skipBytes(1);
-            assertEquals(
-                    lane, ModPayloadOrdering.channel("distant_horizons:msg", header, clientSender));
+            assertEquals(lane, ModPayloadOrdering.channel(channel, header, clientSender));
             assertEquals(1, header.readerIndex());
         } finally {
             header.release();

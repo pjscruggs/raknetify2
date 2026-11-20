@@ -154,7 +154,8 @@ public final class ModPayloadOrdering {
                     "trade_cycling:cycle_trades" ->
                     clientSender ? 2 : 3;
             case "architectury:network" -> architecturyChannel(payload, clientSender);
-            case "distant_horizons:msg" -> distantHorizonsChannel(payload, clientSender);
+            case "distant_horizons:message" -> distantHorizonsChannel(payload, clientSender, true);
+            case "distant_horizons:msg" -> distantHorizonsChannel(payload, clientSender, false);
             default -> 0;
         };
     }
@@ -166,18 +167,55 @@ public final class ModPayloadOrdering {
      *
      * @param payload Distant Horizons header and message body
      * @param clientSender whether this is a serverbound message
+     * @param legacyChannel whether this is the channel name used before Distant Horizons 3.0
      * @return background terrain lane for audited server replies, otherwise zero to defer
      */
-    private static int distantHorizonsChannel(final ByteBuf payload, final boolean clientSender) {
-        final int offset = payload.readerIndex();
-        if (clientSender || payload.readableBytes() < 4 || payload.getUnsignedShort(offset) != 17) {
+    private static int distantHorizonsChannel(
+            final ByteBuf payload, final boolean clientSender, final boolean legacyChannel) {
+        if (clientSender || payload.readableBytes() < 4) {
             return 0;
         }
-        return switch (payload.getUnsignedShort(offset + 2)) {
-            // FullDataSourceResponse, FullDataPartialUpdate and FullDataSplit
-            case 8, 9, 10 -> Constants.BACKGROUND_TERRAIN_CHANNEL;
+        final int offset =
+                payload.readerIndex()
+                        + (legacyChannel && hasDistantHorizonsForgePrefix(payload) ? 1 : 0);
+        final int firstTerrainType =
+                firstDistantHorizonsTerrainType(payload.getUnsignedShort(offset), legacyChannel);
+        // FullDataSourceResponse, FullDataPartialUpdate and FullDataSplit are consecutive.
+        final int type = payload.getUnsignedShort(offset + 2);
+        return firstTerrainType != 0 && type >= firstTerrainType && type <= firstTerrainType + 2
+                ? Constants.BACKGROUND_TERRAIN_CHANNEL
+                : 0;
+    }
+
+    /**
+     * Identifies the first terrain message for each published protocol and channel pair.
+     *
+     * @param version network protocol from the payload header
+     * @param legacyChannel whether the identifier ends in {@code :message}
+     * @return the first terrain message ID, or zero for an unknown pair
+     */
+    private static int firstDistantHorizonsTerrainType(
+            final int version, final boolean legacyChannel) {
+        return switch (version) {
+            case 10, 11 -> legacyChannel ? 7 : 0;
+            case 13 -> 7; // Used on both channel names during the 2.4 to 3.0 transition.
+            case 15, 16, 17 -> legacyChannel ? 0 : 8;
             default -> 0;
         };
+    }
+
+    /**
+     * Forge's discriminator zero precedes the short version in DH 2.3.0–2.3.2. Later Forge releases
+     * write the version as a byte after zero, matching Fabric and NeoForge.
+     *
+     * @param payload complete header or the remaining bytes of a truncated header
+     * @return whether the first zero byte precedes the protocol 10 header
+     */
+    private static boolean hasDistantHorizonsForgePrefix(final ByteBuf payload) {
+        int offset = payload.readerIndex();
+        return payload.readableBytes() >= 5
+                && payload.getUnsignedByte(offset) == 0
+                && payload.getUnsignedShort(offset + 1) == 10;
     }
 
     /**
