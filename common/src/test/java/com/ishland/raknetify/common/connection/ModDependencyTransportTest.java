@@ -27,6 +27,7 @@ package com.ishland.raknetify.common.connection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ishland.raknetify.common.Constants;
@@ -76,6 +77,86 @@ class ModDependencyTransportTest {
         var message =
                 Unpooled.buffer().writeByte(24).writeByte(identifier.length).writeBytes(identifier);
         exerciseBoundaries(begin(codec), message);
+    }
+
+    /** A busy unregistered channel resumes making progress with two ticks of outstanding ACKs. */
+    @org.junit.jupiter.api.Test
+    void sustainedOpaqueTrafficDrainsWithoutExhaustingTheQueue() {
+        var server = begin(distantHorizonsCodec());
+        var receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        var scheduled = new ArrayDeque<Integer>();
+        int submitted = 0;
+        int emitted = 0;
+        byte[] identifier = "test:unregistered_burst".getBytes(StandardCharsets.US_ASCII);
+        try {
+            for (int tick = 0; tick < 400; tick++) {
+                if (scheduled.size() >= 2) {
+                    for (int n = scheduled.removeFirst(); n > 0; n--) {
+                        receipts.pending.removeFirst().setSuccess();
+                    }
+                }
+                if (tick < 360) {
+                    for (int i = 0; i < 9; i++) {
+                        writeQueued(
+                                server,
+                                Unpooled.buffer()
+                                        .writeByte(7)
+                                        .writeZero(1299)
+                                        .writeInt(submitted++));
+                        writeQueued(server, Unpooled.buffer().writeByte(2).writeInt(submitted++));
+                        writeQueued(
+                                server,
+                                Unpooled.buffer()
+                                        .writeByte(24)
+                                        .writeByte(identifier.length)
+                                        .writeBytes(identifier)
+                                        .writeZero(1024)
+                                        .writeInt(submitted++));
+                        writeQueued(server, Unpooled.buffer().writeByte(3).writeInt(submitted++));
+                    }
+                }
+                server.flushOutbound();
+                int produced = server.outboundMessages().size();
+                scheduled.addLast(produced);
+                for (int i = 0; i < produced; i++) {
+                    FrameData frame = server.readOutbound();
+                    try {
+                        ByteBuf bytes = frame.createData();
+                        try {
+                            assertEquals(
+                                    emitted++, bytes.getInt(bytes.writerIndex() - Integer.BYTES));
+                        } finally {
+                            bytes.release();
+                        }
+                    } finally {
+                        frame.release();
+                    }
+                }
+            }
+            assertTrue(server.isActive());
+            assertEquals(12_960, submitted);
+            assertEquals(submitted, emitted);
+            assertTrue(receipts.pending.isEmpty());
+            server.writeOutbound(Unpooled.buffer().writeByte(7));
+            server.writeOutbound(Unpooled.buffer().writeByte(2));
+            expectFrame(server, 7);
+            expectFrame(server, 2);
+            receipts.pending.removeFirst().setSuccess();
+            receipts.pending.removeFirst().setSuccess();
+        } finally {
+            server.finishAndReleaseAll();
+        }
+    }
+
+    /**
+     * Queues a packet and reports a synchronous rejection without registering a listener.
+     *
+     * @param endpoint sending connection
+     * @param message outbound packet consumed by the connection
+     */
+    private static void writeQueued(final EmbeddedChannel endpoint, final ByteBuf message) {
+        assertNull(endpoint.write(message).cause());
     }
 
     /** Only the first small reliable successor may travel immediately behind an opaque payload. */

@@ -127,7 +127,6 @@ public class RakNetConnectionUtil {
             // FlushEnforcer());
             //            channel.pipeline().addLast("raknetify-flush-consolidation", new
             // FlushConsolidationHandler(Integer.MAX_VALUE, true));
-            channel.pipeline().addLast("raknetify-bundle-delivery", new BundleDelivery());
             channel.pipeline().addLast("raknetify-graceful-close", new GracefulCloseHandler());
             channel.pipeline().addLast("raknetify-no-flush", new NoFlush());
             channel.pipeline()
@@ -136,9 +135,10 @@ public class RakNetConnectionUtil {
                             new MultiChannelingStreamingCompression(
                                     Constants.RAKNET_GAME_PACKET_ID,
                                     Constants.RAKNET_STREAMING_COMPRESSION_PACKET_ID));
+            // Route queued raw frames before selecting a compression dictionary or cipher lane.
+            channel.pipeline().addLast("raknetify-bundle-delivery", new BundleDelivery());
             channel.pipeline()
-                    .addAfter(
-                            MultiChannelingStreamingCompression.NAME,
+                    .addLast(
                             CompatibilityNegotiation.NAME,
                             new CompatibilityNegotiation(policy, server));
             channel.pipeline()

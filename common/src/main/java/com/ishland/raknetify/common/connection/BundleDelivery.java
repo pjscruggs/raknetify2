@@ -42,8 +42,8 @@ import java.util.ArrayDeque;
 import java.util.Objects;
 
 /**
- * Fences bundles and mod messages that join different ordering lanes. Other traffic stays
- * concurrent.
+ * Fences bundles and mod messages that join different ordering lanes. Queued game frames can share
+ * one FIFO lane until a backlog drains.
  */
 final class BundleDelivery extends ChannelDuplexHandler {
     /** Queued writes blocked by an earlier mixed-lane bundle. */
@@ -61,6 +61,18 @@ final class BundleDelivery extends ChannelDuplexHandler {
     /** Bounds completion records when newer datagrams arrive before the oldest one. */
     private static final int MAX_IN_FLIGHT_FENCES = 32;
 
+    /** Begin draining on one lane while there is still room for incoming game traffic. */
+    private static final int BURST_QUEUE_FRAMES = 128;
+
+    /** Large packets can create significant pressure even in a short queue. */
+    private static final long BURST_QUEUE_BYTES = 2L * 1024 * 1024;
+
+    /** Allow a wider acknowledgement window while bounding completion records. */
+    private static final int MAX_IN_FLIGHT_BURST = 512;
+
+    /** The normal reliable gameplay lane used to preserve every cross-lane dependency. */
+    private static final int BURST_LANE = 0;
+
     /** Submitted fenced writes whose ordered prefix has not yet been acknowledged. */
     private final java.util.Deque<Fence> fences = new ArrayDeque<>();
 
@@ -69,6 +81,9 @@ final class BundleDelivery extends ChannelDuplexHandler {
 
     /** Guards synchronous completion during a queue drain. */
     private boolean draining;
+
+    /** Keep queued game frames on one lane until the last migrated frame is acknowledged. */
+    private boolean burst;
 
     /** Rejects writes and late callbacks after a terminal failure or removal. */
     private boolean closed;
@@ -89,7 +104,7 @@ final class BundleDelivery extends ChannelDuplexHandler {
             return;
         }
         boolean mixed = requiresFence(message, promise);
-        if (queue.isEmpty() && canSend(message, mixed)) {
+        if (!burst && queue.isEmpty() && canSend(message, mixed, orderedLane(message))) {
             send(ctx, message, promise, mixed);
             return;
         }
@@ -110,6 +125,19 @@ final class BundleDelivery extends ChannelDuplexHandler {
         }
         bytes += size;
         queue.addLast(new Waiting(message, promise, mixed, size));
+        if (burst || backlogRequiresBurst()) {
+            burst = true;
+            drain(ctx);
+        }
+    }
+
+    /**
+     * Starts draining on one lane when either queue dimension shows pressure.
+     *
+     * @return whether the backlog has reached a frame or byte threshold
+     */
+    private boolean backlogRequiresBurst() {
+        return queue.size() >= BURST_QUEUE_FRAMES || bytes >= BURST_QUEUE_BYTES;
     }
 
     /**
@@ -129,21 +157,50 @@ final class BundleDelivery extends ChannelDuplexHandler {
      *
      * @param message next write in submission order
      * @param mixed whether the write has dependencies across lanes
+     * @param lane reliable FIFO lane the write will use, or minus one for non-FIFO traffic
      * @return whether the transport can accept the write now
      */
-    private boolean canSend(final Object message, final boolean mixed) {
+    private boolean canSend(final Object message, final boolean mixed, final int lane) {
         if (fences.isEmpty()) {
-            int lane = solePendingLane();
-            return !mixed || pendingLanes == 0 || (lane >= 0 && lane == orderedLane(message));
+            return !mixed || pendingLanes == 0 || (lane >= 0 && lane == solePendingLane());
         }
-        if (!mixed
-                || !(message instanceof FrameData frame)
-                || fences.size() >= MAX_IN_FLIGHT_FENCES) {
+        return mixed && canPipeline(message, lane);
+    }
+
+    /**
+     * Bounds the outstanding FIFO prefix by both bytes and acknowledgement records.
+     *
+     * @param message prospective write
+     * @param lane lane the write would use
+     * @return whether the active FIFO prefix can accept this write
+     */
+    private boolean canPipeline(final Object message, final int lane) {
+        int limit = burst && lane == BURST_LANE ? MAX_IN_FLIGHT_BURST : MAX_IN_FLIGHT_FENCES;
+        return lane >= 0
+                && lane == fences.getFirst().lane()
+                && fences.size() < limit
+                && message instanceof FrameData frame
+                && fenceBytes + frame.getDataSize() <= Constants.MAX_QUEUED_SIZE;
+    }
+
+    /**
+     * Keeps transport controls, unreliable traffic, and background terrain on their routes. Other
+     * ordered game frames can share a lane before compression.
+     *
+     * @param message queued application message
+     * @param lane original ordered lane, or minus one if it cannot provide FIFO delivery
+     * @return whether this message can become part of the queued FIFO sequence
+     */
+    private static boolean canShareLane(final Object message, final int lane) {
+        if (lane < 0
+                || lane == Constants.BACKGROUND_TERRAIN_CHANNEL
+                || !(message instanceof FrameData frame)) {
             return false;
         }
-        return orderedLane(frame) >= 0
-                && frame.getOrderChannel() == fences.getFirst().lane()
-                && fenceBytes + frame.getDataSize() <= Constants.MAX_QUEUED_SIZE;
+        int id = frame.getPacketId();
+        return id == Constants.RAKNET_GAME_PACKET_ID
+                || id == BundleWire.SINGLE
+                || id == BundleWire.MIXED;
     }
 
     /**
@@ -272,8 +329,8 @@ final class BundleDelivery extends ChannelDuplexHandler {
     }
 
     /**
-     * Holds even acknowledged fences while a preceding fragment on their lane is outstanding. No
-     * ordinary successor is submitted while a fence is outstanding.
+     * Holds even acknowledged fences while a preceding fragment on their lane is outstanding. A
+     * queued sequence ends when no queued writes or fences remain.
      *
      * @param ctx transport context owning the pending writes
      */
@@ -284,6 +341,9 @@ final class BundleDelivery extends ChannelDuplexHandler {
             Fence next = fences.removeFirst();
             fenceBytes -= next.size();
             next.promise().trySuccess();
+        }
+        if (queue.isEmpty() && fences.isEmpty()) {
+            burst = false;
         }
         drain(ctx);
     }
@@ -300,18 +360,37 @@ final class BundleDelivery extends ChannelDuplexHandler {
         draining = true;
         try {
             while (!queue.isEmpty()) {
-                final Waiting next = queue.getFirst();
-                if (!canSend(next.message(), next.mixed())) {
+                if (!drainNext(ctx)) {
                     break;
                 }
-                queue.removeFirst();
-                bytes -= next.bytes();
-                send(ctx, next.message(), next.promise(), next.mixed());
             }
             ctx.flush();
         } finally {
             draining = false;
         }
+    }
+
+    /**
+     * Moves the queue head to the transport when its predecessors make its route safe.
+     *
+     * @param ctx connection owning the queue
+     * @return whether the head was submitted
+     */
+    private boolean drainNext(final ChannelHandlerContext ctx) {
+        final Waiting next = queue.getFirst();
+        int lane = orderedLane(next.message());
+        boolean share = burst && canShareLane(next.message(), lane);
+        boolean ordered = next.mixed() || share;
+        if (!canSend(next.message(), ordered, share ? BURST_LANE : lane)) {
+            return false;
+        }
+        queue.removeFirst();
+        bytes -= next.bytes();
+        if (share) {
+            ((FrameData) next.message()).setOrderChannel(BURST_LANE);
+        }
+        send(ctx, next.message(), next.promise(), ordered);
+        return true;
     }
 
     /**

@@ -41,6 +41,7 @@ import network.ycc.raknet.frame.FrameData;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayDeque;
@@ -375,19 +376,25 @@ class BundleTransportTest {
         }
     }
 
-    /** A missing first ACK limits pipelining and a failed fence fails the remaining prefix. */
-    @Test
-    void missingFenceBoundsReceiptsAndFailureClosesTheRun() {
+    /**
+     * A missing first ACK limits both scheduling windows. A failed fence fails the prefix.
+     *
+     * @param count writes submitted while the first ACK is missing
+     * @param window maximum writes allowed in flight
+     */
+    @ParameterizedTest
+    @CsvSource({"100, 32", "700, 512"})
+    void missingFenceBoundsReceiptsAndFailureClosesTheRun(final int count, final int window) {
         EmbeddedChannel server = server(true);
         var receipts = new Receipts();
         server.pipeline().addFirst(receipts);
         try {
             var writes = new java.util.ArrayList<io.netty.channel.ChannelFuture>();
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < count; i++) {
                 writes.add(server.writeAndFlush(Unpooled.buffer(1).writeByte(5)));
             }
             int submitted = receipts.pending.size();
-            assertTrue(submitted > 1 && submitted < writes.size());
+            assertEquals(window, submitted);
             var missing = receipts.pending.removeFirst();
             while (!receipts.pending.isEmpty()) {
                 receipts.pending.removeLast().setSuccess();
@@ -408,7 +415,7 @@ class BundleTransportTest {
     void compressionStartupPreservesModFence() {
         EmbeddedChannel server =
                 new EmbeddedChannel(
-                        new BundleDelivery(), new MultiChannelingStreamingCompression(0xfd, 0xfe));
+                        new MultiChannelingStreamingCompression(0xfd, 0xfe), new BundleDelivery());
         EmbeddedChannel client =
                 new EmbeddedChannel(new MultiChannelingStreamingCompression(0xfd, 0xfe));
         try {
