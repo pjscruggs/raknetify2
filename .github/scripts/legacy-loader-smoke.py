@@ -95,6 +95,8 @@ def join(args, launch, server, address, name):
         if args.loader == 'forge-mc1.20.1':
             await_line(server, server_log, 'PASS Forge login reply tracking', offset=offset)
             await_line(server, server_log, 'PASS Forge runtime packet ordering registrations')
+        if name == 'delayed-spawn':
+            await_line(player, log, 'PASS delayed RakNet spawn terrain')
         server.stdin.write(b'gamemode creative TransportProbe\n')
         server.stdin.write(b'execute as TransportProbe in minecraft:overworld run tp @s 0 100 0\n')
         server.stdin.write(b'execute as TransportProbe in minecraft:the_nether run tp @s 0 100 0\n')
@@ -156,6 +158,8 @@ def direct_joins(args, native, launch, server):
     """Require real FML play over TCP, an explicit UDP port and a DNS-only UDP hostname."""
     hosts = args.work_dir / 'client/fixture-hosts'
     hosts.write_text('127.0.0.1 localhost fixture.test target.fixture.test target.fixture.test.\n::1 localhost\n')
+    if args.loader == 'forge-mc1.20.1':
+        delayed_spawn(args, launch, server)
     native.check_failures(join(args, launch, server, '127.0.0.1:28990', 'tcp'))
     with native.sibling('login-ack-relay').running(28991) as (port, delayed):
         for prefix, name in [('raknet;', 'raknet'), ('raknetl;', 'large')]:
@@ -165,6 +169,17 @@ def direct_joins(args, native, launch, server):
             dns = ['-Ddns.server=' + resolver, '-Djdk.net.hosts.file=' + str(hosts), *launch]
             native.check_failures(join(args, dns, server, 'raknet;fixture.test', 'service'))
         assert delayed[0] > 0, 'No server acknowledgements were delayed'
+
+
+def delayed_spawn(args, launch, server):
+    """Join above a surveyed platform while the client deliberately delays just its spawn column."""
+    log = args.work_dir / 'server.log'
+    offset = log.stat().st_size
+    server.stdin.write(b'fill 3 200 3 13 200 13 minecraft:stone\nsetworldspawn 8 201 8\ngamerule spawnRadius 0\n')
+    server.stdin.flush()
+    await_line(server, log, 'Gamerule spawnRadius is now set to: 0', offset=offset)
+    join_args = ['-Draknetify.test.delayedSpawn=true', *launch]
+    join(args, join_args, server, 'raknet;127.0.0.1:28991', 'delayed-spawn')
 
 
 def encrypted_direct(args, native, launch, command, folder):
@@ -179,7 +194,8 @@ def encrypted_direct(args, native, launch, command, folder):
             with running([command[0], *auth, *command[1:]], folder, args.work_dir / 'server.log', 'stop') as server:
                 await_line(server, args.work_dir / 'server.log', 'Done (')
                 direct_joins(args, native, [*auth, *launch], server)
-            assert len(authority.sessions) == 4 and len(authority.accepted) == 4, 'Missing native encrypted sessions'
+            expected = 5 if args.loader == 'forge-mc1.20.1' else 4
+            assert len(authority.sessions) == expected and len(authority.accepted) == expected, 'Missing native encrypted sessions'
     finally:
         properties.write_text(offline)
 

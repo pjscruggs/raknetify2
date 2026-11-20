@@ -1,4 +1,6 @@
 /** Builds the Java 17 endpoint against the Forge 47 game and loader APIs. */
+plugins { id 'net.minecraftforge.renamer' version '1.1.2' }
+
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'com.gradleup.shadow'
 
@@ -33,6 +35,7 @@ processResources {
 jar { archiveClassifier = 'dev' }
 shadowJar {
     configurations = [project.configurations.shadowInclude]
+    destinationDirectory = layout.buildDirectory.dir('unmapped')
     archiveClassifier = ''
     manifest { attributes 'MixinConfigs': 'raknetify-forge47.mixins.json,raknetify-forge47-palettes.mixins.json' }
     dependencies { exclude(dependency('it.unimi.dsi:fastutil')) }
@@ -41,7 +44,13 @@ shadowJar {
     filesMatching('META-INF/services/**') { duplicatesStrategy = DuplicatesStrategy.INCLUDE }
     mergeServiceFiles()
 }
-assemble.dependsOn shadowJar
+
+// Forge 47 links Minecraft members by SRG name in installed games.
+renamer.mappings.from minecraft.dependency.toSrgFile
+renamer.classes(tasks.named('shadowJar', Jar)) {
+    archiveClassifier = ''
+    output = layout.buildDirectory.file("libs/${base.archivesName.get()}-${version}.jar")
+}
 
 sourceSets {
     transportTest {
@@ -51,7 +60,12 @@ sourceSets {
 }
 tasks.register('transportTestJar', Jar) {
     archiveClassifier = 'transport-test'
+    destinationDirectory = layout.buildDirectory.dir('unmapped')
+    manifest { attributes 'MixinConfigs': 'transport-test-forge47.mixins.json' }
     from sourceSets.transportTest.output
     from('src/main/resources/pack.mcmeta')
 }
-assemble.dependsOn transportTestJar
+renamer.classes(tasks.named('transportTestJar', Jar)) {
+    archiveClassifier = 'transport-test'
+    output = layout.buildDirectory.file("libs/${base.archivesName.get()}-${version}-transport-test.jar")
+}
