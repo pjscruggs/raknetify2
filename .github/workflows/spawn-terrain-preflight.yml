@@ -1,0 +1,86 @@
+name: Forge delayed terrain preflight
+on:
+  push:
+    branches: [test/initial-terrain-native]
+
+permissions:
+  contents: read
+
+jobs:
+  delayed-spawn:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      LIBGL_ALWAYS_SOFTWARE: 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: Build the exact candidate commit
+        run: git checkout --detach HEAD^
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880
+        id: jdk8
+        with:
+          distribution: zulu
+          java-version: 8
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880
+        id: jdk17
+        with:
+          distribution: zulu
+          java-version: 17
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880
+        with:
+          distribution: zulu
+          java-version: 25
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ./.gradle/loom-cache
+          key: ${{ runner.os }}-forge-spawn-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Set up native client and server builds
+        env:
+          JDK8: ${{ steps.jdk8.outputs.path }}
+        run: |
+          ./gradlew :forge-1.20.1:assemble --no-daemon --warning-mode fail --max-workers=2 "-Dorg.gradle.java.installations.paths=$JDK8"
+          python .github/scripts/install-client-libraries.py
+      - name: Download the published Forge control
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v0.1.0-beta.1.514 --dir "$RUNNER_TEMP" --pattern 'raknetify2-forge-mc1.20.1-0.1.0-beta.1.514.jar'
+          echo 'e86dbeeb63f380f8e2ea485527a4247eba58e7a0af87b0dd2fc4d355695d2fb5  '${RUNNER_TEMP}'/raknetify2-forge-mc1.20.1-0.1.0-beta.1.514.jar' | sha256sum --check
+      - name: Reproduce the fall with the released build
+        env:
+          JDK17: ${{ steps.jdk17.outputs.path }}
+        run: |
+          fixture=(forge-1.20.1/build/libs/*-transport-test.jar)
+          if xvfb-run -a python .github/scripts/legacy-loader-smoke.py --loader forge-mc1.20.1 --java "$JDK17/bin/java" --jar "$RUNNER_TEMP/raknetify2-forge-mc1.20.1-0.1.0-beta.1.514.jar" --fixture "${fixture[0]}" --work-dir "$RUNNER_TEMP/baseline"; then
+            echo 'Expected the released player to fall through the absent terrain'
+            exit 1
+          fi
+          grep -F 'Delayed spawn test applied RakNet position at Y=201.0' "$RUNNER_TEMP/baseline/delayed-spawn-client.log"
+          grep -F 'Player fell before spawn terrain arrived' "$RUNNER_TEMP/baseline/delayed-spawn-client.log"
+      - name: Exercise the fixed and ordinary joins on the candidate
+        env:
+          JDK17: ${{ steps.jdk17.outputs.path }}
+        run: |
+          fixture=(forge-1.20.1/build/libs/*-transport-test.jar)
+          jar=$(find forge-1.20.1/build/libs -name '*.jar' ! -name '*-dev.jar' ! -name '*-transport-test.jar')
+          test -f "$jar"
+          xvfb-run -a python .github/scripts/legacy-loader-smoke.py --loader forge-mc1.20.1 --java "$JDK17/bin/java" --jar "$jar" --fixture "${fixture[0]}" --work-dir "$RUNNER_TEMP/candidate"
+          grep -F 'PASS delayed RakNet spawn terrain' "$RUNNER_TEMP/candidate/delayed-spawn-client.log"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: delayed-spawn-native-logs
+          path: |
+            ${{ runner.temp }}/baseline/*.log
+            ${{ runner.temp }}/candidate/*.log
