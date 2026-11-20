@@ -94,6 +94,47 @@ class ModPayloadOrderingTest {
         assertRoute("unknown:channel", 0, false, 0);
     }
 
+    /**
+     * Only complete protocol 17 headers for audited server replies qualify for the terrain lane.
+     */
+    @Test
+    void distantHorizonsTerrainRequiresKnownVersionDirectionAndType() {
+        for (int type : new int[] {8, 9, 10}) {
+            assertDistantHorizonsRoute(17, type, false, 7);
+            assertDistantHorizonsRoute(17, type, true, 0);
+            assertDistantHorizonsRoute(18, type, false, 0);
+        }
+        assertDistantHorizonsRoute(17, 2, false, 0);
+        assertDistantHorizonsRoute(17, 11, false, 0);
+        var truncated = Unpooled.buffer().writeShort(17).writeByte(10);
+        try {
+            assertEquals(0, ModPayloadOrdering.channel("distant_horizons:msg", truncated, false));
+        } finally {
+            truncated.release();
+        }
+    }
+
+    /**
+     * Checks a protocol discriminator without changing the packet read position.
+     *
+     * @param version Distant Horizons protocol version
+     * @param type registered message type
+     * @param clientSender whether the packet is serverbound
+     * @param lane expected route
+     */
+    private static void assertDistantHorizonsRoute(
+            final int version, final int type, final boolean clientSender, final int lane) {
+        var header = Unpooled.buffer().writeByte(0).writeShort(version).writeShort(type);
+        try {
+            header.skipBytes(1);
+            assertEquals(
+                    lane, ModPayloadOrdering.channel("distant_horizons:msg", header, clientSender));
+            assertEquals(1, header.readerIndex());
+        } finally {
+            header.release();
+        }
+    }
+
     /** Health flags and hunger metadata share the ordering lane used by vanilla health updates. */
     @Test
     void healthMetadataSharesHealthUpdateOrdering() {

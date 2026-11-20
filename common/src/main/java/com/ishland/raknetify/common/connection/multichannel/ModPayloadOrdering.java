@@ -153,6 +153,26 @@ public final class ModPayloadOrdering {
                     "trade_cycling:cycle_trades" ->
                     clientSender ? 2 : 3;
             case "architectury:network" -> architecturyChannel(payload, clientSender);
+            case "distant_horizons:msg" -> distantHorizonsChannel(payload, clientSender);
+            default -> 0;
+        };
+    }
+
+    /**
+     * Keeps Distant Horizons terrain fragments, complete responses and partial updates on the same
+     * reliable terrain lane. Session changes and unknown protocol versions retain their boundary.
+     *
+     * @param payload Distant Horizons header and message body
+     * @param clientSender whether this is a serverbound message
+     * @return terrain lane for audited server replies, otherwise zero to defer
+     */
+    private static int distantHorizonsChannel(final ByteBuf payload, final boolean clientSender) {
+        final int offset = payload.readerIndex();
+        if (clientSender || payload.readableBytes() < 4 || payload.getUnsignedShort(offset) != 17) {
+            return 0;
+        }
+        return switch (payload.getUnsignedShort(offset + 2)) {
+            case 8, 9, 10 -> 7; // FullDataSourceResponse, FullDataPartialUpdate, FullDataSplit
             default -> 0;
         };
     }

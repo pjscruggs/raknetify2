@@ -45,6 +45,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -101,6 +102,63 @@ class ModDependencyTransportTest {
         } finally {
             server.finishAndReleaseAll();
         }
+    }
+
+    /** Terrain replies can progress while entity ACKs are outstanding, in fragment order. */
+    @org.junit.jupiter.api.Test
+    void distantHorizonsTerrainRunsWithoutWaitingForUnrelatedAcknowledgements() {
+        var server = begin(distantHorizonsCodec());
+        var receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        try {
+            server.writeOutbound(Unpooled.buffer().writeByte(2));
+            expectFrame(server, 2);
+            for (int type : new int[] {10, 10, 8, 9}) {
+                server.writeOutbound(distantHorizonsPayload(type));
+                expectFrame(server, 7);
+            }
+            assertEquals(5, receipts.pending.size());
+            while (!receipts.pending.isEmpty()) {
+                receipts.pending.removeFirst().setSuccess();
+            }
+        } finally {
+            server.finishAndReleaseAll();
+        }
+    }
+
+    /** A level initialization retains its existing boundary with vanilla and mod state. */
+    @org.junit.jupiter.api.Test
+    void distantHorizonsLevelInitializationStillFencesTerrain() {
+        exerciseBoundaries(begin(distantHorizonsCodec()), distantHorizonsPayload(2));
+    }
+
+    /**
+     * Installs the normal custom payload classifier and fixture vanilla lanes.
+     *
+     * @return configured codec before multichannel negotiation
+     */
+    private static RakNetSimpleMultiChannelCodec distantHorizonsCodec() {
+        var codec = new RakNetSimpleMultiChannelCodec(0xfd);
+        codec.addHandler(new CustomPayloadChannel.PayloadClassifier(id -> id == 24));
+        codec.addHandler((bytes, quiet) -> bytes.getUnsignedByte(bytes.readerIndex()));
+        return codec;
+    }
+
+    /**
+     * Builds a protocol 17 Distant Horizons envelope for the routing test.
+     *
+     * @param type message registration ID
+     * @return fixture packet owned by the caller
+     */
+    private static ByteBuf distantHorizonsPayload(final int type) {
+        byte[] identifier = "distant_horizons:msg".getBytes(StandardCharsets.US_ASCII);
+        return Unpooled.buffer()
+                .writeByte(24)
+                .writeByte(identifier.length)
+                .writeBytes(identifier)
+                .writeShort(17)
+                .writeShort(type)
+                .writeZero(1024);
     }
 
     /**

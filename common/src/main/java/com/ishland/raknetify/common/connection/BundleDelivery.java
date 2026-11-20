@@ -96,10 +96,16 @@ final class BundleDelivery extends ChannelDuplexHandler {
         long size = 32L + (message instanceof FrameData frame ? frame.getDataSize() : 0);
         if (queue.size() >= 8192 || bytes + size > Constants.MAX_QUEUED_SIZE) {
             TooLongFrameException failure =
-                    new TooLongFrameException("Mixed bundle delivery queue exceeded");
+                    new TooLongFrameException(
+                            "Mixed bundle delivery queue exceeded ("
+                                    + queue.size()
+                                    + " frames, "
+                                    + bytes
+                                    + " bytes)");
             ReferenceCountUtil.release(message);
-            promise.tryFailure(failure);
+            // A failure listener may send a fallback packet synchronously on this channel.
             abort(ctx, failure);
+            promise.tryFailure(failure);
             return;
         }
         bytes += size;
