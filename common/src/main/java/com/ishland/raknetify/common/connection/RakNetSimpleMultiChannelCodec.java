@@ -413,6 +413,7 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
                 opaqueDelivery != null
                         && !opaqueDelivery.isDone()
                         && lane >= 0
+                        && lane != Constants.BACKGROUND_TERRAIN_CHANNEL
                         && buf.readableBytes() <= MAX_OPAQUE_SUCCESSOR_BYTES;
         opaqueDelivery = null;
         final FrameData frame = routedFrame(ctx, buf, follows ? opaqueLane : lane);

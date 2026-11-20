@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.multichannel.CustomPayloadChannel;
 import com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering;
 
@@ -39,6 +40,7 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 
+import network.ycc.raknet.frame.Frame;
 import network.ycc.raknet.frame.FrameData;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,6 +50,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 /** Checks real mod policies against independently acknowledged entity, chunk and menu traffic. */
 class ModDependencyTransportTest {
@@ -115,12 +119,78 @@ class ModDependencyTransportTest {
             expectFrame(server, 2);
             for (int type : new int[] {10, 10, 8, 9}) {
                 server.writeOutbound(distantHorizonsPayload(type));
-                expectFrame(server, 7);
+                expectFrame(server, Constants.BACKGROUND_TERRAIN_CHANNEL);
             }
             assertEquals(5, receipts.pending.size());
             while (!receipts.pending.isEmpty()) {
                 receipts.pending.removeFirst().setSuccess();
             }
+        } finally {
+            server.finishAndReleaseAll();
+        }
+    }
+
+    /** The send queue puts a later Minecraft chunk ahead of queued Distant Horizons fragments. */
+    @org.junit.jupiter.api.Test
+    void minecraftChunksTakePriorityOverQueuedDistantHorizonsFragments() {
+        var server = begin(distantHorizonsCodec());
+        Queue<Frame> pending = new PriorityQueue<>(RakNetConnectionUtil.SEND_ORDER);
+        try {
+            server.writeOutbound(distantHorizonsPayload(10), distantHorizonsPayload(10));
+            server.writeOutbound(Unpooled.buffer().writeByte(7).writeZero(1024));
+            for (int index : new int[] {0, 1, 0}) {
+                FrameData data = server.readOutbound();
+                try {
+                    pending.add(Frame.createOrdered(data, index, 0));
+                } finally {
+                    data.release();
+                }
+            }
+            expectPriority(pending, 7, 0);
+            expectPriority(pending, Constants.BACKGROUND_TERRAIN_CHANNEL, 0);
+            expectPriority(pending, Constants.BACKGROUND_TERRAIN_CHANNEL, 1);
+        } finally {
+            pending.forEach(Frame::release);
+            server.finishAndReleaseAll();
+        }
+    }
+
+    /**
+     * Checks the next scheduled frame and releases its reference.
+     *
+     * @param pending production-ordered frame queue
+     * @param lane expected frame lane
+     * @param index expected index within the lane
+     */
+    private static void expectPriority(
+            final Queue<Frame> pending, final int lane, final int index) {
+        Frame frame = pending.remove();
+        try {
+            assertEquals(lane, frame.getOrderChannel());
+            assertEquals(index, frame.getOrderIndex());
+        } finally {
+            frame.release();
+        }
+    }
+
+    /** A level boundary keeps lane zero even when only Distant Horizons frames are in flight. */
+    @org.junit.jupiter.api.Test
+    void opaqueLevelBoundaryDoesNotBorrowTheBackgroundTerrainLane() {
+        var server = begin(distantHorizonsCodec());
+        var receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        try {
+            server.writeOutbound(distantHorizonsPayload(10));
+            expectFrame(server, Constants.BACKGROUND_TERRAIN_CHANNEL);
+            server.writeOutbound(distantHorizonsPayload(2));
+            assertTrue(server.outboundMessages().isEmpty());
+            receipts.pending.removeFirst().setSuccess();
+            expectFrame(server, 0);
+            server.writeOutbound(distantHorizonsPayload(10, 1));
+            assertTrue(server.outboundMessages().isEmpty());
+            receipts.pending.removeFirst().setSuccess();
+            expectFrame(server, Constants.BACKGROUND_TERRAIN_CHANNEL);
+            receipts.pending.removeFirst().setSuccess();
         } finally {
             server.finishAndReleaseAll();
         }
@@ -151,6 +221,17 @@ class ModDependencyTransportTest {
      * @return fixture packet owned by the caller
      */
     private static ByteBuf distantHorizonsPayload(final int type) {
+        return distantHorizonsPayload(type, 1024);
+    }
+
+    /**
+     * Creates a Distant Horizons reply with the chosen body size.
+     *
+     * @param type message registration ID
+     * @param bodySize test payload size after the protocol header
+     * @return fixture packet owned by the caller
+     */
+    private static ByteBuf distantHorizonsPayload(final int type, final int bodySize) {
         byte[] identifier = "distant_horizons:msg".getBytes(StandardCharsets.US_ASCII);
         return Unpooled.buffer()
                 .writeByte(24)
@@ -158,7 +239,7 @@ class ModDependencyTransportTest {
                 .writeBytes(identifier)
                 .writeShort(17)
                 .writeShort(type)
-                .writeZero(1024);
+                .writeZero(bodySize);
     }
 
     /**

@@ -27,6 +27,7 @@ package com.ishland.raknetify.common.connection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.multichannel.ModPayloadOrdering;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
 
@@ -100,7 +101,7 @@ class ModPayloadOrderingTest {
     @Test
     void distantHorizonsTerrainRequiresKnownVersionDirectionAndType() {
         for (int type : new int[] {8, 9, 10}) {
-            assertDistantHorizonsRoute(17, type, false, 7);
+            assertDistantHorizonsRoute(17, type, false, Constants.BACKGROUND_TERRAIN_CHANNEL);
             assertDistantHorizonsRoute(17, type, true, 0);
             assertDistantHorizonsRoute(18, type, false, 0);
         }

@@ -78,15 +78,18 @@ public class RakNetConnectionUtil {
     }
 
     /**
-     * Send priority: unreliable before reliable, unordered before ordered, then channel and order
-     * index.
+     * Sends unreliable before reliable and unordered before ordered. Background terrain ranks after
+     * the other lanes, with the existing order retained within each lane.
      */
-    private static final Comparator<Frame> cmp =
+    static final Comparator<Frame> SEND_ORDER =
             Comparator.comparingInt((Frame frame) ->
                             frame.getReliability().isReliable ? 1 : 0) // unreliable then reliable
                     .thenComparingInt(frame ->
                             frame.getReliability().isOrdered ? 1 : 0) // unordered then ordered
-                    .thenComparingInt(Frame::getOrderChannel) // lower channel first
+                    .thenComparingInt(frame ->
+                            frame.getOrderChannel() == Constants.BACKGROUND_TERRAIN_CHANNEL
+                                    ? Constants.ORDER_CHANNEL_COUNT
+                                    : frame.getOrderChannel())
                     .thenComparingInt(Frame::getOrderIndex); // lower index first
 
     /**
@@ -240,7 +243,7 @@ public class RakNetConnectionUtil {
             simpleMetricsLogger.setMetricsSynchronizationHandler(metricsSynchronizationHandler);
             final SynchronizationLayer synchronizationLayer =
                     new SynchronizationLayer(Constants.synchronizationIgnoredChannels());
-            ch.pipeline().get(ReliabilityHandler.class).setFrameComparator(cmp);
+            ch.pipeline().get(ReliabilityHandler.class).setFrameComparator(SEND_ORDER);
             ch.pipeline()
                     .addBefore(
                             FrameJoiner.NAME,

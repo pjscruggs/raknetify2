@@ -181,6 +181,7 @@ final class BundleDelivery extends ChannelDuplexHandler {
     /**
      * Selects the stream before compression so both peers use the same per-lane dictionary.
      * Eligibility is checked again against actual frames when the write reaches this handler.
+     * Background terrain remains separate from fences.
      *
      * @param pipeline channel containing the delivery handler
      * @return a current reliable FIFO lane, or the default lane for independent predecessors
@@ -191,10 +192,11 @@ final class BundleDelivery extends ChannelDuplexHandler {
             return 0;
         }
         BundleDelivery delivery = (BundleDelivery) context.handler();
-        if (!delivery.fences.isEmpty()) {
-            return Math.max(0, delivery.fences.getLast().lane());
-        }
-        return Math.max(0, delivery.solePendingLane());
+        int lane =
+                delivery.fences.isEmpty()
+                        ? delivery.solePendingLane()
+                        : delivery.fences.getLast().lane();
+        return lane == Constants.BACKGROUND_TERRAIN_CHANNEL ? 0 : Math.max(0, lane);
     }
 
     /**

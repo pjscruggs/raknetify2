@@ -27,6 +27,7 @@ package com.ishland.raknetify.common.connection.multichannel;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.util.MathUtil;
 
 import io.netty.buffer.ByteBuf;
@@ -160,11 +161,12 @@ public final class ModPayloadOrdering {
 
     /**
      * Keeps Distant Horizons terrain fragments, complete responses and partial updates on the same
-     * reliable terrain lane. Session changes and unknown protocol versions retain their boundary.
+     * reliable background lane. Session changes and unknown protocol versions retain their
+     * boundary.
      *
      * @param payload Distant Horizons header and message body
      * @param clientSender whether this is a serverbound message
-     * @return terrain lane for audited server replies, otherwise zero to defer
+     * @return background terrain lane for audited server replies, otherwise zero to defer
      */
     private static int distantHorizonsChannel(final ByteBuf payload, final boolean clientSender) {
         final int offset = payload.readerIndex();
@@ -172,7 +174,8 @@ public final class ModPayloadOrdering {
             return 0;
         }
         return switch (payload.getUnsignedShort(offset + 2)) {
-            case 8, 9, 10 -> 7; // FullDataSourceResponse, FullDataPartialUpdate, FullDataSplit
+            // FullDataSourceResponse, FullDataPartialUpdate and FullDataSplit
+            case 8, 9, 10 -> Constants.BACKGROUND_TERRAIN_CHANNEL;
             default -> 0;
         };
     }
