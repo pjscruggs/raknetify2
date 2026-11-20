@@ -49,6 +49,9 @@ final class BundleDelivery extends ChannelDuplexHandler {
     /** Queued writes blocked by an earlier mixed-lane bundle. */
     private final java.util.Deque<Waiting> queue = new ArrayDeque<>();
 
+    /** Distant Horizons may depend on a gameplay prefix, with no dependency in reverse. */
+    private final BackgroundDelivery background = new BackgroundDelivery();
+
     /** Owned queue bytes including a header reservation for empty control messages. */
     private long bytes;
 
@@ -103,8 +106,32 @@ final class BundleDelivery extends ChannelDuplexHandler {
             promise.tryFailure(new ClosedChannelException());
             return;
         }
+        int lane = orderedLane(message);
+        if (lane == Constants.BACKGROUND_TERRAIN_CHANNEL) {
+            background.write(ctx, (FrameData) message, promise);
+            return;
+        }
+        if (message instanceof SynchronizationLayer.SyncRequest) {
+            background.reset();
+        }
+        writeGameplay(ctx, message, background.track(ctx, promise), lane);
+    }
+
+    /**
+     * Writes or holds a gameplay packet using dependencies among gameplay packets only.
+     *
+     * @param ctx outbound transport context
+     * @param message owned foreground message
+     * @param promise completion tracked by the background dependency queue
+     * @param lane reliable FIFO lane, or minus one for a non-FIFO message
+     */
+    private void writeGameplay(
+            final ChannelHandlerContext ctx,
+            final Object message,
+            final ChannelPromise promise,
+            final int lane) {
         boolean mixed = requiresFence(message, promise);
-        if (!burst && queue.isEmpty() && canSend(message, mixed, orderedLane(message))) {
+        if (!burst && queue.isEmpty() && canSend(message, mixed, lane)) {
             send(ctx, message, promise, mixed);
             return;
         }
@@ -184,17 +211,15 @@ final class BundleDelivery extends ChannelDuplexHandler {
     }
 
     /**
-     * Keeps transport controls, unreliable traffic, and background terrain on their routes. Other
-     * ordered game frames can share a lane before compression.
+     * Keeps transport controls and unreliable traffic on their routes. Ordered gameplay frames can
+     * share a lane before compression.
      *
      * @param message queued application message
      * @param lane original ordered lane, or minus one if it cannot provide FIFO delivery
      * @return whether this message can become part of the queued FIFO sequence
      */
     private static boolean canShareLane(final Object message, final int lane) {
-        if (lane < 0
-                || lane == Constants.BACKGROUND_TERRAIN_CHANNEL
-                || !(message instanceof FrameData frame)) {
+        if (lane < 0 || !(message instanceof FrameData frame)) {
             return false;
         }
         int id = frame.getPacketId();
@@ -253,7 +278,7 @@ final class BundleDelivery extends ChannelDuplexHandler {
                 delivery.fences.isEmpty()
                         ? delivery.solePendingLane()
                         : delivery.fences.getLast().lane();
-        return lane == Constants.BACKGROUND_TERRAIN_CHANNEL ? 0 : Math.max(0, lane);
+        return Math.max(0, lane);
     }
 
     /**
@@ -411,6 +436,7 @@ final class BundleDelivery extends ChannelDuplexHandler {
      */
     private void discard(final Throwable cause) {
         closed = true;
+        background.close(cause);
         while (!fences.isEmpty()) {
             fences.removeFirst().promise().tryFailure(cause);
         }

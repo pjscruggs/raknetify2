@@ -63,7 +63,7 @@ public class Constants {
     /** Number of ordering queues supported by the transport and streaming dictionaries. */
     public static final int ORDER_CHANNEL_COUNT = 8;
 
-    /** Existing lane reserved for background terrain payloads that yield to Minecraft chunks. */
+    /** Existing lane reserved for Distant Horizons traffic that yields to all gameplay. */
     public static final int BACKGROUND_TERRAIN_CHANNEL = 6;
 
     /** Normal RakNet MTU in bytes, leaving room below common Ethernet MTUs. */

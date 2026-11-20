@@ -48,6 +48,19 @@ public final class ModPayloadOrdering {
     /** An undeclared payload has a boundary and may carry one small successor on its FIFO lane. */
     public static final int UNDECLARED = -4;
 
+    /** A clientbound DH session message that depends on earlier gameplay only. */
+    public static final int BACKGROUND_CONTROL = -5;
+
+    /**
+     * Identifies traffic that uses the background lane outside the gameplay delivery fence.
+     *
+     * @param route classifier result before choosing the physical ordering lane
+     * @return whether gameplay is independent of this write
+     */
+    public static boolean isBackground(final int route) {
+        return route == Constants.BACKGROUND_TERRAIN_CHANNEL || route == BACKGROUND_CONTROL;
+    }
+
     /**
      * Identifies routes that must preserve both sides of a cross-channel dependency.
      *
@@ -162,18 +175,20 @@ public final class ModPayloadOrdering {
 
     /**
      * Keeps Distant Horizons terrain fragments, complete responses and partial updates on the same
-     * reliable background lane. Session changes and unknown protocol versions retain their
-     * boundary.
+     * reliable background lane. Only audited terrain needs no dependency on earlier gameplay.
      *
      * @param payload Distant Horizons header and message body
      * @param clientSender whether this is a serverbound message
      * @param legacyChannel whether this is the channel name used before Distant Horizons 3.0
-     * @return background terrain lane for audited server replies, otherwise zero to defer
+     * @return background route for clientbound DH or zero for serverbound messages
      */
     private static int distantHorizonsChannel(
             final ByteBuf payload, final boolean clientSender, final boolean legacyChannel) {
-        if (clientSender || payload.readableBytes() < 4) {
+        if (clientSender) {
             return 0;
+        }
+        if (payload.readableBytes() < 4) {
+            return BACKGROUND_CONTROL;
         }
         final int offset =
                 payload.readerIndex()
@@ -184,7 +199,7 @@ public final class ModPayloadOrdering {
         final int type = payload.getUnsignedShort(offset + 2);
         return firstTerrainType != 0 && type >= firstTerrainType && type <= firstTerrainType + 2
                 ? Constants.BACKGROUND_TERRAIN_CHANNEL
-                : 0;
+                : BACKGROUND_CONTROL;
     }
 
     /**

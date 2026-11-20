@@ -309,11 +309,9 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
      * @param ctx outbound context forwarding the owned frame
      * @param frame encoded packet whose delivery may guard the next ordering phase
      * @param promise original application completion
-     * @throws Exception if downstream forwarding fails
      */
     private void writeFrame(
-            final ChannelHandlerContext ctx, final FrameData frame, final ChannelPromise promise)
-            throws Exception {
+            final ChannelHandlerContext ctx, final FrameData frame, final ChannelPromise promise) {
         final ChannelPromise completion = promise.unvoid();
         if (!isMultichannelEnabled) {
             pendingSingleChannelWrites++;
@@ -327,7 +325,7 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
                 finishNegotiation(ctx);
             });
         }
-        super.write(ctx, frame, completion);
+        ctx.write(frame, completion);
     }
 
     /**
@@ -369,11 +367,9 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
      * @param ctx outbound application connection
      * @param buf encoded Minecraft packet owned by the caller
      * @param promise original packet completion
-     * @throws Exception if transport forwarding fails
      */
     private void writePayload(
-            final ChannelHandlerContext ctx, final ByteBuf buf, final ChannelPromise promise)
-            throws Exception {
+            final ChannelHandlerContext ctx, final ByteBuf buf, final ChannelPromise promise) {
         if (CompatibilityPolicy.isOrdered(ctx.channel())) {
             opaqueDelivery = null;
             writeFrame(ctx, FrameData.create(ctx.alloc(), packetId, buf), promise);
@@ -401,19 +397,20 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
      * @param buf encoded game packet
      * @param lane logical route selected for this write
      * @param promise original write completion
-     * @throws Exception if the transport rejects the frame
      */
     private void writeStandalone(
             final ChannelHandlerContext ctx,
             final ByteBuf buf,
             final int lane,
-            final ChannelPromise promise)
-            throws Exception {
+            final ChannelPromise promise) {
+        if (ModPayloadOrdering.isBackground(lane)) {
+            writeBackground(ctx, buf, lane, promise);
+            return;
+        }
         boolean follows =
                 opaqueDelivery != null
                         && !opaqueDelivery.isDone()
                         && lane >= 0
-                        && lane != Constants.BACKGROUND_TERRAIN_CHANNEL
                         && buf.readableBytes() <= MAX_OPAQUE_SUCCESSOR_BYTES;
         opaqueDelivery = null;
         final FrameData frame = routedFrame(ctx, buf, follows ? opaqueLane : lane);
@@ -453,26 +450,67 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     }
 
     /**
+     * Assigns DH traffic its own FIFO without changing the next gameplay write's routing.
+     *
+     * @param ctx outbound game connection
+     * @param buf encoded DH payload still owned by the caller
+     * @param route DH terrain or control route
+     * @param promise DH write completion
+     */
+    private void writeBackground(
+            final ChannelHandlerContext ctx,
+            final ByteBuf buf,
+            final int route,
+            final ChannelPromise promise) {
+        final FrameData frame = routedFrame(ctx, buf, Constants.BACKGROUND_TERRAIN_CHANNEL);
+        emit(
+                ctx,
+                frame,
+                route == ModPayloadOrdering.BACKGROUND_CONTROL
+                        ? new FencedWritePromise(ctx, promise)
+                        : promise);
+    }
+
+    /**
      * Opens or closes an advertised clientbound bundle. Older peers retain their historical
      * per-member delivery. The vanilla play delimiter has no fields and uses packet ID zero.
      *
      * @param ctx outbound game context
      * @param buf classified delimiter bytes
      * @param promise delimiter's original completion
-     * @throws Exception if the completed envelope cannot be delivered
      */
     private void delimiter(
-            final ChannelHandlerContext ctx, final ByteBuf buf, final ChannelPromise promise)
-            throws Exception {
+            final ChannelHandlerContext ctx, final ByteBuf buf, final ChannelPromise promise) {
         if (!Boolean.TRUE.equals(ctx.channel().attr(BundleWire.PEER).get())
                 || buf.readableBytes() != 1
                 || buf.getByte(buf.readerIndex()) != 0) {
             promise.trySuccess();
         } else if (bundle.active()) {
-            final var delivery = ctx.newPromise();
-            emit(ctx, bundle.finish(ctx, promise, delivery), delivery);
+            finishBundle(ctx, promise);
         } else {
             bundle.open(ctx, buf, promise);
+        }
+    }
+
+    /**
+     * Sends the vanilla envelope independently of the detached DH members.
+     *
+     * @param ctx outbound game context
+     * @param closing original closing delimiter completion
+     */
+    private void finishBundle(final ChannelHandlerContext ctx, final ChannelPromise closing) {
+        final var delivery = ctx.newPromise();
+        final FrameData envelope = bundle.finish(ctx, closing, delivery);
+        final var background = bundle.takeBackground();
+        emit(ctx, envelope, delivery);
+        for (var member : background) {
+            try {
+                writeBackground(ctx, member.packet(), member.lane(), member.promise());
+            } catch (RuntimeException failure) {
+                member.promise().tryFailure(failure);
+            } finally {
+                member.packet().release();
+            }
         }
     }
 
@@ -482,11 +520,9 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
      * @param ctx outbound application context
      * @param frame completed frame whose ownership transfers to the queue or transport
      * @param promise transport delivery completion
-     * @throws Exception if the outbound pipeline rejects the write
      */
     private void emit(
-            final ChannelHandlerContext ctx, final FrameData frame, final ChannelPromise promise)
-            throws Exception {
+            final ChannelHandlerContext ctx, final FrameData frame, final ChannelPromise promise) {
         if (queuePendingWrites) {
             pendingWrites.add(new PendingWrite(frame, promise));
         } else {

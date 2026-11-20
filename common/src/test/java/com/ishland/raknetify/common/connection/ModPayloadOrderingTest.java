@@ -128,29 +128,41 @@ class ModPayloadOrderingTest {
                     Constants.BACKGROUND_TERRAIN_CHANNEL);
             assertDistantHorizonsRoute(channel, version, type, legacyForge, true, 0);
         }
-        assertDistantHorizonsRoute(channel, version, 2, legacyForge, false, 0);
-        assertDistantHorizonsRoute(channel, version, terrain - 1, legacyForge, false, 0);
-        assertDistantHorizonsRoute(channel, version, terrain + 3, legacyForge, false, 0);
+        for (int type : new int[] {2, terrain - 1, terrain + 3}) {
+            assertDistantHorizonsRoute(
+                    channel,
+                    version,
+                    type,
+                    legacyForge,
+                    false,
+                    ModPayloadOrdering.BACKGROUND_CONTROL);
+        }
     }
 
-    /** Unreleased versions and truncated control or terrain data retain the existing boundary. */
+    /**
+     * Unknown DH headers keep a one-way dependency instead of being assumed independent terrain.
+     */
     @Test
-    void distantHorizonsUnknownVersionsAndTruncatedHeadersDefer() {
+    void distantHorizonsUnknownVersionsAndTruncatedHeadersRemainBackgroundControls() {
+        int control = ModPayloadOrdering.BACKGROUND_CONTROL;
         for (int version : new int[] {1, 12, 14, 18}) {
-            assertDistantHorizonsRoute("distant_horizons:msg", version, 8, false, false, 0);
+            assertDistantHorizonsRoute("distant_horizons:msg", version, 8, false, false, control);
         }
-        assertDistantHorizonsRoute("distant_horizons:msg", 10, 7, false, false, 0);
-        assertDistantHorizonsRoute("distant_horizons:message", 16, 8, false, false, 0);
-        assertDistantHorizonsRoute("distant_horizons:msg", 17, 8, true, false, 0);
+        assertDistantHorizonsRoute("distant_horizons:msg", 10, 7, false, false, control);
+        assertDistantHorizonsRoute("distant_horizons:message", 16, 8, false, false, control);
+        assertDistantHorizonsRoute("distant_horizons:msg", 17, 8, true, false, control);
         var truncated = Unpooled.buffer().writeByte(0).writeShort(10);
         try {
             assertEquals(
-                    0, ModPayloadOrdering.channel("distant_horizons:message", truncated, false));
+                    control,
+                    ModPayloadOrdering.channel("distant_horizons:message", truncated, false));
             truncated.writeByte(0);
             assertEquals(
-                    0, ModPayloadOrdering.channel("distant_horizons:message", truncated, false));
+                    control,
+                    ModPayloadOrdering.channel("distant_horizons:message", truncated, false));
             truncated.clear().writeShort(16).writeByte(8);
-            assertEquals(0, ModPayloadOrdering.channel("distant_horizons:msg", truncated, false));
+            assertEquals(
+                    control, ModPayloadOrdering.channel("distant_horizons:msg", truncated, false));
         } finally {
             truncated.release();
         }

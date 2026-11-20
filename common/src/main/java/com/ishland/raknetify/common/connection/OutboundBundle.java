@@ -52,6 +52,12 @@ final class OutboundBundle {
     /** Original packet completions, resolved only when the complete envelope is delivered. */
     private final List<ChannelPromise> promises = new ArrayList<>();
 
+    /** DH members sent independently after collecting the vanilla envelope. */
+    private final List<BackgroundMember> background = new ArrayList<>();
+
+    /** Encoded bytes reserved for the detached members. */
+    private long backgroundBytes;
+
     /** Ordered lanes required by members after protocol classification. */
     private int lanes;
 
@@ -97,9 +103,14 @@ final class OutboundBundle {
      */
     void append(final ByteBuf packet, final int lane, final ChannelPromise promise) {
         final ByteBuf data = Objects.requireNonNull(bytes);
-        if (++count > BundleWire.MAX_MEMBERS
-                || packet.readableBytes() + (long) Integer.BYTES > data.maxWritableBytes()) {
+        long size = packet.readableBytes() + (long) Integer.BYTES;
+        if (++count > BundleWire.MAX_MEMBERS || size + backgroundBytes > data.maxWritableBytes()) {
             throw new TooLongFrameException("Minecraft bundle exceeds transport limits");
+        }
+        if (ModPayloadOrdering.isBackground(lane)) {
+            backgroundBytes += size;
+            background.add(new BackgroundMember(packet.retainedDuplicate(), lane, promise));
+            return;
         }
         if (ModPayloadOrdering.requiresFence(lane)) {
             lanes = 0xFF;
@@ -135,6 +146,18 @@ final class OutboundBundle {
     }
 
     /**
+     * Transfers DH members to the caller before the closing delimiter is emitted.
+     *
+     * @return detached writes, in their original DH order
+     */
+    List<BackgroundMember> takeBackground() {
+        final var members = List.copyOf(background);
+        background.clear();
+        backgroundBytes = 0;
+        return members;
+    }
+
+    /**
      * Mirrors one envelope's transport outcome to all vanilla writes it represents.
      *
      * @param completions detached original write completions
@@ -157,8 +180,13 @@ final class OutboundBundle {
      */
     void fail(final Throwable failure) {
         final var failed = List.copyOf(promises);
+        final var detached = takeBackground();
         clear();
         failed.forEach(promise -> promise.tryFailure(failure));
+        for (BackgroundMember member : detached) {
+            member.packet().release();
+            member.promise().tryFailure(failure);
+        }
     }
 
     /** Releases the exclusively owned buffer before the object can collect another bundle. */
@@ -169,4 +197,13 @@ final class OutboundBundle {
         }
         promises.clear();
     }
+
+    /**
+     * An original DH bundle member with its independent transport route.
+     *
+     * @param packet owned encoded packet
+     * @param lane DH route before selecting the physical lane
+     * @param promise original member completion
+     */
+    record BackgroundMember(ByteBuf packet, int lane, ChannelPromise promise) {}
 }

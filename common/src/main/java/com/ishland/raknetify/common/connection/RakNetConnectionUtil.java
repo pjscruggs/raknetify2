@@ -243,7 +243,9 @@ public class RakNetConnectionUtil {
             simpleMetricsLogger.setMetricsSynchronizationHandler(metricsSynchronizationHandler);
             final SynchronizationLayer synchronizationLayer =
                     new SynchronizationLayer(Constants.synchronizationIgnoredChannels());
-            ch.pipeline().get(ReliabilityHandler.class).setFrameComparator(SEND_ORDER);
+            final ReliabilityHandler reliability = ch.pipeline().get(ReliabilityHandler.class);
+            reliability.setFrameComparator(SEND_ORDER);
+            reliability.setBackgroundOrderChannel(Constants.BACKGROUND_TERRAIN_CHANNEL);
             ch.pipeline()
                     .addBefore(
                             FrameJoiner.NAME,

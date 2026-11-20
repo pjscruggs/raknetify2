@@ -26,6 +26,7 @@
 package com.ishland.raknetify.common.connection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -254,33 +255,159 @@ class ModDependencyTransportTest {
         }
     }
 
-    /** A level boundary keeps lane zero even when only Distant Horizons frames are in flight. */
+    /** Unacknowledged DH terrain and control cannot hold a bundle fence or its successor. */
     @org.junit.jupiter.api.Test
-    void opaqueLevelBoundaryDoesNotBorrowTheBackgroundTerrainLane() {
+    void gameplayContinuesWithDistantHorizonsReceiptsWithheld() {
         var server = begin(distantHorizonsCodec());
         var receipts = new Receipts();
         server.pipeline().addFirst(receipts);
         try {
+            server.attr(BundleWire.PEER).set(true);
             server.writeOutbound(distantHorizonsPayload(10));
             expectFrame(server, Constants.BACKGROUND_TERRAIN_CHANNEL);
             server.writeOutbound(distantHorizonsPayload(2));
-            assertTrue(server.outboundMessages().isEmpty());
-            receipts.pending.removeFirst().setSuccess();
-            expectFrame(server, 0);
-            server.writeOutbound(distantHorizonsPayload(10, 1));
-            assertTrue(server.outboundMessages().isEmpty());
-            receipts.pending.removeFirst().setSuccess();
             expectFrame(server, Constants.BACKGROUND_TERRAIN_CHANNEL);
+            server.writeOutbound(
+                    Unpooled.buffer().writeByte(0),
+                    Unpooled.buffer().writeByte(2),
+                    Unpooled.buffer().writeByte(3),
+                    Unpooled.buffer().writeByte(0),
+                    Unpooled.buffer().writeByte(7));
+            FrameData bundle = server.readOutbound();
+            assertNotNull(bundle);
+            try {
+                assertEquals(BundleWire.MIXED, bundle.getPacketId());
+            } finally {
+                bundle.release();
+            }
+            assertNull(server.readOutbound());
+            receipts.pending.removeLast().setSuccess();
+            expectFrame(server, 7);
+            receipts.pending.removeLast().setSuccess();
+            assertEquals(2, receipts.pending.size());
+            receipts.pending.removeFirst().setSuccess();
             receipts.pending.removeFirst().setSuccess();
         } finally {
             server.finishAndReleaseAll();
         }
     }
 
-    /** A level initialization retains its existing boundary with vanilla and mod state. */
+    /** DH control waits for earlier gameplay, while subsequent gameplay can overtake DH. */
     @org.junit.jupiter.api.Test
-    void distantHorizonsLevelInitializationStillFencesTerrain() {
-        exerciseBoundaries(begin(distantHorizonsCodec()), distantHorizonsPayload(2));
+    void distantHorizonsControlWaitsOnlyForThePrecedingGameplay() {
+        var server = begin(distantHorizonsCodec());
+        var receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        try {
+            server.writeOutbound(Unpooled.buffer().writeByte(2));
+            expectFrame(server, 2);
+            server.writeOutbound(distantHorizonsPayload(2), distantHorizonsPayload(10));
+            assertNull(server.readOutbound());
+            server.writeOutbound(Unpooled.buffer().writeByte(7));
+            expectFrame(server, 7);
+            var newerGameplay = receipts.pending.removeLast();
+            receipts.pending.removeFirst().setSuccess();
+            expectFrame(server, Constants.BACKGROUND_TERRAIN_CHANNEL);
+            expectFrame(server, Constants.BACKGROUND_TERRAIN_CHANNEL);
+            assertFalse(newerGameplay.isDone());
+            newerGameplay.setSuccess();
+            receipts.pending.removeFirst().setSuccess();
+            receipts.pending.removeFirst().setSuccess();
+        } finally {
+            server.finishAndReleaseAll();
+        }
+    }
+
+    /** A large DH burst uses the normal transport window even with a gameplay fence pending. */
+    @org.junit.jupiter.api.Test
+    void distantHorizonsBulkHasNoDeliveryFenceWindow() {
+        var server = begin(distantHorizonsCodec());
+        var receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        try {
+            server.attr(BundleWire.PEER).set(true);
+            server.writeOutbound(
+                    Unpooled.buffer().writeByte(0),
+                    Unpooled.buffer().writeByte(2),
+                    Unpooled.buffer().writeByte(3),
+                    Unpooled.buffer().writeByte(0));
+            ((FrameData) server.readOutbound()).release();
+            for (int i = 0; i < 600; i++) {
+                server.writeOutbound(distantHorizonsPayload(10, 4096));
+                expectFrame(server, Constants.BACKGROUND_TERRAIN_CHANNEL);
+            }
+            assertEquals(601, receipts.pending.size());
+            while (!receipts.pending.isEmpty()) {
+                receipts.pending.removeFirst().setSuccess();
+            }
+        } finally {
+            server.finishAndReleaseAll();
+        }
+    }
+
+    /** Foreground members of a mixed bundle complete without receiving its DH member. */
+    @org.junit.jupiter.api.Test
+    void distantHorizonsBundleMembersKeepSeparateCompletions() {
+        var server = begin(distantHorizonsCodec());
+        var client = new EmbeddedChannel(new RakNetSimpleMultiChannelCodec(0xfd));
+        var receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        try {
+            server.attr(BundleWire.PEER).set(true);
+            client.attr(BundleWire.RECEIVER).set(true);
+            var opening = server.write(Unpooled.buffer().writeByte(0));
+            var control = server.write(distantHorizonsPayload(2));
+            var entity = server.write(Unpooled.buffer().writeByte(2));
+            var chunk = server.write(Unpooled.buffer().writeByte(7));
+            var closing = server.writeAndFlush(Unpooled.buffer().writeByte(0));
+            FrameData envelope = server.readOutbound();
+            assertNotNull(envelope);
+            client.writeInbound(envelope);
+            for (int expected : new int[] {0, 2, 7, 0}) {
+                ByteBuf packet = client.readInbound();
+                assertNotNull(packet);
+                try {
+                    assertEquals(expected, packet.readUnsignedByte());
+                } finally {
+                    packet.release();
+                }
+            }
+            assertNull(client.readInbound());
+            assertNull(server.readOutbound());
+            receipts.pending.removeFirst().setSuccess();
+            assertTrue(opening.isSuccess() && entity.isSuccess() && chunk.isSuccess());
+            assertTrue(closing.isSuccess());
+            expectFrame(server, Constants.BACKGROUND_TERRAIN_CHANNEL);
+            assertFalse(control.isDone());
+            receipts.pending.removeFirst().setSuccess();
+            assertTrue(control.isSuccess());
+        } finally {
+            server.finishAndReleaseAll();
+            client.finishAndReleaseAll();
+        }
+    }
+
+    /** A phase reset forgets held DH frames even when old gameplay ACKs arrive later. */
+    @org.junit.jupiter.api.Test
+    void synchronizationDiscardsHeldDistantHorizonsFrames() {
+        var server = begin(distantHorizonsCodec());
+        var receipts = new Receipts();
+        server.pipeline().addFirst(receipts);
+        try {
+            server.writeOutbound(Unpooled.buffer().writeByte(2));
+            expectFrame(server, 2);
+            var control = server.write(distantHorizonsPayload(2));
+            var terrain = server.write(distantHorizonsPayload(10));
+            assertNull(server.readOutbound());
+            server.writeOutbound(SynchronizationLayer.SYNC_REQUEST_OBJECT);
+            assertEquals(SynchronizationLayer.SYNC_REQUEST_OBJECT, server.readOutbound());
+            assertTrue(control.isSuccess() && terrain.isSuccess());
+            receipts.pending.removeFirst().setSuccess();
+            receipts.pending.removeFirst().setSuccess();
+            assertNull(server.readOutbound());
+        } finally {
+            server.finishAndReleaseAll();
+        }
     }
 
     /**
@@ -291,7 +418,10 @@ class ModDependencyTransportTest {
     private static RakNetSimpleMultiChannelCodec distantHorizonsCodec() {
         var codec = new RakNetSimpleMultiChannelCodec(0xfd);
         codec.addHandler(new CustomPayloadChannel.PayloadClassifier(id -> id == 24));
-        codec.addHandler((bytes, quiet) -> bytes.getUnsignedByte(bytes.readerIndex()));
+        codec.addHandler((bytes, quiet) -> {
+            int id = bytes.getUnsignedByte(bytes.readerIndex());
+            return id == 0 ? Integer.MIN_VALUE : id;
+        });
         return codec;
     }
 
