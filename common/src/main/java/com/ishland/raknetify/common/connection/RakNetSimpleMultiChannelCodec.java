@@ -310,7 +310,6 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
      * @param frame encoded packet whose delivery may guard the next ordering phase
      * @param promise original application completion
      */
-    @SuppressWarnings("FutureReturnValueIgnored") // The returned future is the supplied promise.
     private void writeFrame(
             final ChannelHandlerContext ctx, final FrameData frame, final ChannelPromise promise) {
         final ChannelPromise completion = promise.unvoid();
@@ -326,7 +325,8 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
                 finishNegotiation(ctx);
             });
         }
-        ctx.write(frame, completion);
+        // The returned future is the supplied completion that the caller already observes.
+        final var unused = ctx.write(frame, completion);
     }
 
     /**

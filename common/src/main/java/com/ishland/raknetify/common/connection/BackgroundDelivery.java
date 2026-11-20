@@ -135,12 +135,12 @@ final class BackgroundDelivery {
      * @param frame owned DH frame
      * @param completion promise the caller uses to observe delivery or failure
      */
-    @SuppressWarnings("FutureReturnValueIgnored") // The returned future is the supplied promise.
     private static void forward(
             final ChannelHandlerContext ctx,
             final FrameData frame,
             final ChannelPromise completion) {
-        ctx.write(frame, completion);
+        // The returned future is the supplied completion that the caller already observes.
+        final var unused = ctx.write(frame, completion);
     }
 
     /** Invalidates held DH traffic along with the previous world's transport cursors. */
