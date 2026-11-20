@@ -88,7 +88,7 @@ final class BackgroundDelivery {
             current = new GameplayPrefix();
         }
         if (predecessors.isEmpty() && waiting.isEmpty() && !draining) {
-            forward(ctx, frame, promise);
+            BundleDelivery.forward(ctx, frame, promise);
             return;
         }
         long size = 32L + frame.getDataSize();
@@ -120,27 +120,12 @@ final class BackgroundDelivery {
             while ((next = waiting.peekFirst()) != null && next.ready()) {
                 waiting.removeFirst();
                 bytes -= next.size();
-                forward(ctx, next.frame(), next.promise());
+                BundleDelivery.forward(ctx, next.frame(), next.promise());
             }
             ctx.flush();
         } finally {
             draining = false;
         }
-    }
-
-    /**
-     * Hands the frame to the transport with the original observable write completion.
-     *
-     * @param ctx transport context bypassing the gameplay queue
-     * @param frame owned DH frame
-     * @param completion promise the caller uses to observe delivery or failure
-     */
-    private static void forward(
-            final ChannelHandlerContext ctx,
-            final FrameData frame,
-            final ChannelPromise completion) {
-        // The returned future is the supplied completion that the caller already observes.
-        final var unused = ctx.write(frame, completion);
     }
 
     /** Invalidates held DH traffic along with the previous world's transport cursors. */

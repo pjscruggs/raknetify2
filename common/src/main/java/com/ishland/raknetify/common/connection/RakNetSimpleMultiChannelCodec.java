@@ -325,8 +325,7 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
                 finishNegotiation(ctx);
             });
         }
-        // The returned future is the supplied completion that the caller already observes.
-        final var unused = ctx.write(frame, completion);
+        BundleDelivery.forward(ctx, frame, completion);
     }
 
     /**

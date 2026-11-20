@@ -31,6 +31,7 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import io.netty.channel.ChannelPromiseNotifier;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.Future;
@@ -279,6 +280,23 @@ final class BundleDelivery extends ChannelDuplexHandler {
                         ? delivery.solePendingLane()
                         : delivery.fences.getLast().lane();
         return Math.max(0, lane);
+    }
+
+    /**
+     * Forwards a frame with its original promise and preserves completion through context wrappers.
+     *
+     * @param ctx outbound frame context
+     * @param frame owned frame to transfer downstream
+     * @param completion original observer and any local delivery marker
+     */
+    static void forward(
+            final ChannelHandlerContext ctx,
+            final FrameData frame,
+            final ChannelPromise completion) {
+        final var downstream = ctx.write(frame, completion);
+        if (!downstream.equals(completion)) {
+            downstream.addListener(new ChannelPromiseNotifier(false, completion));
+        }
     }
 
     /**
