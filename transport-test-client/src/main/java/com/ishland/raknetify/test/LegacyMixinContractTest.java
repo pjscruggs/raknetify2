@@ -69,7 +69,10 @@ final class LegacyMixinContractTest {
      *     accepted
      */
     static void verify() throws Exception {
-        if (VERSION.getFriendlyString().startsWith("26.")) {
+        boolean modern = VERSION.getFriendlyString().startsWith("26.");
+        requireCalls(modern ? "client.player.LocalPlayer" : "class_746", "waitForCollisionChunk");
+        System.out.println("PASS native collision-chunk guard call site");
+        if (modern) {
             return;
         }
         requireCalls("class_2535", "redirectGroup", "redirectChannel");
@@ -158,14 +161,14 @@ final class LegacyMixinContractTest {
      * Loads a class without initializing game state and reads the bytecode exported after Mixin
      * applies.
      *
-     * @param name intermediary class name relative to net.minecraft
+     * @param name runtime class name relative to net.minecraft
      * @return transformed class, including injected method bodies and their actual call sites
      * @throws Exception if the runtime class or its fresh Mixin export is unavailable
      */
     private static ClassNode transformed(final String name) throws Exception {
-        Class.forName(
-                "net.minecraft." + name, false, LegacyMixinContractTest.class.getClassLoader());
-        Path path = Path.of(".mixin.out", "class", "net", "minecraft", name + ".class");
+        String qualifiedName = "net.minecraft." + name;
+        Class.forName(qualifiedName, false, LegacyMixinContractTest.class.getClassLoader());
+        Path path = Path.of(".mixin.out", "class", qualifiedName.replace('.', '/') + ".class");
         ClassNode node = new ClassNode();
         new ClassReader(Files.readAllBytes(path)).accept(node, 0);
         return node;
@@ -174,7 +177,7 @@ final class LegacyMixinContractTest {
     /**
      * Checks every expected hook and proves that a disconnected handler fails the same assertion.
      *
-     * @param target intermediary class whose transformed method bodies must contain the hooks
+     * @param target runtime class whose transformed method bodies must contain the hooks
      * @param hooks stable source handler names retained inside Mixin's generated unique names
      * @throws Exception if loading or reading the transformed target fails
      */

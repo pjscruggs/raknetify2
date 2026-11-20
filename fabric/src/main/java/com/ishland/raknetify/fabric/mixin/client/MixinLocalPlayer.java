@@ -23,10 +23,14 @@
  * THE SOFTWARE.
  */
 
-package com.ishland.raknetify.legacy.mixin;
+package com.ishland.raknetify.fabric.mixin.client;
 
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.level.chunk.EmptyLevelChunk;
+import com.ishland.raknetify.fabric.common.util.MultiVersionUtil;
+import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.world.chunk.EmptyChunk;
 
 import network.ycc.raknet.RakNet;
 
@@ -36,26 +40,30 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /** Keeps local physics from running ahead of terrain delivered on the RakNet chunk lane. */
-@Mixin(value = LocalPlayer.class, remap = false)
-abstract class LocalPlayerMixin {
+@Mixin(ClientPlayerEntity.class)
+abstract class MixinLocalPlayer {
     /**
-     * Skips local simulation and movement reports while the current chunk lacks collision data. The
-     * client level's generic chunk-presence check always returns true in this game version.
+     * Skips local simulation while the current chunk lacks collision data.
      *
      * @param callback Minecraft player-tick callback
      */
-    @Inject(
-            method = {"m_8119_", "tick"},
-            at = @At("HEAD"),
-            cancellable = true)
+    @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     private void waitForCollisionChunk(final CallbackInfo callback) {
-        var player = (LocalPlayer) (Object) this;
-        if (!(player.connection.getConnection().channel().config() instanceof RakNet.Config)) {
+        var player = (ClientPlayerEntity) (Object) this;
+        var world = MinecraftClient.getInstance().world;
+        var connection =
+                (IClientConnection)
+                        MultiVersionUtil.requireCompatible(
+                                        MultiVersionUtil.ClientPlayNetworkHandler$connection,
+                                        "ClientPlayNetworkHandler$connection")
+                                .get(player.networkHandler);
+        var channel = connection.getChannel();
+        if (world == null || channel == null || !(channel.config() instanceof RakNet.Config)) {
             return;
         }
-        var pos = player.chunkPosition();
-        var chunk = player.level().getChunkSource().getChunkNow(pos.x, pos.z);
-        if (chunk == null || chunk instanceof EmptyLevelChunk) {
+        var pos = player.getChunkPos();
+        var chunk = world.getChunkManager().getWorldChunk(pos.x, pos.z);
+        if (chunk == null || chunk instanceof EmptyChunk) {
             callback.cancel();
         }
     }

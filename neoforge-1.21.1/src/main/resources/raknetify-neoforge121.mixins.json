@@ -4,6 +4,6 @@
   "package": "com.ishland.raknetify.legacy.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": ["ServerListenerMixin", "ConnectionMixin"],
-  "client": ["ServerAddressMixin", "MixinServiceRedirect", "StatusPingerMixin", "ConnectScreenMixin"],
+  "client": ["ServerAddressMixin", "MixinServiceRedirect", "StatusPingerMixin", "ConnectScreenMixin", "LocalPlayerMixin"],
   "injectors": {"defaultRequire": 1}
 }

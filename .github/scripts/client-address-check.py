@@ -143,6 +143,7 @@ def run(args, version, metadata, lock):
         assert 'PASS standalone resolver baseline' in text
     else:
         assert '\t- raknetify ' in text, 'Raknetify was not loaded'
+        assert 'PASS native collision-chunk guard call site' in text
         if not version.startswith('26.'):
             assert 'PASS native legacy mixin call sites and rejected missing-hook control' in text
         assert 'PASS native gameplay ordering 12' in text
