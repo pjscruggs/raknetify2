@@ -25,19 +25,65 @@
 
 package com.ishland.raknetify.common.connection;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
+
+import network.ycc.raknet.client.channel.RakNetClientThreadedChannel;
+import network.ycc.raknet.server.channel.RakNetApplicationChannel;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Suppresses application flush requests so RakNet retains control of its own send cadence. */
 public class NoFlush extends ChannelDuplexHandler {
 
+    /** Set on the application loop when at least one write has passed since its last flush. */
+    private boolean wrote;
+
+    /** Shares a single wake-up task across flushes until the transport loop runs it. */
+    private final AtomicBoolean wakePending = new AtomicBoolean();
+
+    /** Clears the wake-up reservation on the transport loop after earlier lazy writes. */
+    private void acknowledgeWake() {
+        wakePending.set(false);
+    }
+
     /**
-     * Consumes a Minecraft flush request without forwarding it to the transport.
+     * Records an application write and preserves its original ownership and completion.
+     *
+     * @param ctx application pipeline forwarding the write
+     * @param message outbound frame transferred to the next handler
+     * @param promise completion associated with the frame
+     * @throws Exception if the downstream pipeline rejects the write
+     */
+    @Override
+    public void write(
+            final ChannelHandlerContext ctx, final Object message, final ChannelPromise promise)
+            throws Exception {
+        wrote = true;
+        super.write(ctx, message, promise);
+    }
+
+    /**
+     * Wakes a separate transport loop to process Netty's lazily enqueued writes. RakNet still
+     * decides when to assemble and send datagrams within its congestion window.
      *
      * @param ctx outbound context intentionally left unflushed
      */
     @Override
     public void flush(final ChannelHandlerContext ctx) {
-        // no-op
+        if (!wrote) {
+            return;
+        }
+        wrote = false;
+        Channel application = ctx.channel();
+        if (application instanceof RakNetApplicationChannel
+                || application instanceof RakNetClientThreadedChannel) {
+            var loop = application.parent().eventLoop();
+            if (!loop.inEventLoop() && wakePending.compareAndSet(false, true)) {
+                loop.execute(this::acknowledgeWake);
+            }
+        }
     }
 }
