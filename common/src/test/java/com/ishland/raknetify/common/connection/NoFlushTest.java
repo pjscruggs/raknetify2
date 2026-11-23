@@ -40,7 +40,6 @@ import network.ycc.raknet.client.channel.RakNetClientThreadedChannel;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /** Exercises application flushes across separate application and UDP event loops. */
@@ -51,40 +50,56 @@ class NoFlushTest {
         NioEventLoopGroup io = new NioEventLoopGroup(1);
         DefaultEventLoopGroup game = new DefaultEventLoopGroup(1);
         RakNetClientThreadedChannel channel = new RakNetClientThreadedChannel();
-        CompletableFuture<Void> release = new CompletableFuture<>();
         try {
             io.register(channel.parent()).syncUninterruptibly();
             game.register(channel).syncUninterruptibly();
             channel.pipeline().addLast(new NoFlush());
             channel.parent().pipeline().addLast(new Sink());
             SingleThreadEventExecutor worker = (SingleThreadEventExecutor) io.next();
-            CompletableFuture<Void> entered = new CompletableFuture<>();
-            worker.execute(() -> {
-                entered.complete(null);
-                release.join();
-            });
-            entered.orTimeout(5, TimeUnit.SECONDS).join();
-            int initial = worker.pendingTasks();
             var writes =
-                    game.submit(
-                                    () -> {
-                                        channel.flush();
-                                        assertEquals(initial, worker.pendingTasks());
-                                        var first = channel.writeAndFlush(1);
-                                        var second = channel.writeAndFlush(2);
-                                        channel.flush();
-                                        assertEquals(initial + 3, worker.pendingTasks());
-                                        return List.of(first, second);
-                                    })
-                            .syncUninterruptibly();
-            release.complete(null);
-            writes.getNow().forEach(ChannelFuture::syncUninterruptibly);
+                    worker.submit(() -> measureQueue(worker, channel))
+                            .syncUninterruptibly()
+                            .getNow();
+            writes.forEach(ChannelFuture::syncUninterruptibly);
         } finally {
-            release.complete(null);
             channel.close().awaitUninterruptibly();
             game.shutdownGracefully(0, 5, TimeUnit.SECONDS).syncUninterruptibly();
             io.shutdownGracefully(0, 5, TimeUnit.SECONDS).syncUninterruptibly();
         }
+    }
+
+    /**
+     * Samples the queue on its owning NIO thread, including on older Netty versions that dispatch
+     * queue inspections back to that same thread.
+     *
+     * @param worker parent transport executor currently running this measurement
+     * @param channel application channel whose writes should share a wake-up
+     * @return pending writes to complete once the parent resumes draining its queue
+     * @throws Exception if the application loop fails to submit its batch
+     */
+    private static List<ChannelFuture> measureQueue(
+            final SingleThreadEventExecutor worker, final RakNetClientThreadedChannel channel)
+            throws Exception {
+        int initial = worker.pendingTasks();
+        var game = channel.eventLoop();
+        game.submit(channel::flush).get(5, TimeUnit.SECONDS);
+        assertEquals(initial, worker.pendingTasks());
+        var writes = game.submit(() -> writeBatch(channel)).get(5, TimeUnit.SECONDS);
+        assertEquals(initial + 3, worker.pendingTasks());
+        return writes;
+    }
+
+    /**
+     * Submits two writes followed by an empty flush on the application thread.
+     *
+     * @param channel application endpoint forwarding the writes
+     * @return both original write completions
+     */
+    private static List<ChannelFuture> writeBatch(final RakNetClientThreadedChannel channel) {
+        var first = channel.writeAndFlush(1);
+        var second = channel.writeAndFlush(2);
+        channel.flush();
+        return List.of(first, second);
     }
 
     /** Consumes the two integer messages on the transport executor before datagram encoding. */
