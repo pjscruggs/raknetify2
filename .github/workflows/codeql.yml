@@ -27,6 +27,8 @@ jobs:
       - uses: github/codeql-action/setup-codeql@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         id: query-tools
         with:
+          # Keep the bundled libraries in sync with the committed query pack lock.
+          tools: linked
           languages: java-kotlin
       - name: Test framework analysis against positive and negative witnesses
         env:
@@ -82,6 +84,7 @@ jobs:
         if: matrix.build-mode == 'manual'
       - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
+          tools: linked
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
           queries: ${{ matrix.language == 'java-kotlin' && './quality/codeql/security-and-quality.qls' || 'security-and-quality' }}
