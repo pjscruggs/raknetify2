@@ -31,6 +31,8 @@ For a Forge 1.20.1 server behind Velocity, download `raknetify2-forge-proxy-mc1.
 
 The included `compatibility.json` lists supported Minecraft versions and runtime requirements for Fabric. For Forge, NeoForge and Spigot/Paper, check the Minecraft version declared by that JAR.
 
+Keep the host platform up to date independently of Raknetify2. See the [security policy](SECURITY.md) for guidance on host dependencies and private reporting.
+
 Development builds are available from [GitHub Actions](https://github.com/pjscruggs/raknetify2/actions/workflows/build.yml). Open a successful run for `main` and download its `Artifacts` archive. A GitHub account is required to download these builds.
 
 ## Direct server setup
