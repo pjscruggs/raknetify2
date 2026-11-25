@@ -29,7 +29,7 @@ class CompatibilityReportTest(unittest.TestCase):
             folder = self.folder / entry['scenario']
             folder.mkdir()
             row = dict(entry, schema=1, client=entry['server'] if entry['scenario'] == 'snapshot' else '26.3', status='passed', revision='expected', raknetify='fixture', sha256='a' * 64,
-                       inputs=self.plan.expected_inputs(entry['scenario']))
+                       inputs=self.plan.expected_inputs(entry['scenario'], entry['mode']))
             (folder / 'result.json').write_text(json.dumps(row))
 
     def test_missing_and_duplicate(self):

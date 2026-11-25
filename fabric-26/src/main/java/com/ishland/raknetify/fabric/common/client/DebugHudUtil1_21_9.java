@@ -85,7 +85,7 @@ public class DebugHudUtil1_21_9 {
                 @Nullable final Level world,
                 @Nullable final LevelChunk clientChunk,
                 @Nullable final LevelChunk chunk) {
-            if (MinecraftVersions.IS_26_4_SNAPSHOT) {
+            if (MinecraftVersions.IS_26_4_PREVIEW) {
                 DebugHudUtil.getDebugString(s -> DebugHudLines26_4.addLine(lines, s));
             } else {
                 DebugHudUtil.getDebugString(s -> lines.addToGroup(ID, s));

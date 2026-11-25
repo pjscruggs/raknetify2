@@ -19,7 +19,7 @@ import urllib.request
 LOADER_VERSION = '0.20.1'
 """Fabric Loader version used for every mapping-generation bootstrap."""
 
-INSTALLER_VERSION = '1.1.1'
+INSTALLER_VERSION = '1.1.2'
 """Fabric installer version embedded in downloaded server launchers."""
 
 

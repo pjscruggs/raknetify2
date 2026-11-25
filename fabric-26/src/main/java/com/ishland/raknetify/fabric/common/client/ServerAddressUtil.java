@@ -47,7 +47,7 @@ public final class ServerAddressUtil {
      */
     public static ServerAddress withAddress(
             final ServerAddress original, final String host, final int port) {
-        if (!MinecraftVersions.IS_26_4_SNAPSHOT) {
+        if (!MinecraftVersions.IS_26_4_PREVIEW) {
             return new ServerAddress(host, port);
         }
         try {

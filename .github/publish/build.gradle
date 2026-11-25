@@ -44,7 +44,7 @@ publishMods {
         curseforge {
             accessToken = providers.environmentVariable('CURSEFORGE_TOKEN')
             projectId = '1785937'
-            minecraftVersions.addAll(supportedGames.collect { it == '26.4-snapshot-10' ? '26.4-snapshot' : it })
+            minecraftVersions.addAll(supportedGames.collect { it == '26.4-pre-1' ? '26.4-snapshot' : it })
             javaVersions.addAll(requiredJavaVersions(loader))
             client = true
             server = true

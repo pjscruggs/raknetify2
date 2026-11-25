@@ -60,11 +60,17 @@
       "sha512": "ee7733f50049b9f847f3abeea7a1dcb429932a5e9be16e9ab4e1d7db752ff7e43f5a449f8d971fa60e6f96917e509a05d86a03399a71be2749449ef91ec39f67",
       "version": "Fabric-26.3-v2.21.0"
     },
+    "fabric-api-26.4-pre-1": {
+      "filename": "fabric-api-0.167.1+26.4.jar",
+      "url": "https://cdn.modrinth.com/data/P7dR8mSH/versions/e3fLe6Cu/fabric-api-0.167.1%2B26.4.jar",
+      "sha512": "c2786b9a1da3abfe9bbe6611ce8a834abf7703f44004956fcfd72a8b2026b85520a36a26a7b51da3106278c253c81ffeb3a9fb47217bc6d649e21b6b3d5813d4",
+      "version": "0.167.1+26.4"
+    },
     "fabric-api-fabric": {
-      "filename": "fabric-api-0.166.0+26.3.jar",
-      "url": "https://cdn.modrinth.com/data/P7dR8mSH/versions/998R2rNP/fabric-api-0.166.0%2B26.3.jar",
-      "sha512": "de0d1a502cfcfcc594e0338e91c2fcf92a1239d47904ac2c3c50980ee132c676dba6abd81cd9449cdb0383657683c286f5bfc5c1bc1609c6b13bd569d36351d2",
-      "version": "0.166.0+26.3"
+      "filename": "fabric-api-0.166.2+26.3.jar",
+      "url": "https://cdn.modrinth.com/data/P7dR8mSH/versions/Zns5SSRA/fabric-api-0.166.2%2B26.3.jar",
+      "sha512": "fb686a9fa923248328107a12498229d6951e316257f18b7d0e4cbd6885ba447ed50a44076a8a5ba47cfe2043b329db3587ab000aeab1face26b2587a5d4ba6b5",
+      "version": "0.166.2+26.3"
     },
     "minihud-26.3": {
       "filename": "minihud-fabric-26.3-0.41.2.jar",

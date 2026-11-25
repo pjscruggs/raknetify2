@@ -56,7 +56,7 @@ public class RakNetCompressionCompatibilityHandler extends ChannelDuplexHandler 
         // The snapshot renamed this packet, so evaluate the old class reference only on earlier
         // versions.
         boolean setupCompression =
-                MinecraftVersions.IS_26_4_SNAPSHOT
+                MinecraftVersions.IS_26_4_PREVIEW
                         ? "net.minecraft.network.protocol.login.ClientboundSetupCompressionPacket"
                                 .equals(msg.getClass().getName())
                         : msg instanceof ClientboundLoginCompressionPacket;

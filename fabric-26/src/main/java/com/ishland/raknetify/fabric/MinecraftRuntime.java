@@ -109,7 +109,7 @@ public final class MinecraftRuntime {
                 ModPlatform.get().configDirectory());
         handleMappings();
 
-        if (ModPlatform.get().isClient() && !MinecraftVersions.IS_26_4_SNAPSHOT) {
+        if (ModPlatform.get().isClient() && !MinecraftVersions.IS_26_4_PREVIEW) {
             DebugHudUtil1_21_9.init();
         }
 

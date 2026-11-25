@@ -54,7 +54,7 @@ public final class TransferPacketUtil {
      */
     public static ClientboundTransferPacket replace(
             final ClientboundTransferPacket original, final String host, final int port) {
-        if (!MinecraftVersions.IS_26_4_SNAPSHOT) {
+        if (!MinecraftVersions.IS_26_4_PREVIEW) {
             return new ClientboundTransferPacket(host, port);
         }
         try {

@@ -76,7 +76,7 @@ public class RaknetifyFabricMixinPlugin implements IMixinConfigPlugin {
             // The required redirect in MixinServerLoginNetworkHandler covers that constructor
             // instead.
             case "compat.fabricapi.MixinServerLoginNetworkAddon" ->
-                    !MinecraftVersions.IS_26_4_SNAPSHOT
+                    !MinecraftVersions.IS_26_4_PREVIEW
                             && ModPlatform.get().isModLoaded("fabric-networking-api-v1");
             case "compat.qsl.MixinServerLoginNetworkAddon" ->
                     ModPlatform.get().isModLoaded("quilt_networking");
@@ -85,11 +85,11 @@ public class RaknetifyFabricMixinPlugin implements IMixinConfigPlugin {
             case "access.IDebugHudEntries",
                     "common.encryption.MixinClientConnection",
                     "compat.krypton.MixinServerLoginNetworkHandler" ->
-                    !MinecraftVersions.IS_26_4_SNAPSHOT;
+                    !MinecraftVersions.IS_26_4_PREVIEW;
             case "client.hud.MixinDebugHudEntries26_4",
                     "client.MixinClientHandshake26_4",
                     "server.MixinServerLoginEncryption26_4" ->
-                    MinecraftVersions.IS_26_4_SNAPSHOT;
+                    MinecraftVersions.IS_26_4_PREVIEW;
             default -> true;
         };
     }

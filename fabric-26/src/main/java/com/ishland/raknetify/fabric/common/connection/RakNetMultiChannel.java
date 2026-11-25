@@ -562,7 +562,7 @@ public class RakNetMultiChannel {
         if (MinecraftVersions.AT_LEAST_26_3) {
             classToChannelIdOverride.put(ClientboundAddTransientBlockPacket.class, 7);
         }
-        if (MinecraftVersions.IS_26_4_SNAPSHOT) {
+        if (MinecraftVersions.IS_26_4_PREVIEW) {
             addVersionedPacket("ClientboundAddEntityMotionPacket", 2);
         }
     }

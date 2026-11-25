@@ -446,7 +446,7 @@ def prepare_server(args, version, polymer, krypton, packetfixer):
     (folder / 'fixture-mods.json').write_text(json.dumps(fixture_mod_inventory(folder)), encoding='utf-8')
     launcher = folder / 'fabric-server-launch.jar'
     if not launcher.exists():
-        url = f'https://meta.fabricmc.net/v2/versions/loader/{version}/0.20.1/1.1.1/server/jar'
+        url = f'https://meta.fabricmc.net/v2/versions/loader/{version}/0.20.1/1.1.2/server/jar'
         with urllib.request.urlopen(url, timeout=60) as response:
             launcher.write_bytes(response.read())
     return folder

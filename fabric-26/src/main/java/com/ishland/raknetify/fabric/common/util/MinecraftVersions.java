@@ -45,10 +45,10 @@ public final class MinecraftVersions {
     /** Whether packet references introduced in Minecraft 26.3 may be resolved. */
     public static final boolean AT_LEAST_26_3 = FAMILY.atLeast(26, 3);
 
-    // Keep this exact snapshot predicate aligned with the Minecraft dependency in fabric.mod.json.
-    /** Whether the runtime matches the specifically supported 26.4 snapshot API. */
-    public static final boolean IS_26_4_SNAPSHOT =
-            "26.4-alpha.10".equals(CURRENT) || "26.4-snapshot-10".equals(CURRENT);
+    // Keep this exact preview predicate aligned with the Minecraft dependency in fabric.mod.json.
+    /** Whether the runtime matches the specifically supported 26.4 preview API. */
+    public static final boolean IS_26_4_PREVIEW =
+            "26.4-pre.1".equals(CURRENT) || "26.4-pre-1".equals(CURRENT);
 
     /** Prevents construction of the immutable runtime-version flags. */
     private MinecraftVersions() {}

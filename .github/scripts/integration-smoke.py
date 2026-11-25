@@ -22,6 +22,7 @@ def helpers():
 def inputs(args, common):
     """Resolve separate client and server inputs so disabled translation cannot masquerade as coverage."""
     api = ['fabric-api-fabric']
+    preview_api = ['fabric-api-26.4-pre-1'] if args.mode == 'ordered' else []
     via = ['viaversion-26.2', 'viafabric-26.2']
     pairs = {
         'via-client': ([], api + via),
@@ -29,7 +30,7 @@ def inputs(args, common):
         'mod-payloads': (api + ['carpet-fabric', 'servux-fabric', 'no-chat-reports-fabric'],
                          api + ['carpet-fabric', 'minihud-26.3', 'malilib-26.3', 'no-chat-reports-fabric']),
         'terrain': ([], []),
-        'snapshot': ([], []),
+        'snapshot': (preview_api, preview_api),
         'reference-pack': (common.manifest()['packs']['server'], common.manifest()['packs']['client']),
         'grim': (api + ['grimac-26.3'], []),
         'proxy-native': (api + ['fabricproxy-lite'], []),

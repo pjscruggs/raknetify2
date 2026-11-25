@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 def cases(tier):
     """Keep pull requests short and reserve larger version sweeps for release and scheduled builds."""
-    selected = [('snapshot', '26.4-snapshot-10'), ('via-client', '26.2'), ('via-plus', '26.2'), ('mod-payloads', '26.3'), ('paper-plugins', '26.3'), ('proxy-native', '26.3')]
+    selected = [('snapshot', '26.4-pre-1'), ('via-client', '26.2'), ('via-plus', '26.2'), ('mod-payloads', '26.3'), ('paper-plugins', '26.3'), ('proxy-native', '26.3')]
     if tier != 'pull_request':
         selected.extend([('via-client', '1.21.11'), ('via-plus', '1.21.11'), ('terrain', '26.3'), ('proxy', '26.2')])
     if tier in ('schedule', 'workflow_dispatch'):
@@ -37,13 +37,13 @@ def network(tier):
     return rows
 
 
-def expected_inputs(case):
-    """Resolve the same public lock used to install client and server dependencies."""
+def expected_inputs(case, mode):
+    """Resolve the locked client and server dependencies for this scenario and transport mode."""
     spec = importlib.util.spec_from_file_location('integration_smoke', Path(__file__).with_name('integration-smoke.py'))
     smoke = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(smoke)
     common = smoke.helpers()
-    server, client = smoke.inputs(SimpleNamespace(scenario=case), common)
+    server, client = smoke.inputs(SimpleNamespace(scenario=case, mode=mode), common)
     keys = set(server + client)
     if case == 'terrain':
         keys.update(['terralith-datapack', 'incendium-datapack', 'nullscape-datapack'])
@@ -60,7 +60,7 @@ def collect(folder, tier, revision):
         assert identity in expected and identity not in results, 'Unexpected or duplicate compatibility case'
         client = row['server'] if row['scenario'] == 'snapshot' else '26.3'
         assert (row['schema'], row['revision'], row['status'], row['client']) == (1, revision, 'passed', client), 'Invalid receipt'
-        assert row['inputs'] == expected_inputs(row['scenario']), 'Integration lock mismatch'
+        assert row['inputs'] == expected_inputs(row['scenario'], row['mode']), 'Integration lock mismatch'
         results[identity] = row
     assert set(results) == expected, 'Incomplete compatibility results'
     assert len({(row['raknetify'], row['sha256']) for row in results.values()}) == 1, 'Mixed Raknetify2 artifacts'
